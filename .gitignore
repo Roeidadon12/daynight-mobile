@@ -1,0 +1,62 @@
+# Flutter/Dart
+build/
+**/build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+*.log
+
+# Environment / secrets
+*.env
+.env*
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/ServiceDefinitions.json
+DerivedData/
+*.xcworkspace
+*.xcuserstate
+*.xcuserdata/
+
+# Android
+android/.gradle/
+android/captures/
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/local.properties
+*.keystore
+*.jks
+
+# macOS (if you build for desktop)
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/Flutter/ephemeral/
+
+# Windows (if you build for desktop)
+windows/Flutter/GeneratedPluginRegistrant.cpp
+windows/flutter/ephemeral/
+
+# Linux (if you build for desktop)
+linux/flutter/ephemeral/
+
+# Web
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# IDEs
+.vscode/
+.idea/
+*.iml

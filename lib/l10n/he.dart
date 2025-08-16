@@ -1,0 +1,18 @@
+const Map<String, String> heTexts = {
+  'home': 'בית',
+  'search': 'חיפוש',
+  'ticket': 'כרטיס',
+  'editing': 'עריכה',
+  'welcome': 'ברוכים הבאים ל-Day Night',
+  'day_night_home': 'דף הבית Day Night',
+  'upcoming-events-label': 'אירועים קרובים',
+  'view-all': 'הצג הכל',
+  'search-events': 'חפש אירועים',
+  'criteria-date': 'תאריך',
+  'criteria-price': 'מחיר',
+  'criteria-event-type': 'סוג אירוע',
+  'filter-by-date': 'סינון לפי תאריך',
+  'no-results': 'אין תוצאות',
+  'clear': 'נקה',
+  'search-button': 'חיפוש',
+};

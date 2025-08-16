@@ -1,0 +1,18 @@
+const Map<String, String> enTexts = {
+  'home': 'Home',
+  'search': 'Search',
+  'ticket': 'Ticket',
+  'editing': 'Editing',
+  'welcome': 'Welcome to Day Night',
+  'day_night_home': 'Day Night Home',
+  'upcoming-events-label': 'Upcoming Events',
+  'view-all': 'View All',
+  'search-events': 'Search Events',
+  'criteria-date': 'Date',
+  'criteria-price': 'Price',
+  'criteria-event-type': 'Event Type',
+  'filter-by-date': 'Filter by Date',
+  'no-results': 'No Results',
+  'clear': 'Clear',
+  'search-button': 'Search',
+};
