@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../models/event.dart';
-import '../../constants.dart';
 import 'event_details_page.dart';
 import '../../utils/slide_page_route.dart';
 

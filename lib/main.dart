@@ -10,7 +10,6 @@ import 'tabs/editing_tab.dart';
 import 'services/category_repository.dart';
 import 'services/language_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:day_night/constants.dart';
 
 Future<void> setAppLanguageIdByDeviceLocale() async {
   final languages = await LanguageService().getLanguages();
