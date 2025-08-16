@@ -60,3 +60,7 @@ linux/flutter/ephemeral/
 .vscode/
 .idea/
 *.iml
+
+# macOS system files
+.DS_Store
+**/.DS_Store
