@@ -5,7 +5,8 @@ import '../controllers/shared/horizontal_buttons_controller.dart';
 import '../constants.dart';
 import '../controllers/search/search_criteria_button.dart';
 import '../models/search_criteria.dart';
-import '../controllers/search/search_date_criteria.dart'; // Add this import
+import '../controllers/search/search_date_criteria.dart';
+import '../controllers/search/search_price_criteria.dart';
 import '../services/event_service.dart';
 import '../controllers/event/event_list_item.dart';
 
@@ -158,7 +159,23 @@ class _SearchTabState extends State<SearchTab> {
         }
         break;
       case SearchCriteriaType.priceCriteria:
-        // Handle price criteria
+        final result = await showCustomPriceRangePicker(context);
+        if (result != null && result['start'] != null && result['end'] != null) {
+          final double rangeFromPrice = result['start']!;
+          final double rangeToPrice = result['end']!;
+          
+          // Call the service to get events for the selected date range
+          final events = await eventService.getEventsByPriceRange(rangeFromPrice, rangeToPrice);
+          
+          setState(() {
+            searchResults = events;
+          });
+        } else {
+          // If no dates selected, deselect the criteria
+          setState(() {
+            criteria.selected = false;
+          });
+        }
         break;
       case SearchCriteriaType.eventTypeCriteria:
         // Handle event type criteria

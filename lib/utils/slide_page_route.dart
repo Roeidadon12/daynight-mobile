@@ -9,17 +9,23 @@ class SlidePageRoute extends PageRouteBuilder {
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             // Determine the slide direction based on text direction
             final bool isRTL = Directionality.of(context) == TextDirection.rtl;
-            
+
+            // Wrap the child in SafeArea so it never overlaps status bar
+            final safeChild = SafeArea(
+              top: true, // respect top safe area
+              bottom: false, // keep bottom free for scrolling if needed
+              child: child,
+            );
+
             // Create slide transition
             return SlideTransition(
               position: Tween<Offset>(
                 begin: Offset(isRTL ? -1.0 : 1.0, 0.0),
                 end: Offset.zero,
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeInOut,
-              )),
-              child: child,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+              ),
+              child: safeChild,
             );
           },
         );

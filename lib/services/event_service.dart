@@ -28,6 +28,33 @@ class EventService {
     }
   }
 
+  Future<List<Event>> getEventsByPriceRange(double rangeFromPrice, double rangeToPrice) async {
+    if (rangeFromPrice < 0 || rangeToPrice < 0 || rangeFromPrice > rangeToPrice) {
+      Logger.error('Invalid price range', 'EventService');
+      return [];
+    }
+
+    final response = await api.request(
+      endpoint: '/events-by-price-range',
+      method: 'GET',
+      queryParams: {
+        'start_price': rangeFromPrice.toString(),
+        'end_price': rangeToPrice.toString(),
+      },
+    );
+    if (response.statusCode == 200) {
+      try {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((json) => Event.fromJson(json as Map<String, dynamic>)).toList();
+      } catch (error) {
+        Logger.error('Failed to parse events from API response', 'EventService', error);
+        return [];
+      }
+    } else {
+      return [];
+    }
+  }
+
  Future<List<Event>> getEventsByDateRange(DateTime startDate, DateTime endDate) async {
     if (startDate.isAfter(endDate)) {
       Logger.error('Start date cannot be after end date', 'EventService');

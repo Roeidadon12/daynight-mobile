@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+/* import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../models/event.dart';
 import '../../app_localizations.dart';
 import '../../constants.dart';
@@ -7,10 +8,63 @@ import '../shared/custom_app_bar.dart';
 class EventDetailsPage extends StatefulWidget {
   final Event event;
 
-  const EventDetailsPage({
-    super.key,
-    required this.event,
-  });
+  const EventDetailsPage({super.key, required this.event});
+
+  @override
+  State<EventDetailsPage> createState() => _EventDetailsPageState();
+}
+
+class _EventDetailsPageState extends State<EventDetailsPage> {
+  bool isLiked = false;
+
+  void _handleShare() {}
+  void _handleLike() {
+    setState(() {
+      isLiked = !isLiked;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light, // <-- Forces white status bar icons
+      child: Scaffold(
+        backgroundColor: kMainBackgroundColor,
+        body: SafeArea(
+          child: Column(
+            children: [
+              CustomAppBar(
+                titleKey: 'event-details',
+                isLiked: isLiked,
+                onSharePressed: _handleShare,
+                onLikePressed: _handleLike,
+              ),
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    // SliverAppBar and content here...
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+} */
+
+import 'package:flutter/material.dart';
+import '../../models/event.dart';
+import '../../app_localizations.dart';
+import '../../constants.dart';
+import '../shared/custom_app_bar.dart';
+import 'package:flutter/services.dart';
+
+class EventDetailsPage extends StatefulWidget {
+  final Event event;
+
+  const EventDetailsPage({super.key, required this.event});
 
   @override
   State<EventDetailsPage> createState() => _EventDetailsPageState();
@@ -32,155 +86,247 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kMainBackgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Custom App Bar
-            CustomAppBar(
-              titleKey: 'event-details',
-              isLiked: isLiked,
-              onSharePressed: _handleShare,
-              onLikePressed: _handleLike,
-            ),
-            
-            // Scrollable Content
-            Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  // Image Header
-                  SliverAppBar(
-                    expandedHeight: 200.0,
-                    floating: false,
-                    pinned: false,
-                    automaticallyImplyLeading: false,
-                    backgroundColor: kMainBackgroundColor,
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: widget.event.thumbnailUrl != null
-                          ? Image.network(
-                              widget.event.thumbnailUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Center(child: Icon(Icons.broken_image, size: 60, color: Colors.grey)),
-                            )
-                          : const Center(child: Icon(Icons.image, size: 60, color: Colors.grey)),
-                    ),
-                  ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent, // background behind status bar
+        statusBarIconBrightness: Brightness.light, // icons color
+        statusBarBrightness: Brightness.light, // iOS top bar
+      ), // <-- Forces white status bar icons
+      child: Scaffold(
+        backgroundColor: kMainBackgroundColor,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Custom App Bar
+              CustomAppBar(
+                titleKey: 'event-details',
+                isLiked: isLiked,
+                onSharePressed: _handleShare,
+                onLikePressed: _handleLike,
+              ),
 
-                  // Event Details
-                  SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title
-                    Text(
-                      widget.event.information?['title'] ?? 'No Title',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Date and Location Row
-                    Row(
-                      children: [
-                        Icon(Icons.calendar_today, size: 16, color: Colors.grey[400]),
-                        const SizedBox(width: 8),
-                        Text(
-                          widget.event.formattedStartDate,
-                          style: TextStyle(color: Colors.grey[400], fontSize: 14),
-                        ),
-                        const SizedBox(width: 16),
-                        Icon(Icons.location_on, size: 16, color: Colors.grey[400]),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            widget.event.location,
-                            style: TextStyle(color: Colors.grey[400], fontSize: 14),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Description
-                    if (widget.event.information?['description'] != null) ...[
-                      Text(
-                        AppLocalizations.of(context).get('description'),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+              // Scrollable Content
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    // Image Header with safe area
+                    SliverSafeArea(
+                      top: false, // already handled by Scaffold SafeArea
+                      sliver: SliverAppBar(
+                        expandedHeight: MediaQuery.of(context).size.width,
+                        floating: false,
+                        pinned: false,
+                        automaticallyImplyLeading: false,
+                        backgroundColor: kMainBackgroundColor,
+                        flexibleSpace: FlexibleSpaceBar(
+                          background: widget.event.thumbnailUrl != null
+                              ? ClipRRect(
+                                  child: Image.network(
+                                    widget.event.thumbnailUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Center(
+                                              child: Icon(
+                                                Icons.broken_image,
+                                                size: 60,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                  ),
+                                )
+                              : const Center(
+                                  child: Icon(
+                                    Icons.image,
+                                    size: 60,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.event.information!['description'],
-                        style: TextStyle(
-                          color: Colors.grey[300],
-                          fontSize: 16,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
-                    // Price Information
-                    Text(
-                      AppLocalizations.of(context).get('price-info'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${widget.event.price} ${AppLocalizations.of(context).get('currency')}',
-                      style: TextStyle(
-                        color: Colors.grey[300],
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
 
-                    // Book Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // TODO: Implement booking functionality
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kBrandPrimary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context).get('book-now'),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                    // Event Details
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title
+                            Text(
+                              widget.event.information?['title'] ?? 'No Title',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Date and Location
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withAlpha(40),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        widget.event.formattedStartDate,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      ElevatedButton.icon(
+                                        onPressed: () {},
+                                        icon: const Icon(Icons.calendar_today),
+                                        label: Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          ).get('add-to-calendar'),
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          foregroundColor: kBrandPrimary,
+                                          side: const BorderSide(
+                                            color: kBrandPrimary,
+                                            width: 2,
+                                          ),
+                                          elevation: 0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        widget.event.location,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      ElevatedButton.icon(
+                                        onPressed: () {},
+                                        icon: const Icon(Icons.location_on),
+                                        label: Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          ).get('navigate-to'),
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          foregroundColor: kBrandPrimary,
+                                          side: const BorderSide(
+                                            color: kBrandPrimary,
+                                            width: 2,
+                                          ),
+                                          elevation: 0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Price Information
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '${widget.event.price} ${AppLocalizations.of(context).get('currency')}',
+                                          style: TextStyle(
+                                            color: Colors.grey[300],
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '${widget.event.price} ${AppLocalizations.of(context).get('currency')}',
+                                          style: TextStyle(
+                                            color: Colors.grey[500],
+                                            fontSize: 14,
+                                            decoration:
+                                                TextDecoration.lineThrough,
+                                            decorationColor: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Special offer: Limited time!',
+                                      style: TextStyle(
+                                        color: Colors.grey[400],
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Flexible(
+                                  fit: FlexFit.loose,
+                                  child: SizedBox(
+                                    height: 56,
+                                    child: ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: kBrandPrimary,
+                                        foregroundColor: Colors.white,
+                                        side: const BorderSide(
+                                          color: kBrandPrimary,
+                                          width: 2,
+                                        ),
+                                        elevation: 0,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              AppLocalizations.of(
+                                                context,
+                                              ).get('to-buy-ticket'),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Icon(Icons.arrow_forward),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
