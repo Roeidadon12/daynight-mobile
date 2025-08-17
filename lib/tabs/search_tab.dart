@@ -1,3 +1,4 @@
+import 'package:day_night/models/enums.dart';
 import 'package:flutter/material.dart';
 import '../app_localizations.dart';
 import '../models/event.dart';
@@ -19,7 +20,7 @@ class SearchTab extends StatefulWidget {
 
 class _SearchTabState extends State<SearchTab> {
   List<Event> searchResults = [];
-  List<SearchCriteria> searchCriteria = []; 
+  List<SearchCriteria> searchCriteria = [];
 
   @override
   void initState() {
@@ -27,16 +28,10 @@ class _SearchTabState extends State<SearchTab> {
     searchCriteria = [
       SearchCriteria(
         type: SearchCriteriaType.dateCrieteria,
-        text: '',  // We'll update these in didChangeDependencies
+        text: '', // We'll update these in didChangeDependencies
       ),
-      SearchCriteria(
-        type: SearchCriteriaType.priceCriteria,
-        text: '',
-      ),
-      SearchCriteria(
-        type: SearchCriteriaType.eventTypeCriteria,
-        text: '',
-      ),
+      SearchCriteria(type: SearchCriteriaType.priceCriteria, text: ''),
+      SearchCriteria(type: SearchCriteriaType.eventTypeCriteria, text: ''),
     ];
   }
 
@@ -44,9 +39,12 @@ class _SearchTabState extends State<SearchTab> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Update texts with localized strings
-    _getCriteriaByType(SearchCriteriaType.dateCrieteria).text = AppLocalizations.of(context).get('criteria-date');
-    _getCriteriaByType(SearchCriteriaType.priceCriteria).text = AppLocalizations.of(context).get('criteria-price');
-    _getCriteriaByType(SearchCriteriaType.eventTypeCriteria).text = AppLocalizations.of(context).get('criteria-event-type');
+    _getCriteriaByType(SearchCriteriaType.dateCrieteria).text =
+        AppLocalizations.of(context).get('criteria-date');
+    _getCriteriaByType(SearchCriteriaType.priceCriteria).text =
+        AppLocalizations.of(context).get('criteria-price');
+    _getCriteriaByType(SearchCriteriaType.eventTypeCriteria).text =
+        AppLocalizations.of(context).get('criteria-event-type');
   }
 
   SearchCriteria _getCriteriaByType(SearchCriteriaType type) {
@@ -55,7 +53,6 @@ class _SearchTabState extends State<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
-
     return SafeArea(
       child: Container(
         color: kMainBackgroundColor,
@@ -81,7 +78,7 @@ class _SearchTabState extends State<SearchTab> {
                 onTap: () {
                   // TODO: Implement search functionality
                 },
-                height: 56.0, 
+                height: 56.0,
               ),
             ),
 
@@ -141,13 +138,18 @@ class _SearchTabState extends State<SearchTab> {
     switch (criteria.type) {
       case SearchCriteriaType.dateCrieteria:
         final result = await showCustomDatePicker(context);
-        if (result != null && result['start'] != null && result['end'] != null) {
+        if (result != null &&
+            result['start'] != null &&
+            result['end'] != null) {
           final DateTime startDate = result['start']!;
           final DateTime endDate = result['end']!;
-          
+
           // Call the service to get events for the selected date range
-          final events = await eventService.getEventsByDateRange(startDate, endDate);
-          
+          final events = await eventService.getEventsByDateRange(
+            startDate,
+            endDate,
+          );
+
           setState(() {
             searchResults = events;
           });
@@ -160,13 +162,24 @@ class _SearchTabState extends State<SearchTab> {
         break;
       case SearchCriteriaType.priceCriteria:
         final result = await showCustomPriceRangePicker(context);
-        if (result != null && result['start'] != null && result['end'] != null) {
-          final double rangeFromPrice = result['start']!;
-          final double rangeToPrice = result['end']!;
-          
+        if (result != null && result['range'] != null) {
+          final range = result['range'];
+          double rangeFromPrice = 0.0;
+          double rangeToPrice = 0.0;
+
+          if (range is Map<String, dynamic>) {
+            rangeFromPrice = (range["start"] ?? 0.0) as double;
+            rangeToPrice = (range["end"] ?? 0.0) as double;
+          }
+          final ValidCurrency selectedCurrency =
+              ValidCurrency.ILS; // Default currency
+
           // Call the service to get events for the selected date range
-          final events = await eventService.getEventsByPriceRange(rangeFromPrice, rangeToPrice);
-          
+          final events = await eventService.getEventsByPriceRange(
+            rangeFromPrice,
+            rangeToPrice,
+          );
+
           setState(() {
             searchResults = events;
           });
@@ -181,7 +194,7 @@ class _SearchTabState extends State<SearchTab> {
         // Handle event type criteria
         break;
     }
-    
+
     setState(() {
       // Update searchResults based on selected criteria
     });

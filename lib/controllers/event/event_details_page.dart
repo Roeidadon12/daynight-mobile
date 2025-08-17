@@ -1,59 +1,5 @@
-/* import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../../models/event.dart';
-import '../../app_localizations.dart';
-import '../../constants.dart';
-import '../shared/custom_app_bar.dart';
-
-class EventDetailsPage extends StatefulWidget {
-  final Event event;
-
-  const EventDetailsPage({super.key, required this.event});
-
-  @override
-  State<EventDetailsPage> createState() => _EventDetailsPageState();
-}
-
-class _EventDetailsPageState extends State<EventDetailsPage> {
-  bool isLiked = false;
-
-  void _handleShare() {}
-  void _handleLike() {
-    setState(() {
-      isLiked = !isLiked;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light, // <-- Forces white status bar icons
-      child: Scaffold(
-        backgroundColor: kMainBackgroundColor,
-        body: SafeArea(
-          child: Column(
-            children: [
-              CustomAppBar(
-                titleKey: 'event-details',
-                isLiked: isLiked,
-                onSharePressed: _handleShare,
-                onLikePressed: _handleLike,
-              ),
-              Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    // SliverAppBar and content here...
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-} */
-
+import 'package:day_night/controllers/ticket/checkout/checkout_rounds.dart';
+import 'package:day_night/utils/slide_page_route.dart';
 import 'package:flutter/material.dart';
 import '../../models/event.dart';
 import '../../app_localizations.dart';
@@ -210,13 +156,23 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        widget.event.location,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
+                                      Flexible(
+                                        child: Text(
+                                          widget.event.location,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                          ),
+                                          softWrap: true,
+                                          overflow: TextOverflow
+                                              .ellipsis, // or .visible if you want full wrap
+                                          maxLines:
+                                              2, // remove if you want unlimited wrapping
                                         ),
                                       ),
+                                      const SizedBox(
+                                        width: 8,
+                                      ), // spacing between text & button
                                       ElevatedButton.icon(
                                         onPressed: () {},
                                         icon: const Icon(Icons.location_on),
@@ -288,7 +244,16 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                   child: SizedBox(
                                     height: 56,
                                     child: ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          SlidePageRoute(
+                                            page: CheckoutRoundsPage(
+                                              event: widget.event,
+                                            ),
+                                          ),
+                                        );
+                                      },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: kBrandPrimary,
                                         foregroundColor: Colors.white,

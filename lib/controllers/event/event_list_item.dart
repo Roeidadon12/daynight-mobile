@@ -1,3 +1,4 @@
+import 'package:day_night/controllers/event/event_summary_tile.dart';
 import 'package:flutter/material.dart';
 import '../../models/event.dart';
 import 'event_details_page.dart';
@@ -7,11 +8,7 @@ class EventListItem extends StatelessWidget {
   final Event event;
   final VoidCallback? onTap;
 
-  const EventListItem({
-    super.key,
-    required this.event,
-    this.onTap,
-  });
+  const EventListItem({super.key, required this.event, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +21,7 @@ class EventListItem extends StatelessWidget {
         }
         Navigator.push(
           context,
-          SlidePageRoute(
-            page: EventDetailsPage(event: event),
-          ),
+          SlidePageRoute(page: EventDetailsPage(event: event)),
         );
       },
       child: Container(
@@ -36,7 +31,9 @@ class EventListItem extends StatelessWidget {
             // Event Image
             if (event.thumbnailUrl != null)
               ClipRRect(
-                borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                borderRadius: const BorderRadius.horizontal(
+                  left: Radius.circular(12),
+                ),
                 child: Image.network(
                   event.thumbnailUrl!,
                   width: baseHeight,
@@ -51,55 +48,15 @@ class EventListItem extends StatelessWidget {
                 width: baseHeight,
                 height: baseHeight,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                  borderRadius: const BorderRadius.horizontal(
+                    left: Radius.circular(12),
+                  ),
                 ),
                 child: const Icon(Icons.image, size: 40, color: Colors.grey),
               ),
-            
+
             // Event Details
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      event.information?['title'] ?? 'No Title',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(Icons.calendar_today, size: 14, color: Colors.grey[400]),
-                        const SizedBox(width: 4),
-                        Text(
-                          event.startShortDate,
-                          style: TextStyle(color: Colors.grey[400], fontSize: 12),
-                        ),
-                        const SizedBox(width: 12),
-                        Icon(Icons.location_on, size: 14, color: Colors.grey[400]),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            event.location,
-                            style: TextStyle(color: Colors.grey[400], fontSize: 12),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            EventSummaryTile(event: event),
             // Directional Icon
             Padding(
               padding: const EdgeInsets.only(right: 8.0),

@@ -19,5 +19,14 @@ const Map<String, String> enTexts = {
   'navigate-to': 'Navigate',
   'currency': '₪',
   'to-buy-ticket': 'To Buy Ticket',
-  'filter-by-price': 'Price',
+  'filter-by-price': 'Filter Price',
+  'currency-option': 'Select Currency',
+  'from-price': 'From Price',
+  'to-price': 'To Price',
+  'apply': 'Apply',
+  'reset': 'Reset',
+  'ILS': 'Israeli Shekel (₪)', // Israeli Shekel
+  'USD': 'US Dollar (\$)', // US Dollar
+  'EUR': 'Euro (€)', // Euro
+  'GBP': 'British Pound (£)', // British Pound
 };

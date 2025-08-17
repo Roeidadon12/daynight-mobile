@@ -1,4 +1,3 @@
-
 import '../api_service.dart';
 import '../constants.dart';
 import 'dart:convert';
@@ -28,8 +27,13 @@ class EventService {
     }
   }
 
-  Future<List<Event>> getEventsByPriceRange(double rangeFromPrice, double rangeToPrice) async {
-    if (rangeFromPrice < 0 || rangeToPrice < 0 || rangeFromPrice > rangeToPrice) {
+  Future<List<Event>> getEventsByPriceRange(
+    double rangeFromPrice,
+    double rangeToPrice,
+  ) async {
+    if (rangeFromPrice < 0 ||
+        rangeToPrice < 0 ||
+        rangeFromPrice > rangeToPrice) {
       Logger.error('Invalid price range', 'EventService');
       return [];
     }
@@ -42,12 +46,19 @@ class EventService {
         'end_price': rangeToPrice.toString(),
       },
     );
+
     if (response.statusCode == 200) {
       try {
         final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => Event.fromJson(json as Map<String, dynamic>)).toList();
+        return data
+            .map((json) => Event.fromJson(json as Map<String, dynamic>))
+            .toList();
       } catch (error) {
-        Logger.error('Failed to parse events from API response', 'EventService', error);
+        Logger.error(
+          'Failed to parse events from API response',
+          'EventService',
+          error,
+        );
         return [];
       }
     } else {
@@ -55,7 +66,10 @@ class EventService {
     }
   }
 
- Future<List<Event>> getEventsByDateRange(DateTime startDate, DateTime endDate) async {
+  Future<List<Event>> getEventsByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     if (startDate.isAfter(endDate)) {
       Logger.error('Start date cannot be after end date', 'EventService');
       return [];
@@ -69,17 +83,20 @@ class EventService {
     final response = await api.request(
       endpoint: '/events-by-date-range',
       method: 'GET',
-      queryParams: {
-        'start_date': startDateStr,
-        'end_date': endDateStr,
-      },
+      queryParams: {'start_date': startDateStr, 'end_date': endDateStr},
     );
     if (response.statusCode == 200) {
       try {
         final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => Event.fromJson(json as Map<String, dynamic>)).toList();
+        return data
+            .map((json) => Event.fromJson(json as Map<String, dynamic>))
+            .toList();
       } catch (error) {
-        Logger.error('Failed to parse events from API response', 'EventService', error);
+        Logger.error(
+          'Failed to parse events from API response',
+          'EventService',
+          error,
+        );
         return [];
       }
     } else {
@@ -95,12 +112,18 @@ class EventService {
     );
     if (response.statusCode == 200) {
       try {
-        final List<dynamic> data = jsonDecode(response.body);        
-//        return data.map((json) => Event.fromJson(json)).toList();
-        final events = data.map((json) => Event.fromJson(json as Map<String, dynamic>)).toList();
+        final List<dynamic> data = jsonDecode(response.body);
+        //        return data.map((json) => Event.fromJson(json)).toList();
+        final events = data
+            .map((json) => Event.fromJson(json as Map<String, dynamic>))
+            .toList();
         return events;
       } catch (error) {
-        Logger.error('Failed to parse events from API response', 'EventService', error);
+        Logger.error(
+          'Failed to parse events from API response',
+          'EventService',
+          error,
+        );
         return [];
       }
     } else {

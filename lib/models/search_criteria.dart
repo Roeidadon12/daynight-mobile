@@ -1,8 +1,5 @@
-enum SearchCriteriaType {
-  dateCrieteria,
-  priceCriteria,
-  eventTypeCriteria,
-}
+
+import 'package:day_night/models/enums.dart';
 
 class SearchCriteria {
   final SearchCriteriaType type;

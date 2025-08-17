@@ -20,4 +20,13 @@ const Map<String, String> heTexts = {
   'currency': '₪',
   'to-buy-ticket': 'לרכישת כרטיס',
   'filter-by-price': 'סינון מחיר',
+  'currency-option': 'בחר מטבע',
+  'from-price': 'ממחיר',
+  'to-price': 'למחיר',
+  'apply': 'החל',
+  'reset': 'איפוס',
+  'ILS': 'שקל חדש (₪)',
+  'USD': 'דולר אמריקאי (\$)',
+  'EUR': 'יורו (€)', 
+  'GBP': 'לירה שטרלינג (£)', 
 };
