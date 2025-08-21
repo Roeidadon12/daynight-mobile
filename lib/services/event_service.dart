@@ -4,11 +4,28 @@ import 'dart:convert';
 import '../models/event.dart';
 import '../utils/logger.dart';
 
+/// Service class responsible for handling all event-related API operations.
+///
+/// This service provides methods to fetch, search, and filter events from the backend API.
+/// It uses the [ApiService] for making HTTP requests and handles the serialization/deserialization
+/// of event data.
 class EventService {
+  /// The API service instance used for making HTTP requests.
   final ApiService api;
 
+  /// Creates a new [EventService] instance.
+  ///
+  /// Initializes the [ApiService] with the base URL from configuration.
   EventService() : api = ApiService(baseUrl: kApiBaseUrl);
 
+  /// Fetches events filtered by date type.
+  ///
+  /// [type] specifies the date filter type (e.g., 'upcoming', 'past', 'today').
+  ///
+  /// Returns a list of [Event] objects. Returns an empty list if the request fails
+  /// or if there's an error parsing the response.
+  ///
+  /// Throws nothing - errors are logged and an empty list is returned.
   Future<List<Event>> getEventsByDate(String type) async {
     final response = await api.request(
       endpoint: '/events-by-date',
@@ -18,8 +35,12 @@ class EventService {
     if (response.statusCode == 200) {
       try {
         final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => Event.fromJson(json)).toList();
-      } catch (_) {
+        return data.map((json) => Event.fromJson(json as Map<String, dynamic>)).toList();
+      } catch (e) {
+        Logger.error(
+          'Failed to parse events from API response',
+          'EventService',
+        );
         return [];
       }
     } else {
@@ -27,6 +48,18 @@ class EventService {
     }
   }
 
+  /// Fetches events within a specified price range.
+  ///
+  /// [rangeFromPrice] is the minimum price (inclusive).
+  /// [rangeToPrice] is the maximum price (inclusive).
+  ///
+  /// Returns a list of [Event] objects that fall within the specified price range.
+  /// Returns an empty list if:
+  /// - The price range is invalid (negative prices or min > max)
+  /// - The request fails
+  /// - There's an error parsing the response
+  ///
+  /// Throws nothing - errors are logged and an empty list is returned.
   Future<List<Event>> getEventsByPriceRange(
     double rangeFromPrice,
     double rangeToPrice,
@@ -49,19 +82,39 @@ class EventService {
 
     if (response.statusCode == 200) {
       try {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data
-            .map((json) => Event.fromJson(json as Map<String, dynamic>))
-            .toList();
-      } catch (error) {
+        Logger.debug('Raw response body: ${response.body}', 'EventService');
+        
+        if (response.body.isEmpty) {
+          Logger.error('Empty response body', 'EventService');
+          return [];
+        }
+
+        final dynamic decodedData = jsonDecode(response.body);
+        
+        if (decodedData == null) {
+          Logger.error('Decoded data is null', 'EventService');
+          return [];
+        }
+
+        if (decodedData is! List) {
+          Logger.error('Decoded data is not a List: ${decodedData.runtimeType}', 'EventService');
+          return [];
+        }
+
+        final List<dynamic> data = decodedData;
+        return data.map((json) => Event.fromJson(json as Map<String, dynamic>)).toList();
+      } catch (e) {
         Logger.error(
-          'Failed to parse events from API response',
+          'Failed to parse JSON response: ${e.toString()}',
           'EventService',
-          error,
         );
         return [];
       }
     } else {
+      Logger.error(
+        'API request failed with status code: ${response.statusCode}',
+        'EventService',
+      );
       return [];
     }
   }

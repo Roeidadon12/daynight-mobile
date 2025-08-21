@@ -27,25 +27,20 @@ class EventSummaryTile extends StatelessWidget {
                 width: baseHeight,
                 height: baseHeight,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Image.asset(
-                  'assets/images/image_place_holder.png',
-                  width: baseHeight,
-                  height: baseHeight,
-                  fit: BoxFit.cover,
-                ),
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.broken_image, size: 40),
               ),
             )
           else
-            ClipRRect(
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(12),
+            Container(
+              width: baseHeight,
+              height: baseHeight,
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.horizontal(
+                  left: Radius.circular(12),
+                ),
               ),
-              child: Image.asset(
-                'assets/images/image_place_holder.png',
-                width: baseHeight,
-                height: baseHeight,
-                fit: BoxFit.cover,
-              ),
+              child: const Icon(Icons.image, size: 40, color: Colors.grey),
             ),
 
           // Event Details

@@ -10,6 +10,7 @@ import 'tabs/editing_tab.dart';
 import 'services/category_repository.dart';
 import 'services/language_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<void> setAppLanguageIdByDeviceLocale() async {
   final languages = await LanguageService().getLanguages();
@@ -24,9 +25,17 @@ Future<void> setAppLanguageIdByDeviceLocale() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Your existing initialization
   await setAppLanguageIdByDeviceLocale();
   await CategoryRepository().loadCategories();
-  runApp(const MyApp());
+
+  // Wrap your app with ProviderScope for Riverpod
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

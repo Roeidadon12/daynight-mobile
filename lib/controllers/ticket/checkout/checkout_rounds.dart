@@ -1,5 +1,10 @@
+import 'package:day_night/constants.dart';
+import 'package:day_night/controllers/event/event_summary_tile.dart';
+import 'package:day_night/controllers/shared/custom_app_bar.dart';
+import 'package:day_night/controllers/ticket/list_tickets.dart';
 import 'package:day_night/models/event.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CheckoutRoundsPage extends StatelessWidget {
   final Event event;
@@ -8,51 +13,55 @@ class CheckoutRoundsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<dynamic> tickets = event.tickets ?? [];
+    final List<Ticket> tickets = event.tickets ?? [];
 
-    return ListView(
-      children: tickets.map((item) => ListTicketsWidget(item: item)).toList(),
-    );
-  }
-}
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: kMainBackgroundColor,
+        body: SafeArea(
+          child: Column(
+            children: [
+              /// Top App Bar
+              CustomAppBar(
+                titleKey: 'buy-tickets',
+                onBackPressed: () => Navigator.pop(context),
+              ),
 
-class ListTicketsWidget extends StatefulWidget {
-  final MyItem item;
+              /// Main content (summary + list)
+              Expanded(
+                child: ListView(
+                  children: [
+                    EventSummaryTile(event: event),
 
-  const ListTicketsWidget({super.key, required this.item});
+                    ...tickets.map((t) => ListTickets(item: t)).toList(),
+                  ],
+                ),
+              ),
 
-  @override
-  ListTicketsWidgetState createState() => ListTicketsWidgetState();
-}
-
-class ListTicketsWidgetState extends State<ListTicketsWidget> {
-  String? selectedValue;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(widget.item.title),
-      trailing: DropdownButton<String>(
-        value: selectedValue,
-        items: widget.item.options
-            .map((val) => DropdownMenuItem(
-                  value: val,
-                  child: Text(val),
-                ))
-            .toList(),
-        onChanged: (val) {
-          setState(() {
-            selectedValue = val!;
-          });
-        },
+              /// Bottom Button
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Handle button press
+                      print('Proceed to payment');
+                    },
+                    child: const Text('Proceed to Payment'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
-}
-
-class MyItem {
-  final String title;
-  final List<String> options;
-
-  MyItem(this.title, this.options);
 }

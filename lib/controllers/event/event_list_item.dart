@@ -12,7 +12,6 @@ class EventListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double baseHeight = 60;
 
     return GestureDetector(
       onTap: () {
@@ -28,34 +27,6 @@ class EventListItem extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         child: Row(
           children: [
-            // Event Image
-            if (event.thumbnailUrl != null)
-              ClipRRect(
-                borderRadius: const BorderRadius.horizontal(
-                  left: Radius.circular(12),
-                ),
-                child: Image.network(
-                  event.thumbnailUrl!,
-                  width: baseHeight,
-                  height: baseHeight,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.broken_image, size: 40),
-                ),
-              )
-            else
-              Container(
-                width: baseHeight,
-                height: baseHeight,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.horizontal(
-                    left: Radius.circular(12),
-                  ),
-                ),
-                child: const Icon(Icons.image, size: 40, color: Colors.grey),
-              ),
-
-            // Event Details
             EventSummaryTile(event: event),
             // Directional Icon
             Padding(

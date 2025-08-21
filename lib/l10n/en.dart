@@ -29,4 +29,5 @@ const Map<String, String> enTexts = {
   'USD': 'US Dollar (\$)', // US Dollar
   'EUR': 'Euro (€)', // Euro
   'GBP': 'British Pound (£)', // British Pound
+  'buy-tickets': 'Buy Tickets',
 };

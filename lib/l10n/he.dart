@@ -29,4 +29,5 @@ const Map<String, String> heTexts = {
   'USD': 'דולר אמריקאי (\$)',
   'EUR': 'יורו (€)', 
   'GBP': 'לירה שטרלינג (£)', 
+  'buy-tickets': 'רכישת כרטיסים',
 };

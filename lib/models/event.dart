@@ -1,5 +1,119 @@
 import '../../constants.dart';
 import 'package:intl/intl.dart';
+import '../utils/functions.dart';
+
+class Ticket {
+  final double? price;
+  final String? description;
+  final int? id;
+  final int? eventId;
+  final String? eventType;
+  final String? title;
+  final String? ticketAvailableType;
+  final int? ticketAvailable;
+  final String? maxTicketBuyType;
+  final int? maxBuyTicket;
+  final String? pricingType;
+  final double? fPrice;
+  final String? earlyBirdDiscount;
+  final String? earlyBirdDiscountAmount;
+  final String? earlyBirdDiscountType;
+  final DateTime? earlyBirdDiscountDate;
+  final DateTime? earlyBirdDiscountTime;
+  final String? variations;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final DateTime? eventOnSaleDate;
+  final String? ticketType;
+  final int? allocation;
+  final String? eventOffSale;
+  final String? rounds;
+  final int? increment;
+  final int? saleLimit;
+  final int? ticketStatus;
+  final String? ticketImage;
+  final int? requiredGender;
+  final int? requiredDob;
+  final int? requiredIdNumber;
+  final String? zeroSetByAdmin;
+  final int? isDeleted;
+
+  Ticket({
+    this.id,
+    this.eventId,
+    this.eventType,
+    this.title,
+    this.ticketAvailableType,
+    this.ticketAvailable,
+    this.maxTicketBuyType,
+    this.maxBuyTicket,
+    this.description,
+    this.pricingType,
+    this.price,
+    this.fPrice,
+    this.earlyBirdDiscount,
+    this.earlyBirdDiscountAmount,
+    this.earlyBirdDiscountType,
+    this.earlyBirdDiscountDate,
+    this.earlyBirdDiscountTime,
+    this.variations,
+    this.createdAt,
+    this.updatedAt,
+    this.eventOnSaleDate,
+    this.ticketType,
+    this.allocation,
+    this.eventOffSale,
+    this.rounds,
+    this.increment,
+    this.saleLimit,
+    this.ticketStatus,
+    this.ticketImage,
+    this.requiredGender,
+    this.requiredDob,
+    this.requiredIdNumber,
+    this.zeroSetByAdmin,
+    this.isDeleted,
+  });
+
+  factory Ticket.fromJson(Map<String, dynamic> json) {
+    return Ticket(
+      id: getJsonField<int>(json, 'id'),
+      title: getJsonField<String>(json, 'title'),
+      price: getJsonField<double>(json, 'price', defaultValue: 0.0),
+      description: getJsonField<String>(json, 'description'),
+      eventId: getJsonField<int>(json, 'event_id'),
+      eventType: getJsonField<String>(json, 'event_type'),
+      ticketAvailableType: getJsonField<String>(json, 'ticket_available_type'),
+      ticketAvailable: getJsonField<int>(json, 'ticket_available'),
+      maxTicketBuyType: getJsonField<String>(json, 'max_ticket_buy_ty'),
+      maxBuyTicket: getJsonField<int>(json, 'max_buy_ticket'),
+      pricingType: getJsonField<String>(json, 'pricing_type'),
+      fPrice: getJsonField<double>(json, 'f_price', defaultValue: 0.0),
+      earlyBirdDiscount: getJsonField<String>(json, 'early_bird_discount'),
+      earlyBirdDiscountAmount: getJsonField<String>(json, 'early_bird_discount_amount'),
+      earlyBirdDiscountType: getJsonField<String>(json, 'early_bird_discount_type'),
+      earlyBirdDiscountDate: getJsonField<DateTime>(json, 'early_bird_discount_date'),
+      earlyBirdDiscountTime: getJsonField<DateTime>(json, 'early_bird_discount_time'),
+      variations: getJsonField<String>(json, 'variations'),
+      createdAt: getJsonField<DateTime>(json, 'created_at'),
+      updatedAt: getJsonField<DateTime>(json, 'updated_at'),
+      eventOnSaleDate: getJsonField<DateTime>(json, 'event_on_sale_date'),
+      ticketType: getJsonField<String>(json, 'ticket_type'),
+      allocation: getJsonField<int>(json, 'allocation'),
+      eventOffSale: getJsonField<String>(json, 'event_off_sale'),
+      rounds: getJsonField<String>(json, 'rounds'),
+      increment: getJsonField<int>(json, 'increment'),
+      saleLimit: getJsonField<int>(json, 'sale_limit'),
+      ticketStatus: getJsonField<int>(json, 'ticket_status'),
+      ticketImage: getJsonField<String>(json, 'ticket_image'),
+      requiredGender: getJsonField<int>(json, 'required_gender'),
+      requiredDob: getJsonField<int>(json, 'required_dob'),
+      requiredIdNumber: getJsonField<int>(json, 'required_id_number'),
+      zeroSetByAdmin: getJsonField<String>(json, 'zero_set_by_admin'),
+      isDeleted: getJsonField<int>(json, 'is_deleted', defaultValue: 0),
+    );
+  }
+}
 
 class Event {
   final int? id;
@@ -25,6 +139,7 @@ class Event {
       return startDate!;
     }
   }
+
   final String? createdAt;
   final String? updatedAt;
   final String? eventType;
@@ -47,7 +162,7 @@ class Event {
   final int? measurementId;
   final int? pixelId;
   final int? tiktokPixelId;
-  final List<dynamic>? tickets;
+  final List<Ticket>? tickets;
   final Map<String, dynamic>? information;
   final List<dynamic>? booking;
   final List<dynamic>? wishlists;
@@ -104,55 +219,60 @@ class Event {
 
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? ''),
-      organizerId: json['organizer_id'] is int ? json['organizer_id'] : int.tryParse(json['organizer_id']?.toString() ?? ''),
-      thumbnail: json['thumbnail'],
-      status: json['status'],
-      dateType: json['date_type'],
-      countdownStatus: json['countdown_status'] is int ? json['countdown_status'] : int.tryParse(json['countdown_status']?.toString() ?? ''),
-      startDate: json['start_date'],
-      startTime: json['start_time'],
-      duration: json['duration'],
-      endDate: json['end_date'],
-      endTime: json['end_time'],
-      endDateTime: json['end_date_time'],
-      price: json['price'] is double ? json['price'] : double.tryParse(json['price']?.toString() ?? '0'),
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      eventType: json['event_type'],
-      isFeatured: json['is_featured'],
-      latitude: json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null,
-      longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,
-      minAge: json['min_age'] is int ? json['min_age'] : int.tryParse(json['min_age']?.toString() ?? ''),
-      isRequiredIdNumber: json['is_required_id_number'],
-      isRequiredFacebookUsername: json['is_required_facebook_username'] is int ? json['is_required_facebook_username'] : int.tryParse(json['is_required_facebook_username']?.toString() ?? ''),
-      isRequiredInstagramUsername: json['is_required_instagram_username'] is int ? json['is_required_instagram_username'] : int.tryParse(json['is_required_instagram_username']?.toString() ?? ''),
-      coverImage: json['cover_image'],
-      mapStatus: json['map_status'] is int ? json['map_status'] : int.tryParse(json['map_status']?.toString() ?? ''),
-      mapAddress: json['map_address'],
-      isRequiredFacebookOrInstagram: json['is_required_facebook_or_instagram'] is int ? json['is_required_facebook_or_instagram'] : int.tryParse(json['is_required_facebook_or_instagram']?.toString() ?? ''),
-      autoTicketApproval: json['auto_ticket_approval'] is int ? json['auto_ticket_approval'] : int.tryParse(json['auto_ticket_approval']?.toString() ?? ''),
-      taxStatus: json['tax_status'] is int ? json['tax_status'] : int.tryParse(json['tax_status']?.toString() ?? ''),
-      taxType: json['tax_type'],
-      taxAmount: json['tax_amount'] != null ? double.tryParse(json['tax_amount'].toString()) : null,
-      imageOfIdStatus: json['image_of_id_status'] is int ? json['image_of_id_status'] : int.tryParse(json['image_of_id_status']?.toString() ?? ''),
-      measurementId: json['measurement_id'] is int ? json['measurement_id'] : int.tryParse(json['measurement_id']?.toString() ?? ''),
-      pixelId: json['pixel_id'] is int ? json['pixel_id'] : int.tryParse(json['pixel_id']?.toString() ?? ''),
-      tiktokPixelId: json['tiktok_pixel_id'] is int ? json['tiktok_pixel_id'] : int.tryParse(json['tiktok_pixel_id']?.toString() ?? ''),
-      tickets: json['tickets'] as List<dynamic>?,
-      information: json['information'] as Map<String, dynamic>?,
-      booking: json['booking'] as List<dynamic>?,
-      wishlists: json['wishlists'] as List<dynamic>?,
-      organizer: json['organizer'],
-      galleries: json['galleries'] as List<dynamic>?,
-      dates: json['dates'] as List<dynamic>?,
-      visitors: json['visitors'] as List<dynamic>?,
+      id: getJsonField<int>(json, 'id'),
+      organizerId: getJsonField<int>(json, 'organizer_id'),
+      thumbnail: getJsonField<String>(json, 'thumbnail'),
+      status: getJsonField<String>(json, 'status'),
+      dateType: getJsonField<String>(json, 'date_type'),
+      countdownStatus: getJsonField<int>(json, 'countdown_status'),
+      startDate: getJsonField<String>(json, 'start_date'),
+      startTime: getJsonField<String>(json, 'start_time'),
+      duration: getJsonField<String>(json, 'duration'),
+      endDate: getJsonField<String>(json, 'end_date'),
+      endTime: getJsonField<String>(json, 'end_time'),
+      endDateTime: getJsonField<String>(json, 'end_date_time'),
+      price: getJsonField<double>(json, 'price', defaultValue: 0.0),
+      createdAt: getJsonField<String>(json, 'created_at'),
+      updatedAt: getJsonField<String>(json, 'updated_at'),
+      eventType: getJsonField<String>(json, 'event_type'),
+      isFeatured: getJsonField<String>(json, 'is_featured'),
+      latitude: getJsonField<double>(json, 'latitude'),
+      longitude: getJsonField<double>(json, 'longitude'),
+      minAge: getJsonField<int>(json, 'min_age'),
+      isRequiredIdNumber: getJsonField<int>(json, 'is_required_id_number'),
+      isRequiredFacebookUsername: getJsonField<int>(json, 'is_required_facebook_username'),
+      isRequiredInstagramUsername: getJsonField<int>(json, 'is_required_instagram_username'),
+      coverImage: getJsonField<String>(json, 'cover_image'),
+      mapStatus: getJsonField<int>(json, 'map_status'),
+      mapAddress: getJsonField<String>(json, 'map_address'),
+      isRequiredFacebookOrInstagram: getJsonField<int>(json, 'is_required_facebook_or_instagram'),
+      autoTicketApproval: getJsonField<int>(json, 'auto_ticket_approval'),
+      taxStatus: getJsonField<int>(json, 'tax_status'),
+      taxType: getJsonField<String>(json, 'tax_type'),
+      taxAmount: getJsonField<double>(json, 'tax_amount'),
+      imageOfIdStatus: getJsonField<int>(json, 'image_of_id_status'),
+      measurementId: getJsonField<int>(json, 'measurement_id'),
+      pixelId: getJsonField<int>(json, 'pixel_id'),
+      tiktokPixelId: getJsonField<int>(json, 'tiktok_pixel_id'),
+      tickets: (getJsonField<List<dynamic>>(json, 'tickets'))
+          ?.map((item) => Ticket.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      information: getJsonField<Map<String, dynamic>>(json, 'information'),
+      booking: getJsonField<List<dynamic>>(json, 'booking'),
+      wishlists: getJsonField<List<dynamic>>(json, 'wishlists'),
+      organizer: getJsonField<dynamic>(json, 'organizer'),
+      galleries: getJsonField<List<dynamic>>(json, 'galleries'),
+      dates: getJsonField<List<dynamic>>(json, 'dates'),
+      visitors: getJsonField<List<dynamic>>(json, 'visitors'),
     );
   }
 
   String? get thumbnailUrl {
     if (thumbnail == null || thumbnail!.isEmpty) return null;
-    return 'kCoverImageBaseUrl/$thumbnail'.replaceFirst('kCoverImageBaseUrl', kCoverImageBaseUrl);
+    return 'kCoverImageBaseUrl/$thumbnail'.replaceFirst(
+      'kCoverImageBaseUrl',
+      kCoverImageBaseUrl,
+    );
   }
 
   String get title {
@@ -170,12 +290,17 @@ class Event {
     final address = information?['address']?.toString() ?? '';
 
     // Build location string from available fields
-    final parts = [address, city, state, country].where((part) => part.isNotEmpty).toList();
+    final parts = [
+      address,
+      city,
+      state,
+      country,
+    ].where((part) => part.isNotEmpty).toList();
     return parts.join(', ');
   }
 
   String get startShortDate {
-        final rawDate = startDate?.toString();
+    final rawDate = startDate?.toString();
     if (rawDate == null || rawDate.isEmpty) return '';
     try {
       final date = DateTime.parse(rawDate);

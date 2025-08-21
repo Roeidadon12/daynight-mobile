@@ -76,8 +76,8 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(BuildContext context) {
     final categories = getCategoriesByLanguage();
     final labels = <String>[
-      AppLocalizations.of(context).get('today-events'),
-      AppLocalizations.of(context).get('week-events'),
+      if (todayEvents.isNotEmpty) AppLocalizations.of(context).get('today-events'),
+      if (weekEvents.isNotEmpty) AppLocalizations.of(context).get('week-events'),
       ...categories.map((c) => c.name),
     ];
     return SafeArea(
@@ -102,10 +102,12 @@ class _HomeTabState extends State<HomeTab> {
                 HorizontalButtonsController(
                   labels: labels,
                   delegates: {
-                    AppLocalizations.of(context).get('today-events'): () =>
-                        onButtonPressed(HomeTabButtonType.today),
-                    AppLocalizations.of(context).get('week-events'): () =>
-                        onButtonPressed(HomeTabButtonType.week),
+                    if (todayEvents.isNotEmpty)
+                      AppLocalizations.of(context).get('today-events'): () =>
+                          onButtonPressed(HomeTabButtonType.today),
+                    if (weekEvents.isNotEmpty)
+                      AppLocalizations.of(context).get('week-events'): () =>
+                          onButtonPressed(HomeTabButtonType.week),
                     ...{
                       for (final cat in categories)
                         cat.name: () => onCategoryPressed(cat),
@@ -113,12 +115,15 @@ class _HomeTabState extends State<HomeTab> {
                   },
                   height: 56,
                 ),
-                HorizontalEventGallery(
-                  events: displayedEvents,
-                  onEventTap: (event) {},
-                  height: 160,
-                  title: AppLocalizations.of(context).get('events'),
-                  subtitle: AppLocalizations.of(context).get('tap-to-view'),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: HorizontalEventGallery(
+                    events: displayedEvents,
+                    onEventTap: (event) {},
+                    height: 160,
+                    title: AppLocalizations.of(context).get('events'),
+                    subtitle: AppLocalizations.of(context).get('tap-to-view'),
+                  ),
                 ),
 
                 Padding(
@@ -160,12 +165,15 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                 ),
 
-                HorizontalEventGallery(
-                  events: upcomingEvents,
-                  onEventTap: (event) {},
-                  height: 100,
-                  title: AppLocalizations.of(context).get('upcoming-events'),
-                  subtitle: AppLocalizations.of(context).get('tap-to-view'),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: HorizontalEventGallery(
+                    events: upcomingEvents,
+                    onEventTap: (event) {},
+                    height: 100,
+                    title: AppLocalizations.of(context).get('upcoming-events'),
+                    subtitle: AppLocalizations.of(context).get('tap-to-view'),
+                  ),
                 ),
               ],
             ),

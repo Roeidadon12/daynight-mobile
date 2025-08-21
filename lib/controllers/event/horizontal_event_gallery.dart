@@ -125,7 +125,7 @@ Widget build(BuildContext context) {
             // The active event is the one closest to the center (current page)
             final isActive = (index == _currentPage);
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(vertical: 8.0,  horizontal: 8.0),
               child: AnimatedScale(
                 scale: isActive ? 1.0 : 0.9,
                 duration: const Duration(milliseconds: 250),

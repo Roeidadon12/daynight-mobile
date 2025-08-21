@@ -142,7 +142,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.transparent,
                                           foregroundColor: kBrandPrimary,
-                                          side: const BorderSide(
+                                          side: BorderSide(
                                             color: kBrandPrimary,
                                             width: 2,
                                           ),
@@ -184,7 +184,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.transparent,
                                           foregroundColor: kBrandPrimary,
-                                          side: const BorderSide(
+                                          side: BorderSide(
                                             color: kBrandPrimary,
                                             width: 2,
                                           ),
@@ -257,7 +257,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: kBrandPrimary,
                                         foregroundColor: Colors.white,
-                                        side: const BorderSide(
+                                        side: BorderSide(
                                           color: kBrandPrimary,
                                           width: 2,
                                         ),
