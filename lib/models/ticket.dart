@@ -1,4 +1,3 @@
-import 'package:intl/intl.dart';
 
 /// A model representing a ticket for an event in the DayNight application.
 ///

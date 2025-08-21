@@ -171,8 +171,6 @@ class _SearchTabState extends State<SearchTab> {
             rangeFromPrice = (range["start"] ?? 0.0) as double;
             rangeToPrice = (range["end"] ?? 0.0) as double;
           }
-          final ValidCurrency selectedCurrency =
-              ValidCurrency.ILS; // Default currency
 
           // Call the service to get events for the selected date range
           final events = await eventService.getEventsByPriceRange(
