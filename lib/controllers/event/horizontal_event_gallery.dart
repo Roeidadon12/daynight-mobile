@@ -74,14 +74,6 @@ class _HorizontalEventGalleryWithDots extends StatefulWidget {
 class _HorizontalEventGalleryWithDotsState extends State<_HorizontalEventGalleryWithDots> {
   int _currentPage = 0;
 
-  late final PageController _internalController;
-
-@override
-void initState() {
-  super.initState();
-  _internalController = widget.pageController;
-}
-
 @override
 void didUpdateWidget(covariant _HorizontalEventGalleryWithDots oldWidget) {
   super.didUpdateWidget(oldWidget);

@@ -25,6 +25,8 @@ class _HomeTabState extends State<HomeTab> {
   List<Event> displayedEvents = [];
   List<Event> upcomingEvents = [];
 
+  bool _isFirstLoad = true;
+
   @override
   void initState() {
     super.initState();
@@ -39,13 +41,37 @@ class _HomeTabState extends State<HomeTab> {
       displayedEvents.clear();
       upcomingEvents.clear();
     });
+    
+    // Fetch all event types
     final today = await eventService.getEventsByDate('today');
     final week = await eventService.getEventsByDate('week');
+    
     setState(() {
       todayEvents = today;
       weekEvents = week;
-      displayedEvents = todayEvents;
     });
+
+    // If this is the first load, automatically select the first available button
+    if (_isFirstLoad) {
+      _isFirstLoad = false;
+      
+      // Check in priority order: today events -> week events -> first category
+      if (today.isNotEmpty) {
+        onButtonPressed(HomeTabButtonType.today);
+      } else if (week.isNotEmpty) {
+        onButtonPressed(HomeTabButtonType.week);
+      } else {
+        // Get categories and trigger the first category if available
+        final categories = getCategoriesByLanguage();
+        if (categories.isNotEmpty) {
+          onCategoryPressed(categories.first);
+        }
+      }
+    } else {
+      setState(() {
+        displayedEvents = todayEvents;
+      });
+    }
   }
 
   void onButtonPressed(HomeTabButtonType type) {
@@ -59,6 +85,10 @@ class _HomeTabState extends State<HomeTab> {
           break;
       }
     });
+    // Update the UI to reflect the selected button
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void onCategoryPressed(Category category) async {
