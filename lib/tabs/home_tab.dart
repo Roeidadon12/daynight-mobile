@@ -1,4 +1,6 @@
 import 'package:day_night/controllers/event/horizontal_event_gallery.dart';
+import 'package:day_night/controllers/event/event_details_page.dart';
+import 'package:day_night/utils/slide_page_route.dart';
 import 'package:flutter/material.dart';
 import '../app_localizations.dart';
 import '../controllers/user/user_controller.dart';
@@ -11,6 +13,12 @@ import '../utils/category_utils.dart';
 import '../services/event_service.dart';
 import '../models/event.dart';
 import '../constants.dart';
+
+enum HomeTabView {
+  today,
+  week,
+  category,
+}
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -26,6 +34,7 @@ class _HomeTabState extends State<HomeTab> {
   List<Event> upcomingEvents = [];
 
   bool _isFirstLoad = true;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -36,29 +45,45 @@ class _HomeTabState extends State<HomeTab> {
   Future<void> _fetchEvents() async {
     final eventService = EventService();
     setState(() {
+      _isLoading = true;
       todayEvents.clear();
       weekEvents.clear();
       displayedEvents.clear();
       upcomingEvents.clear();
     });
     
-    // Fetch all event types
-    final today = await eventService.getEventsByDate('today');
-    final week = await eventService.getEventsByDate('week');
-    
-    setState(() {
-      todayEvents = today;
-      weekEvents = week;
-    });
+    try {
+      // Fetch all event types in parallel
+      final results = await Future.wait([
+        eventService.getEventsByDate('today'),
+        eventService.getEventsByDate('week'),
+        eventService.getEventsByDate('upcoming'),
+      ]);
+      
+      if (mounted) {
+        setState(() {
+          todayEvents = results[0];
+          weekEvents = results[1];
+          upcomingEvents = results[2];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
 
     // If this is the first load, automatically select the first available button
     if (_isFirstLoad) {
       _isFirstLoad = false;
       
       // Check in priority order: today events -> week events -> first category
-      if (today.isNotEmpty) {
+      if (todayEvents.isNotEmpty) {
         onButtonPressed(HomeTabButtonType.today);
-      } else if (week.isNotEmpty) {
+      } else if (weekEvents.isNotEmpty) {
         onButtonPressed(HomeTabButtonType.week);
       } else {
         // Get categories and trigger the first category if available
@@ -79,9 +104,11 @@ class _HomeTabState extends State<HomeTab> {
       switch (type) {
         case HomeTabButtonType.today:
           displayedEvents = todayEvents;
+          _currentView = HomeTabView.today;
           break;
         case HomeTabButtonType.week:
           displayedEvents = weekEvents;
+          _currentView = HomeTabView.week;
           break;
       }
     });
@@ -93,21 +120,43 @@ class _HomeTabState extends State<HomeTab> {
 
   void onCategoryPressed(Category category) async {
     final eventService = EventService();
-    setState(() {
-      displayedEvents.clear();
-    });
+    // Keep current events until new ones are loaded
     final events = await eventService.getEventsByCategory(category.id);
-    setState(() {
-      displayedEvents = events;
-    });
+    if (mounted) {
+      setState(() {
+        displayedEvents = events;
+        _currentCategory = category;
+        _currentView = HomeTabView.category;
+      });
+    }
+  }
+
+  HomeTabView _currentView = HomeTabView.today;
+  Category? _currentCategory;
+
+  String _getEmptyStateMessage(BuildContext context, [String? displayMessage]) {
+    if (displayMessage != null) {
+      return AppLocalizations.of(context).get(displayMessage);
+    }
+    
+    switch (_currentView) {
+      case HomeTabView.today:
+        return AppLocalizations.of(context).get('no-today-events');
+      case HomeTabView.week:
+        return AppLocalizations.of(context).get('no-week-events');
+      case HomeTabView.category:
+        final categoryName = _currentCategory?.name ?? '';
+        return '${AppLocalizations.of(context).get('no-category-events')} $categoryName';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final categories = getCategoriesByLanguage();
+    // Always include the event type buttons, regardless of content
     final labels = <String>[
-      if (todayEvents.isNotEmpty) AppLocalizations.of(context).get('today-events'),
-      if (weekEvents.isNotEmpty) AppLocalizations.of(context).get('week-events'),
+      AppLocalizations.of(context).get('today-events'),
+      AppLocalizations.of(context).get('week-events'),
       ...categories.map((c) => c.name),
     ];
     return SafeArea(
@@ -129,15 +178,22 @@ class _HomeTabState extends State<HomeTab> {
                     },
                   ),
                 ),
-                HorizontalButtonsController(
-                  labels: labels,
-                  delegates: {
-                    if (todayEvents.isNotEmpty)
-                      AppLocalizations.of(context).get('today-events'): () =>
-                          onButtonPressed(HomeTabButtonType.today),
-                    if (weekEvents.isNotEmpty)
-                      AppLocalizations.of(context).get('week-events'): () =>
-                          onButtonPressed(HomeTabButtonType.week),
+                if (_isLoading)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                else
+                  HorizontalButtonsController(
+                    labels: labels,
+                    delegates: {
+                    // Always include event type buttons
+                    AppLocalizations.of(context).get('today-events'): () =>
+                        onButtonPressed(HomeTabButtonType.today),
+                    AppLocalizations.of(context).get('week-events'): () =>
+                        onButtonPressed(HomeTabButtonType.week),
                     ...{
                       for (final cat in categories)
                         cat.name: () => onCategoryPressed(cat),
@@ -149,10 +205,18 @@ class _HomeTabState extends State<HomeTab> {
                   padding: const EdgeInsets.only(top: 16.0),
                   child: HorizontalEventGallery(
                     events: displayedEvents,
-                    onEventTap: (event) {},
+                    onEventTap: (event) {
+                      Navigator.push(
+                        context,
+                        SlidePageRoute(
+                          page: EventDetailsPage(event: event),
+                        ),
+                      );
+                    },
                     height: 160,
                     title: AppLocalizations.of(context).get('events'),
                     subtitle: AppLocalizations.of(context).get('tap-to-view'),
+                    emptyStateMessage: _getEmptyStateMessage(context),
                   ),
                 ),
 
@@ -199,10 +263,18 @@ class _HomeTabState extends State<HomeTab> {
                   padding: const EdgeInsets.only(top: 16.0),
                   child: HorizontalEventGallery(
                     events: upcomingEvents,
-                    onEventTap: (event) {},
+                    onEventTap: (event) {
+                      Navigator.push(
+                        context,
+                        SlidePageRoute(
+                          page: EventDetailsPage(event: event),
+                        ),
+                      );
+                    },
                     height: 100,
                     title: AppLocalizations.of(context).get('upcoming-events'),
                     subtitle: AppLocalizations.of(context).get('tap-to-view'),
+                    emptyStateMessage: _getEmptyStateMessage(context, 'no-upcoming-events'),
                   ),
                 ),
               ],

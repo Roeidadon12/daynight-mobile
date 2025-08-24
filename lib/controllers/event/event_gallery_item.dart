@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/event.dart';
+import '../../constants.dart';
 
 class EventGalleryItem extends StatelessWidget {
   final Event event;
@@ -15,7 +16,7 @@ class EventGalleryItem extends StatelessWidget {
 
   Widget _buildDefaultImage() {
     return Image.asset(
-      'assets/images/image_place_holder.png',
+      kDefaultEventImage,
       fit: BoxFit.cover,
     );
   }

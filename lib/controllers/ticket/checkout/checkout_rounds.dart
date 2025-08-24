@@ -38,7 +38,7 @@ class CheckoutRoundsPage extends StatelessWidget {
                   children: [
                     EventSummaryTile(event: event),
 
-                    ...tickets.map((t) => ListTickets(item: t)).toList(),
+                    ...tickets.map((t) => ListTickets(ticket: t)).toList(),
                   ],
                 ),
               ),

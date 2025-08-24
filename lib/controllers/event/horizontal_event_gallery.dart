@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../models/event.dart';
 import 'event_gallery_item.dart';
 import 'package:day_night/constants.dart';
+import '../shared/event_empty_state.dart';
+import '../../app_localizations.dart';
 
 class HorizontalEventGallery extends StatefulWidget {
   final List<Event> events;
@@ -9,6 +11,8 @@ class HorizontalEventGallery extends StatefulWidget {
   final double height;
   final String? title; 
   final String? subtitle;
+  final String? emptyStateMessage;
+  final String? emptyStateTitle;
 
   const HorizontalEventGallery({
     super.key,
@@ -16,7 +20,9 @@ class HorizontalEventGallery extends StatefulWidget {
     this.onEventTap,
     this.height = 160,
     this.title, 
-    this.subtitle, 
+    this.subtitle,
+    this.emptyStateMessage,
+    this.emptyStateTitle,
   });
 
   @override
@@ -41,9 +47,23 @@ class _HorizontalEventGalleryState extends State<HorizontalEventGallery> {
 
   @override
   Widget build(BuildContext context) {
+    final containerHeight = widget.height * 1.5 + 120;
+    final containerWidth = widget.height * 1.5 + 120;
+
+    if (widget.events.isEmpty) {
+      return SizedBox(
+        height: containerHeight,
+        width: containerWidth,
+        child: EventEmptyState(
+          message: widget.emptyStateMessage ?? AppLocalizations.of(context).get('no-events-available'),
+          title: widget.emptyStateTitle,
+        ),
+      );
+    }
+    
     return SizedBox(
-      height: widget.height * 1.5 + 120,
-      width: widget.height * 1.5 + 120,
+      height: containerHeight,
+      width: containerWidth,
       child: _HorizontalEventGalleryWithDots(
         events: widget.events,
         onEventTap: widget.onEventTap,

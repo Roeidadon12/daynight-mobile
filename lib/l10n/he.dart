@@ -30,4 +30,10 @@ const Map<String, String> heTexts = {
   'EUR': 'יורו (€)', 
   'GBP': 'לירה שטרלינג (£)', 
   'buy-tickets': 'רכישת כרטיסים',
+  'no-events-available': 'אין אירועים זמינים כרגע',
+  'no-today-events': 'אין אירועים להיום',
+  'no-week-events': 'אין אירועים השבוע',
+  'no-category-events': 'אין אירועים בקטגוריה זו',
+  'no-upcoming-events': 'אין אירועים קרובים',
+
 };

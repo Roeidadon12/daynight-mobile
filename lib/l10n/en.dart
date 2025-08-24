@@ -28,6 +28,11 @@ const Map<String, String> enTexts = {
   'ILS': 'Israeli Shekel (₪)', // Israeli Shekel
   'USD': 'US Dollar (\$)', // US Dollar
   'EUR': 'Euro (€)', // Euro
+  'no-events-available': 'No events available at this time',
+  'no-today-events': 'No events scheduled for today',
+  'no-week-events': 'No events scheduled for this week',
+  'no-category-events': 'No events found in this category',
+  'no-upcoming-events': 'No upcoming events available',
   'GBP': 'British Pound (£)', // British Pound
   'buy-tickets': 'Buy Tickets',
 };

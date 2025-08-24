@@ -65,29 +65,22 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                         automaticallyImplyLeading: false,
                         backgroundColor: kMainBackgroundColor,
                         flexibleSpace: FlexibleSpaceBar(
-                          background: widget.event.thumbnailUrl != null
-                              ? ClipRRect(
-                                  child: Image.network(
-                                    widget.event.thumbnailUrl!,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            const Center(
-                                              child: Icon(
-                                                Icons.broken_image,
-                                                size: 60,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                  ),
+                          background: ClipRRect(
+                            child: widget.event.thumbnailUrl != null
+                              ? Image.network(
+                                  widget.event.thumbnailUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => 
+                                    Image.asset(
+                                      kDefaultEventImage,
+                                      fit: BoxFit.cover,
+                                    ),
                                 )
-                              : const Center(
-                                  child: Icon(
-                                    Icons.image,
-                                    size: 60,
-                                    color: Colors.grey,
-                                  ),
+                              : Image.asset(
+                                  kDefaultEventImage,
+                                  fit: BoxFit.cover,
                                 ),
+                          ),
                         ),
                       ),
                     ),

@@ -9,6 +9,7 @@ import 'tabs/ticket_tab.dart';
 import 'tabs/editing_tab.dart';
 import 'services/category_repository.dart';
 import 'services/language_service.dart';
+import 'services/event_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -76,11 +77,25 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    final eventService = EventService();
+    // Pre-fetch initial data
+    await Future.wait([
+      eventService.getEventsByDate('today'),
+      eventService.getEventsByDate('week'),
+    ]);
+    
+    // Add a minimum splash screen duration
+    await Future.delayed(const Duration(seconds: 2));
+    
+    if (mounted) {
       setState(() {
         _showSplash = false;
       });
-    });
+    }
   }
 
   @override
