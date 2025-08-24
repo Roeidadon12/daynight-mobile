@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../constants.dart';
+import 'secondary_button.dart';
 
 /// A controller widget that displays a horizontal array of buttons.
 /// [labels] is the list of button labels.
@@ -28,25 +28,11 @@ class HorizontalButtonsController extends StatelessWidget {
           children: List.generate(labels.length, (index) {
             final label = labels[index];
             final isSelected = selectedIndex == index;
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isSelected ? kBrandPrimary : Colors.transparent,
-                  foregroundColor: Colors.white,
-                  side: BorderSide(
-                    color: Colors.white,
-                    width: 0.8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      height / 2, // Make the button rounded
-                    ), // Optional: rounded corners
-                  ),
-                ),
-                onPressed: delegates[label],
-                child: Text(label),
-              ),
+            return SecondaryButton(
+              text: label,
+              isSelected: isSelected,
+              onPressed: delegates[label],
+              height: height,
             );
           }),
         ),

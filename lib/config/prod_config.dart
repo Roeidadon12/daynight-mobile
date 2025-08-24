@@ -15,7 +15,7 @@ class ProdConfig implements AppConfig {
   int get defaultLanguageId => 22;
   
   @override
-  Color get mainBackgroundColor => const Color(0xFF121212);
+  Color get mainBackgroundColor => const Color(0x0C0E12FF);
   
   @override
   Color get brandPrimary => const Color(0xFF6200EE);

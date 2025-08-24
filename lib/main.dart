@@ -11,7 +11,8 @@ import 'services/category_repository.dart';
 import 'services/language_service.dart';
 import 'services/event_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
+import 'providers/search_provider.dart';
 
 Future<void> setAppLanguageIdByDeviceLocale() async {
   final languages = await LanguageService().getLanguages();
@@ -33,8 +34,11 @@ void main() async {
 
   // Wrap your app with ProviderScope for Riverpod
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SearchProvider()),
+      ],
+      child: const MyApp(),
     ),
   );
 }

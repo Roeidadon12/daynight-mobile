@@ -3,6 +3,7 @@ import '../constants.dart';
 import 'dart:convert';
 import '../models/event.dart';
 import '../utils/logger.dart';
+import '../models/enums.dart';
 
 /// Service class responsible for handling all event-related API operations.
 ///
@@ -31,6 +32,45 @@ class EventService {
       endpoint: '/events-by-date',
       method: 'GET',
       queryParams: {'type': type},
+    );
+    if (response.statusCode == 200) {
+      try {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((json) => Event.fromJson(json as Map<String, dynamic>)).toList();
+      } catch (e) {
+        Logger.error(
+          'Failed to parse events from API response',
+          'EventService',
+        );
+        return [];
+      }
+    } else {
+      return [];
+    }
+  }
+
+  /// Fetches events filtered by price range.
+  ///
+  /// [minPrice] specifies the minimum price filter.
+  /// [maxPrice] specifies the maximum price filter.
+  ///
+  /// Returns a list of [Event] objects that fall within the specified price range.
+  /// Returns an empty list if the request fails or if there's an error parsing the response.
+  ///
+  /// Throws nothing - errors are logged and an empty list is returned.
+  Future<List<Event>> getEventsByPrice(
+    double minPrice,
+    double maxPrice, {
+    ValidCurrency currency = ValidCurrency.ILS,
+  }) async {
+    final response = await api.request(
+      endpoint: '/events-by-price',
+      method: 'GET',
+      queryParams: {
+        'min_price': minPrice.toString(),
+        'max_price': maxPrice.toString(),
+        'currency': currency.toString().split('.').last,
+      },
     );
     if (response.statusCode == 200) {
       try {

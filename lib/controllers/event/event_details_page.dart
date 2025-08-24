@@ -5,6 +5,7 @@ import '../../models/event.dart';
 import '../../app_localizations.dart';
 import '../../constants.dart';
 import '../shared/custom_app_bar.dart';
+import '../shared/primary_button.dart';
 import 'package:flutter/services.dart';
 
 class EventDetailsPage extends StatefulWidget {
@@ -232,47 +233,19 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                     ),
                                   ],
                                 ),
-                                Flexible(
-                                  fit: FlexFit.loose,
-                                  child: SizedBox(
-                                    height: 56,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          SlidePageRoute(
-                                            page: CheckoutRoundsPage(
-                                              event: widget.event,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: kBrandPrimary,
-                                        foregroundColor: Colors.white,
-                                        side: BorderSide(
-                                          color: kBrandPrimary,
-                                          width: 2,
+                                PrimaryButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      SlidePageRoute(
+                                        page: CheckoutRoundsPage(
+                                          event: widget.event,
                                         ),
-                                        elevation: 0,
                                       ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              AppLocalizations.of(
-                                                context,
-                                              ).get('to-buy-ticket'),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          const Icon(Icons.arrow_forward),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                                    );
+                                  },
+                                  textKey: 'to-buy-ticket',
+                                  trailingIcon: Icons.arrow_forward,
                                 ),
                               ],
                             ),
