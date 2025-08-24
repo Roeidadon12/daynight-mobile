@@ -36,7 +36,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => SearchProvider()),
+        ChangeNotifierProvider<SearchProvider>.value(value: SearchProvider()),
       ],
       child: const MyApp(),
     ),
@@ -124,11 +124,11 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0; // Already exists
 
-  static const List<Widget> _pages = <Widget>[
-    HomeTab(),
-    SearchTab(),
-    TicketTab(),
-    EditingTab(),
+  final List<Widget> _pages = [
+    const HomeTab(),
+    const SearchTab(),
+    const TicketTab(),
+    const EditingTab(),
   ];
 
   void _onItemTapped(int index) {
@@ -137,11 +137,13 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: Container(
         color: Colors.black, // Set your desired background color here
         child: BottomNavigationBar(

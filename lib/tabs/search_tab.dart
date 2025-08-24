@@ -19,18 +19,37 @@ class SearchTab extends StatefulWidget {
   State<SearchTab> createState() => _SearchTabState();
 }
 
-class _SearchTabState extends State<SearchTab> {
+class _SearchTabState extends State<SearchTab> with AutomaticKeepAliveClientMixin {
   late final SearchProvider _searchProvider;
+  bool _isVisible = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     _searchProvider = Provider.of<SearchProvider>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkVisibilityAndRestore();
+    });
+  }
+
+  void _checkVisibilityAndRestore() {
+    if (mounted) {
+      final isVisible = ModalRoute.of(context)?.isCurrent ?? false;
+      if (isVisible && !_isVisible) {
+        _searchProvider.restoreLastSearch();
+      }
+      _isVisible = isVisible;
+    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _checkVisibilityAndRestore();
+    
     final criteria = _searchProvider.searchCriteria;
     // Update texts with localized strings
     for (var c in criteria) {
@@ -50,6 +69,7 @@ class _SearchTabState extends State<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Consumer<SearchProvider>(
       builder: (context, searchProvider, _) {
         return SafeArea(

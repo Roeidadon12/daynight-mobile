@@ -271,7 +271,7 @@ class _HomeTabState extends State<HomeTab> {
                         ),
                       );
                     },
-                    height: 100,
+                    height: 120,
                     title: AppLocalizations.of(context).get('upcoming-events'),
                     subtitle: AppLocalizations.of(context).get('tap-to-view'),
                     emptyStateMessage: _getEmptyStateMessage(context, 'no-upcoming-events'),
