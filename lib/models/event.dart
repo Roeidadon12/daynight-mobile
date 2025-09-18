@@ -1,5 +1,3 @@
-import '../../constants.dart';
-import 'package:intl/intl.dart';
 import '../utils/functions.dart';
 
 class Ticket {

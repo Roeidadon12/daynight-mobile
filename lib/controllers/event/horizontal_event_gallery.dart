@@ -36,7 +36,7 @@ class HorizontalEventGallery extends StatefulWidget {
 class _HorizontalEventGalleryState extends State<HorizontalEventGallery> {
   late final PageController _pageController;
 
-  bool _isAtFirstPage = true;
+  //bool _isAtFirstPage = true;
 
   @override
   void initState() {
@@ -48,7 +48,7 @@ class _HorizontalEventGalleryState extends State<HorizontalEventGallery> {
   void _onPageChanged() {
     if (mounted) {
       setState(() {
-        _isAtFirstPage = _pageController.page?.round() == 0;
+        //_isAtFirstPage = _pageController.page?.round() == 0;
       });
     }
   }
