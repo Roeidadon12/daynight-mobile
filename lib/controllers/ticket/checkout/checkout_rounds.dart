@@ -4,6 +4,7 @@ import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/controllers/shared/primary_button.dart';
 import 'package:day_night/controllers/ticket/list_tickets.dart';
 import 'package:day_night/models/event.dart';
+import 'package:day_night/models/events_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -14,7 +15,7 @@ class CheckoutRoundsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Ticket> tickets = event.tickets ?? [];
+    final List<Ticket> tickets = []; //event.tickets ?? [];
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -39,7 +40,7 @@ class CheckoutRoundsPage extends StatelessWidget {
                   children: [
                     EventSummaryTile(event: event),
 
-                    ...tickets.map((t) => ListTickets(ticket: t)).toList(),
+                    ...tickets.map((t) => ListTickets(ticket: t)),
                   ],
                 ),
               ),

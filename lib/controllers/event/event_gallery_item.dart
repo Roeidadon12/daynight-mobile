@@ -1,5 +1,5 @@
+import 'package:day_night/models/events_response.dart';
 import 'package:flutter/material.dart';
-import '../../models/event.dart';
 import '../../constants.dart';
 
 class EventGalleryItem extends StatelessWidget {
@@ -34,13 +34,11 @@ class EventGalleryItem extends StatelessWidget {
           child: Stack(
             children: [
               Positioned.fill(
-                child: event.thumbnailUrl != null
-                  ? Image.network(
-                      event.thumbnailUrl!,
+                child: Image.network(
+                      event.thumbnail,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => _buildDefaultImage(),
-                    )
-                  : _buildDefaultImage(),
+                    ),
               ),
             ],
           ),

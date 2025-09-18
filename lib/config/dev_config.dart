@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'app_config.dart';
 
 class DevConfig implements AppConfig {
+  /// Primary and fallback URLs
+  static const String primaryDomain = 'https://daynight.co.il';
+  static const String fallbackIp = 'https://104.21.4.6';
+  
   @override
-  String get baseUrl => 'http://10.0.2.2:8001';
+  String get baseUrl => '$primaryDomain/roei-test';
   
   @override
   String get apiBaseUrl => '$baseUrl/api';

@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'models/api_response.dart';
 import 'exceptions/api_exceptions.dart';
-import 'utils/logger.dart';
 
-/// Service class for handling HTTP requests with centralized error handling.
+/// Service class for handling HTTP requests.
 class ApiService {
-  /// Base URL for all API requests.
+  /// Base URL for API requests.
   final String baseUrl;
   
   /// Default timeout duration for requests.
@@ -25,69 +23,28 @@ class ApiService {
           'Accept': 'application/json',
         };
 
-  /// Makes an HTTP request and returns a typed [ApiResponse].
-  ///
-  /// Type [T] specifies the expected response data type.
-  /// [fromJson] is a function that converts JSON to type [T].
-  Future<ApiResponse<T>> requestTyped<T>({
-    required String endpoint,
-    required String method,
-    required T Function(Map<String, dynamic>) fromJson,
-    Map<String, String>? headers,
-    Map<String, dynamic>? queryParams,
-    dynamic body,
-  }) async {
-    try {
-      final response = await request(
-        endpoint: endpoint,
-        method: method,
-        headers: headers,
-        queryParams: queryParams,
-        body: body,
-      );
-
-      return ApiResponse.fromJson(response, fromJson);
-    } on ApiException {
-      rethrow;
-    } catch (e) {
-      throw ParseException('Failed to parse response: $e');
-    }
+  /// Makes an HTTP GET request.
+  Future<Map<String, dynamic>> get(String endpoint) async {
+    return request(
+      endpoint: endpoint,
+      method: 'GET',
+    );
   }
 
-  /// Makes an HTTP request and returns a typed [ApiResponse] containing a list.
-  ///
-  /// Type [T] specifies the expected item type in the list.
-  /// [fromJson] is a function that converts JSON to type [T].
-  Future<ApiResponse<List<T>>> requestTypedList<T>({
-    required String endpoint,
-    required String method,
-    required T Function(Map<String, dynamic>) fromJson,
-    Map<String, String>? headers,
-    Map<String, dynamic>? queryParams,
-    dynamic body,
+  /// Makes an HTTP POST request.
+  Future<Map<String, dynamic>> post(
+    String endpoint, {
+    Map<String, dynamic>? body,
   }) async {
-    try {
-      final response = await request(
-        endpoint: endpoint,
-        method: method,
-        headers: headers,
-        queryParams: queryParams,
-        body: body,
-      );
-
-      return ApiResponse.fromJsonList(response, fromJson);
-    } on ApiException {
-      rethrow;
-    } catch (e) {
-      throw ParseException('Failed to parse response: $e');
-    }
+    return request(
+      endpoint: endpoint,
+      method: 'POST',
+      body: body,
+    );
   }
 
-  /// Makes a raw HTTP request and handles common error cases.
-  ///
-  /// This is an internal method used by [requestTyped] and [requestTypedList].
-  /// It handles network errors, timeouts, and HTTP error responses.
-  Future<http.Response> request({
+  /// Makes an HTTP request with the given parameters.
+  Future<Map<String, dynamic>> request({
     required String endpoint,
     required String method,
     Map<String, String>? headers,
@@ -95,100 +52,61 @@ class ApiService {
     dynamic body,
   }) async {
     try {
-      final Uri uri = Uri.parse('$baseUrl$endpoint')
-          .replace(queryParameters: queryParams);
-
-      final Map<String, String> mergedHeaders = {
-        ...defaultHeaders,
-        ...?headers,
-      };
-
-      http.Response response;
+      final cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+      final cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+      final url = '$cleanBaseUrl/$cleanEndpoint';
       
-      switch (method.toUpperCase()) {
-        case 'GET':
-          response = await http
-              .get(uri, headers: mergedHeaders)
-              .timeout(timeout);
-          break;
-        case 'POST':
-          response = await http
-              .post(uri, headers: mergedHeaders, body: jsonEncode(body))
-              .timeout(timeout);
-          break;
-        case 'PUT':
-          response = await http
-              .put(uri, headers: mergedHeaders, body: jsonEncode(body))
-              .timeout(timeout);
-          break;
-        case 'DELETE':
-          response = await http
-              .delete(uri, headers: mergedHeaders)
-              .timeout(timeout);
-          break;
-        default:
-          throw BadRequestException('Unsupported HTTP method: $method');
-      }
+      final uri = Uri.parse(url).replace(queryParameters: queryParams);
+      print('Making request to: $uri');
 
-      // Log the response for debugging
-      Logger.debug(
-        'API ${method.toUpperCase()} ${uri.path}: ${response.statusCode}',
-        'ApiService',
+      final response = await _executeRequest(
+        uri: uri,
+        method: method,
+        headers: {...defaultHeaders, ...?headers},
+        body: body,
       );
 
-      // Handle HTTP error responses
-      _handleErrorResponse(response);
-
-      return response;
+      if (response.statusCode == HttpStatus.ok) {
+        return json.decode(response.body) as Map<String, dynamic>;
+      } else {
+        print('Request failed with status: ${response.statusCode}');
+        throw ServerException('Request failed with status: ${response.statusCode}');
+      }
     } on SocketException catch (e) {
-      Logger.error('Network error', 'ApiService', e);
-      throw NetworkException('No internet connection');
-    } on TimeoutException catch (e) {
-      Logger.error('Request timeout', 'ApiService', e);
-      throw TimeoutException('Request timed out');
+      print('Socket error: $e');
+      rethrow;
     } catch (e) {
-      Logger.error('API request failed', 'ApiService', e);
+      print('Error making request: $e');
       rethrow;
     }
   }
 
-  /// Handles HTTP error responses by throwing appropriate exceptions.
-  void _handleErrorResponse(http.Response response) {
-    if (response.statusCode >= 400) {
-      final body = _parseErrorBody(response);
-      final message = body['message'] as String? ?? 'Unknown error';
-      final errorDetails = body['errors'] as Map<String, dynamic>?;
-
-      switch (response.statusCode) {
-        case 400:
-          throw BadRequestException(message, details: errorDetails);
-        case 401:
-          throw UnauthorizedException(message, details: errorDetails);
-        case 403:
-          throw ForbiddenException(message, details: errorDetails);
-        case 404:
-          throw NotFoundException(message, details: errorDetails);
-        case 409:
-          throw ConflictException(message, details: errorDetails);
-        case 500:
-        case 501:
-        case 503:
-          throw ServerException(message, details: errorDetails);
-        default:
-          throw ServerException(
-            'HTTP Error ${response.statusCode}',
-            details: errorDetails,
-          );
-      }
-    }
-  }
-
-  /// Attempts to parse error response body as JSON.
-  Map<String, dynamic> _parseErrorBody(http.Response response) {
-    try {
-      return jsonDecode(response.body) as Map<String, dynamic>;
-    } catch (_) {
-      return {'message': response.body};
+  /// Executes an HTTP request with the given parameters.
+  Future<http.Response> _executeRequest({
+    required Uri uri,
+    required String method,
+    required Map<String, String> headers,
+    dynamic body,
+  }) async {
+    switch (method.toUpperCase()) {
+      case 'GET':
+        return await http.get(uri, headers: headers).timeout(timeout);
+      case 'POST':
+        return await http.post(
+          uri,
+          headers: headers,
+          body: body != null ? json.encode(body) : null,
+        ).timeout(timeout);
+      case 'PUT':
+        return await http.put(
+          uri,
+          headers: headers,
+          body: body != null ? json.encode(body) : null,
+        ).timeout(timeout);
+      case 'DELETE':
+        return await http.delete(uri, headers: headers).timeout(timeout);
+      default:
+        throw BadRequestException('Unsupported HTTP method: $method');
     }
   }
 }

@@ -4,8 +4,7 @@ class Language {
   final String code;
   final int direction;
   final int isDefault;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final Map<String, String>? keywords;
 
   Language({
     required this.id,
@@ -13,8 +12,7 @@ class Language {
     required this.code,
     required this.direction,
     required this.isDefault,
-    required this.createdAt,
-    required this.updatedAt,
+    required this.keywords,
   });
 
   factory Language.fromJson(Map<String, dynamic> json) {
@@ -24,8 +22,9 @@ class Language {
       code: json['code'] as String,
       direction: json['direction'] as int,
       isDefault: json['is_default'] as int,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      keywords: (json['keywords'] as Map<String, dynamic>?)?.map(
+        (key, value) => MapEntry(key, value as String),
+      ),
     );
   }
 }

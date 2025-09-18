@@ -1,7 +1,7 @@
 import '../api_service.dart';
-import 'dart:convert';
 import '../constants.dart';
 import '../models/category.dart';
+import '../models/enums.dart';
 
 class CategoryService {
   final ApiService api;
@@ -10,18 +10,21 @@ class CategoryService {
 
   Future<List<Category>> getCategories({int? languageId}) async {
     final response = await api.request(
-      endpoint: '/active-categories',
+      endpoint: ApiCommands.getCategories.value,
       method: 'GET',
-      queryParams: languageId != null ? {'languageId': languageId.toString()} : null,
+      queryParams: languageId != null ? {'language_id': languageId.toString()} : null,
     );
-    if (response.statusCode == 200) {
-      try {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => Category.fromJson(json)).toList();
-      } catch (_) {
+    try {
+      if (!response.containsKey('categories')) {
         return [];
       }
-    } else {
+      final categoriesList = response['categories'];
+
+      return (categoriesList as List)
+          .map((json) => Category.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print('Error parsing categories: $e');
       return [];
     }
   }

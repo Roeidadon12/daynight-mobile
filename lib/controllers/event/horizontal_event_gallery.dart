@@ -1,8 +1,9 @@
+import 'package:day_night/models/events_response.dart';
 import 'package:flutter/material.dart';
-import '../../models/event.dart';
 import 'event_gallery_item.dart';
 import 'package:day_night/constants.dart';
 import '../shared/event_empty_state.dart';
+import '../shared/horizontal_refresh_indicator.dart';
 import '../../app_localizations.dart';
 
 class HorizontalEventGallery extends StatefulWidget {
@@ -13,6 +14,7 @@ class HorizontalEventGallery extends StatefulWidget {
   final String? subtitle;
   final String? emptyStateMessage;
   final String? emptyStateTitle;
+  final Future<void> Function()? onRefresh;
 
   const HorizontalEventGallery({
     super.key,
@@ -23,6 +25,7 @@ class HorizontalEventGallery extends StatefulWidget {
     this.subtitle,
     this.emptyStateMessage,
     this.emptyStateTitle,
+    this.onRefresh,
   });
 
   @override
@@ -33,14 +36,26 @@ class HorizontalEventGallery extends StatefulWidget {
 class _HorizontalEventGalleryState extends State<HorizontalEventGallery> {
   late final PageController _pageController;
 
+  bool _isAtFirstPage = true;
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController(viewportFraction: 0.8);
+    _pageController.addListener(_onPageChanged);
+  }
+
+  void _onPageChanged() {
+    if (mounted) {
+      setState(() {
+        _isAtFirstPage = _pageController.page?.round() == 0;
+      });
+    }
   }
 
   @override
   void dispose() {
+    _pageController.removeListener(_onPageChanged);
     _pageController.dispose();
     super.dispose();
   }
@@ -61,15 +76,25 @@ class _HorizontalEventGalleryState extends State<HorizontalEventGallery> {
       );
     }
     
+    Widget content = _HorizontalEventGalleryWithDots(
+      events: widget.events,
+      onEventTap: widget.onEventTap,
+      height: widget.height,
+      pageController: _pageController,
+    );
+
+    if (widget.onRefresh != null) {
+      content = HorizontalRefreshIndicator(
+        onRefresh: widget.onRefresh!,
+        color: kBrandPrimary,
+        child: content,
+      );
+    }
+
     return SizedBox(
       height: containerHeight,
       width: containerWidth,
-      child: _HorizontalEventGalleryWithDots(
-        events: widget.events,
-        onEventTap: widget.onEventTap,
-        height: widget.height,
-        pageController: _pageController,
-      ),
+      child: content,
     );
   }
 }
@@ -127,6 +152,7 @@ Widget build(BuildContext context) {
       Expanded(
         child: PageView.builder(
           controller: widget.pageController,
+          physics: const ClampingScrollPhysics(),
           itemCount: widget.events.length,
           onPageChanged: (int index) {
             setState(() {

@@ -1,5 +1,5 @@
+import 'package:day_night/models/events_response.dart';
 import 'package:flutter/material.dart';
-import '../models/event.dart';
 import '../models/enums.dart';
 import '../models/search_criteria.dart';
 import '../services/event_service.dart';

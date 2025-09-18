@@ -1,9 +1,8 @@
 import '../api_service.dart';
 import '../constants.dart';
-import 'dart:convert';
-import '../models/event.dart';
 import '../utils/logger.dart';
 import '../models/enums.dart';
+import '../models/events_response.dart';
 
 /// Service class responsible for handling all event-related API operations.
 ///
@@ -28,25 +27,50 @@ class EventService {
   ///
   /// Throws nothing - errors are logged and an empty list is returned.
   Future<List<Event>> getEventsByDate(String type) async {
-    final response = await api.request(
-      endpoint: '/events-by-date',
-      method: 'GET',
-      queryParams: {'type': type},
-    );
-    if (response.statusCode == 200) {
-      try {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => Event.fromJson(json as Map<String, dynamic>)).toList();
-      } catch (e) {
-        Logger.error(
-          'Failed to parse events from API response',
-          'EventService',
-        );
-        return [];
-      }
-    } else {
-      return [];
+    var queryParams = <String, String>{};
+
+    switch (type) {
+      case 'week':
+        queryParams['start_date'] = DateTime.now().toIso8601String().split(
+          'T',
+        )[0];
+        queryParams['end_date'] = DateTime.now()
+            .add(const Duration(days: 7))
+            .toIso8601String()
+            .split('T')[0];
+        // Handle upcoming events
+        break;
+      case 'today':
+        // Handle today's events
+        queryParams['start_date'] = DateTime.now().toIso8601String().split(
+          'T',
+        )[0];
+        queryParams['end_date'] = DateTime.now().toIso8601String().split(
+          'T',
+        )[0];
+        break;
+      case 'upcoming':
+        queryParams['start_date'] = DateTime.now().toIso8601String().split(
+          'T',
+        )[0];
+        queryParams['end_date'] = DateTime.now()
+            .add(const Duration(days: 30))
+            .toIso8601String()
+            .split('T')[0];
+        break;
+      default:
+        // Handle unknown event type
+        break;
     }
+
+    final response = await api.request(
+      endpoint: ApiCommands.getEvents.value,
+      method: 'GET',
+      queryParams: queryParams,
+    );
+
+    final events = getEvents(response);
+    return events;
   }
 
   /// Fetches events filtered by price range.
@@ -54,7 +78,7 @@ class EventService {
   /// [minPrice] specifies the minimum price filter.
   /// [maxPrice] specifies the maximum price filter.
   ///
-  /// Returns a list of [Event] objects that fall within the specified price range.
+  /// Returns a list of [EventsResponse] objects that fall within the specified price range.
   /// Returns an empty list if the request fails or if there's an error parsing the response.
   ///
   /// Throws nothing - errors are logged and an empty list is returned.
@@ -64,7 +88,7 @@ class EventService {
     ValidCurrency currency = ValidCurrency.ILS,
   }) async {
     final response = await api.request(
-      endpoint: '/events-by-price',
+      endpoint: ApiCommands.getEvents.value,
       method: 'GET',
       queryParams: {
         'min_price': minPrice.toString(),
@@ -72,20 +96,9 @@ class EventService {
         'currency': currency.toString().split('.').last,
       },
     );
-    if (response.statusCode == 200) {
-      try {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => Event.fromJson(json as Map<String, dynamic>)).toList();
-      } catch (e) {
-        Logger.error(
-          'Failed to parse events from API response',
-          'EventService',
-        );
-        return [];
-      }
-    } else {
-      return [];
-    }
+
+    final events = getEvents(response);
+    return events;
   }
 
   /// Fetches events within a specified price range.
@@ -93,7 +106,7 @@ class EventService {
   /// [rangeFromPrice] is the minimum price (inclusive).
   /// [rangeToPrice] is the maximum price (inclusive).
   ///
-  /// Returns a list of [Event] objects that fall within the specified price range.
+  /// Returns a list of [EventsResponse] objects that fall within the specified price range.
   /// Returns an empty list if:
   /// - The price range is invalid (negative prices or min > max)
   /// - The request fails
@@ -112,7 +125,7 @@ class EventService {
     }
 
     final response = await api.request(
-      endpoint: '/events-by-price-range',
+      endpoint: ApiCommands.getEvents.value,
       method: 'GET',
       queryParams: {
         'start_price': rangeFromPrice.toString(),
@@ -120,43 +133,8 @@ class EventService {
       },
     );
 
-    if (response.statusCode == 200) {
-      try {
-        Logger.debug('Raw response body: ${response.body}', 'EventService');
-        
-        if (response.body.isEmpty) {
-          Logger.error('Empty response body', 'EventService');
-          return [];
-        }
-
-        final dynamic decodedData = jsonDecode(response.body);
-        
-        if (decodedData == null) {
-          Logger.error('Decoded data is null', 'EventService');
-          return [];
-        }
-
-        if (decodedData is! List) {
-          Logger.error('Decoded data is not a List: ${decodedData.runtimeType}', 'EventService');
-          return [];
-        }
-
-        final List<dynamic> data = decodedData;
-        return data.map((json) => Event.fromJson(json as Map<String, dynamic>)).toList();
-      } catch (e) {
-        Logger.error(
-          'Failed to parse JSON response: ${e.toString()}',
-          'EventService',
-        );
-        return [];
-      }
-    } else {
-      Logger.error(
-        'API request failed with status code: ${response.statusCode}',
-        'EventService',
-      );
-      return [];
-    }
+    final events = getEvents(response);
+    return events;
   }
 
   Future<List<Event>> getEventsByDateRange(
@@ -174,53 +152,57 @@ class EventService {
     // Call the API to get events by date range
 
     final response = await api.request(
-      endpoint: '/events-by-date-range',
+      endpoint: ApiCommands.getEvents.value,
       method: 'GET',
       queryParams: {'start_date': startDateStr, 'end_date': endDateStr},
     );
-    if (response.statusCode == 200) {
-      try {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data
-            .map((json) => Event.fromJson(json as Map<String, dynamic>))
-            .toList();
-      } catch (error) {
-        Logger.error(
-          'Failed to parse events from API response',
-          'EventService',
-          error,
-        );
-        return [];
-      }
-    } else {
-      return [];
-    }
+
+    final events = getEvents(response);
+    return events;
   }
 
-  Future<List<Event>> getEventsByCategory(int categoryId) async {
+  Future<List<Event>> getEventsByCategory(int language_id, int categoryId) async {
     final response = await api.request(
-      endpoint: '/events-by-category',
+      endpoint: ApiCommands.getEvents.value,
       method: 'GET',
-      queryParams: {'category_id': categoryId.toString()},
+      queryParams: {
+        'category_id': categoryId.toString(),
+        'language_id': language_id.toString(),
+      },
     );
-    if (response.statusCode == 200) {
-      try {
-        final List<dynamic> data = jsonDecode(response.body);
-        //        return data.map((json) => Event.fromJson(json)).toList();
-        final events = data
-            .map((json) => Event.fromJson(json as Map<String, dynamic>))
-            .toList();
-        return events;
-      } catch (error) {
-        Logger.error(
-          'Failed to parse events from API response',
-          'EventService',
-          error,
-        );
-        return [];
-      }
-    } else {
-      return [];
-    }
+
+    final events = getEvents(response);
+    return events;
   }
 }
+
+List<Event> getEvents(Map<String, dynamic> response) {
+  try {
+    if (!response.containsKey('events')) {
+      Logger.error('Response missing events key', 'EventService');
+      throw Exception('Response missing events key');
+    }
+
+    // Parse the entire response into EventsResponse
+    final eventsResponse = EventsResponse.fromJson(response);
+
+    // Get the list of events from the data property
+    final events = eventsResponse.events.data;
+
+    if (events.isEmpty) {
+      Logger.warning('No events returned from API', 'EventService');
+    } else {
+      Logger.info(
+        'Successfully fetched ${events.length} events',
+        'EventService',
+      );
+    }
+
+    return events;
+  } catch (e) {
+    Logger.error('Error parsing events: $e', 'EventService');
+  }  
+  
+  return [];
+}
+

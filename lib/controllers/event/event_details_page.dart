@@ -1,7 +1,7 @@
 import 'package:day_night/controllers/ticket/checkout/checkout_rounds.dart';
+import 'package:day_night/models/events_response.dart';
 import 'package:day_night/utils/slide_page_route.dart';
 import 'package:flutter/material.dart';
-import '../../models/event.dart';
 import '../../app_localizations.dart';
 import '../../constants.dart';
 import '../shared/custom_app_bar.dart';
@@ -67,19 +67,14 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                         backgroundColor: kMainBackgroundColor,
                         flexibleSpace: FlexibleSpaceBar(
                           background: ClipRRect(
-                            child: widget.event.thumbnailUrl != null
-                              ? Image.network(
-                                  widget.event.thumbnailUrl!,
+                            child: Image.network(
+                                  widget.event.thumbnail,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) => 
                                     Image.asset(
                                       kDefaultEventImage,
                                       fit: BoxFit.cover,
                                     ),
-                                )
-                              : Image.asset(
-                                  kDefaultEventImage,
-                                  fit: BoxFit.cover,
                                 ),
                           ),
                         ),
@@ -95,7 +90,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                           children: [
                             // Title
                             Text(
-                              widget.event.information?['title'] ?? 'No Title',
+                              widget.event.title,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 24,

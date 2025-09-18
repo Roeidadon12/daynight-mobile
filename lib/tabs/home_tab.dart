@@ -1,5 +1,6 @@
 import 'package:day_night/controllers/event/horizontal_event_gallery.dart';
 import 'package:day_night/controllers/event/event_details_page.dart';
+import 'package:day_night/models/events_response.dart';
 import 'package:day_night/utils/slide_page_route.dart';
 import 'package:flutter/material.dart';
 import '../app_localizations.dart';
@@ -11,7 +12,6 @@ import '../models/enums.dart';
 import '../models/category.dart';
 import '../utils/category_utils.dart';
 import '../services/event_service.dart';
-import '../models/event.dart';
 import '../constants.dart';
 
 enum HomeTabView {
@@ -89,7 +89,7 @@ class _HomeTabState extends State<HomeTab> {
         // Get categories and trigger the first category if available
         final categories = getCategoriesByLanguage();
         if (categories.isNotEmpty) {
-          onCategoryPressed(categories.first);
+          //onCategoryPressed(categories.first);
         }
       }
     } else {
@@ -121,7 +121,7 @@ class _HomeTabState extends State<HomeTab> {
   void onCategoryPressed(Category category) async {
     final eventService = EventService();
     // Keep current events until new ones are loaded
-    final events = await eventService.getEventsByCategory(category.id);
+    final events = await eventService.getEventsByCategory(kAppLanguageId, category.id);
     if (mounted) {
       setState(() {
         displayedEvents = events;
@@ -213,6 +213,7 @@ class _HomeTabState extends State<HomeTab> {
                         ),
                       );
                     },
+                    onRefresh: _fetchEvents,
                     height: 160,
                     title: AppLocalizations.of(context).get('events'),
                     subtitle: AppLocalizations.of(context).get('tap-to-view'),
@@ -271,6 +272,7 @@ class _HomeTabState extends State<HomeTab> {
                         ),
                       );
                     },
+                    onRefresh: _fetchEvents,
                     height: 120,
                     title: AppLocalizations.of(context).get('upcoming-events'),
                     subtitle: AppLocalizations.of(context).get('tap-to-view'),

@@ -1,5 +1,5 @@
+import 'package:day_night/models/events_response.dart';
 import 'package:flutter/material.dart';
-import '../../models/event.dart';
 
 class EventSummaryTile extends StatelessWidget {
   final Event event;
@@ -17,13 +17,12 @@ class EventSummaryTile extends StatelessWidget {
       child: Row(
         children: [
           // Event Image
-          if (event.thumbnailUrl != null)
             ClipRRect(
               borderRadius: const BorderRadius.horizontal(
                 left: Radius.circular(12),
               ),
               child: Image.network(
-                event.thumbnailUrl!,
+                event.thumbnail,
                 width: baseHeight,
                 height: baseHeight,
                 fit: BoxFit.cover,
@@ -33,18 +32,6 @@ class EventSummaryTile extends StatelessWidget {
                   height: baseHeight,
                   fit: BoxFit.cover,
                 ),
-              ),
-            )
-          else
-            ClipRRect(
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(12),
-              ),
-              child: Image.asset(
-                'assets/images/image_place_holder.png',
-                width: baseHeight,
-                height: baseHeight,
-                fit: BoxFit.cover,
               ),
             ),
 

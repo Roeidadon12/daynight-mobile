@@ -161,7 +161,7 @@ class _SearchTabState extends State<SearchTab> with AutomaticKeepAliveClientMixi
             startDate,
             endDate,
           );
-          _searchProvider.setSearchResults(events);
+         _searchProvider.setSearchResults(events);
         }
         break;
       case SearchCriteriaType.priceCriteria:

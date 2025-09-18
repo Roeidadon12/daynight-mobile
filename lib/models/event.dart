@@ -114,7 +114,7 @@ class Ticket {
     );
   }
 }
-
+/*
 class Event {
   final int? id;
   final int? organizerId;
@@ -315,3 +315,4 @@ class Event {
     return '$startShortDate | $location';
   }
 }
+*/

@@ -1,6 +1,7 @@
 import 'package:day_night/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'utils/logger.dart';
 import 'splash_screen.dart';
 import 'app_localizations.dart';
 import 'tabs/home_tab.dart';
@@ -15,14 +16,24 @@ import 'package:provider/provider.dart';
 import 'providers/search_provider.dart';
 
 Future<void> setAppLanguageIdByDeviceLocale() async {
-  final languages = await LanguageService().getLanguages();
-  final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
-  final deviceLangCode = deviceLocale.languageCode;
-  final match = languages.firstWhere(
-    (lang) => lang.code == deviceLangCode,
-    orElse: () => languages.firstWhere((lang) => lang.code == 'en', orElse: () => languages.first),
-  );
-  kAppLanguageId = match.id;
+  try {
+    final languages = await LanguageService().getLanguages();
+    if (languages.isEmpty) {
+      Logger.warning('No languages available, using default language ID', 'Main');
+      return;
+    }
+    
+    final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
+    final deviceLangCode = deviceLocale.languageCode;
+    final match = languages.firstWhere(
+      (lang) => lang.code == deviceLangCode,
+      orElse: () => languages.firstWhere((lang) => lang.code == 'en', orElse: () => languages.first),
+    );
+    kAppLanguageId = match.id;
+  } catch (e) {
+    Logger.error('Failed to set app language: $e', 'Main');
+    // Keep the default language ID from config
+  }
 }
 
 void main() async {
@@ -30,7 +41,7 @@ void main() async {
 
   // Your existing initialization
   await setAppLanguageIdByDeviceLocale();
-  await CategoryRepository().loadCategories();
+  await CategoryRepository().loadCategories(languageId: kAppLanguageId);
 
   // Wrap your app with ProviderScope for Riverpod
   runApp(

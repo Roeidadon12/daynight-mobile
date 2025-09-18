@@ -16,3 +16,15 @@ enum ValidCurrency {
   EUR, // Euro
   GBP, // British Pound
 }
+
+enum ApiCommands {
+  getCategories('/categories'),
+  getEvents('/events'),
+  getEventDetails('/event/details'),
+  updateEvent('/events'),
+  deleteEvent('/events'),
+  getLanguages('/languages');
+
+  final String value;
+  const ApiCommands(this.value);
+}
