@@ -148,8 +148,8 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                     ),
                     onPressed: () {
                       Navigator.pop(context, {
-                        "start": _rangeStart,
-                        "end": _rangeEnd,
+                        "start_date": _rangeStart,
+                        "end_date": _rangeEnd,
                       });
                     },
                     child: Text(

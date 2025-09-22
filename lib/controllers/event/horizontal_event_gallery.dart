@@ -9,7 +9,7 @@ import '../../app_localizations.dart';
 class HorizontalEventGallery extends StatefulWidget {
   final List<Event> events;
   final void Function(Event event)? onEventTap;
-  final double height;
+  final double itemSize;  // Single dimension for square aspect ratio
   final String? title; 
   final String? subtitle;
   final String? emptyStateMessage;
@@ -20,7 +20,7 @@ class HorizontalEventGallery extends StatefulWidget {
     super.key,
     required this.events,
     this.onEventTap,
-    this.height = 160,
+    required this.itemSize,  // Default square size
     this.title, 
     this.subtitle,
     this.emptyStateMessage,
@@ -41,7 +41,7 @@ class _HorizontalEventGalleryState extends State<HorizontalEventGallery> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.8);
+    _pageController = PageController(viewportFraction: 0.85);
     _pageController.addListener(_onPageChanged);
   }
 
@@ -62,8 +62,9 @@ class _HorizontalEventGalleryState extends State<HorizontalEventGallery> {
 
   @override
   Widget build(BuildContext context) {
-    final containerHeight = widget.height * 1.5 + 120;
-    final containerWidth = widget.height * 1.5 + 120;
+    // Container dimensions based on item size plus padding
+    final containerHeight = widget.itemSize + 100;  // Extra space for title and dots
+    final containerWidth = MediaQuery.of(context).size.width;  // Full width of the screen
 
     if (widget.events.isEmpty) {
       return SizedBox(
@@ -79,7 +80,7 @@ class _HorizontalEventGalleryState extends State<HorizontalEventGallery> {
     Widget content = _HorizontalEventGalleryWithDots(
       events: widget.events,
       onEventTap: widget.onEventTap,
-      height: widget.height,
+      size: widget.itemSize,
       pageController: _pageController,
     );
 
@@ -102,13 +103,13 @@ class _HorizontalEventGalleryState extends State<HorizontalEventGallery> {
 class _HorizontalEventGalleryWithDots extends StatefulWidget {
   final List<Event> events;
   final void Function(Event event)? onEventTap;
-  final double height;
+  final double size;
   final PageController pageController;
 
   const _HorizontalEventGalleryWithDots({
     required this.events,
     this.onEventTap,
-    required this.height,
+    required this.size,
     required this.pageController,
   });
 
@@ -171,7 +172,8 @@ Widget build(BuildContext context) {
                 child: EventGalleryItem(
                   event: widget.events[index],
                   onTap: widget.onEventTap != null ? () => widget.onEventTap!(widget.events[index]) : null,
-                  heightFactor: 1.0,
+                  width: widget.size,
+                  height: widget.size,  // Using same size for width and height to make it square
                 ),
               ),
             );

@@ -27,14 +27,14 @@ class EventService {
   ///
   /// Throws nothing - errors are logged and an empty list is returned.
   Future<List<Event>> getEventsByDate(String type) async {
-    var queryParams = <String, String>{};
+    final Map<String, dynamic> searchResult = {};
 
     switch (type) {
       case 'week':
-        queryParams['start_date'] = DateTime.now().toIso8601String().split(
+        searchResult['start_date'] = DateTime.now().toIso8601String().split(
           'T',
         )[0];
-        queryParams['end_date'] = DateTime.now()
+        searchResult['end_date'] = DateTime.now()
             .add(const Duration(days: 7))
             .toIso8601String()
             .split('T')[0];
@@ -42,18 +42,18 @@ class EventService {
         break;
       case 'today':
         // Handle today's events
-        queryParams['start_date'] = DateTime.now().toIso8601String().split(
+        searchResult['start_date'] = DateTime.now().toIso8601String().split(
           'T',
         )[0];
-        queryParams['end_date'] = DateTime.now().toIso8601String().split(
+        searchResult['end_date'] = DateTime.now().toIso8601String().split(
           'T',
         )[0];
         break;
       case 'upcoming':
-        queryParams['start_date'] = DateTime.now().toIso8601String().split(
+        searchResult['start_date'] = DateTime.now().toIso8601String().split(
           'T',
         )[0];
-        queryParams['end_date'] = DateTime.now()
+        searchResult['end_date'] = DateTime.now()
             .add(const Duration(days: 30))
             .toIso8601String()
             .split('T')[0];
@@ -63,13 +63,9 @@ class EventService {
         break;
     }
 
-    final response = await api.request(
-      endpoint: ApiCommands.getEvents.value,
-      method: 'GET',
-      queryParams: queryParams,
-    );
+    final eventService = EventService();
+    final events = await eventService.getEventsByCriteria(searchResult);
 
-    final events = getEvents(response);
     return events;
   }
 
@@ -82,6 +78,15 @@ class EventService {
   /// Returns an empty list if the request fails or if there's an error parsing the response.
   ///
   /// Throws nothing - errors are logged and an empty list is returned.
+  Future<List<Event>> getAllEvents() async {
+    final response = await api.request(
+      endpoint: ApiCommands.getEvents.value,
+      method: 'GET',
+    );
+
+    return getEvents(response);
+  }
+
   Future<List<Event>> getEventsByPrice(
     double minPrice,
     double maxPrice, {
@@ -169,6 +174,20 @@ class EventService {
         'category_id': categoryId.toString(),
         'language_id': language_id.toString(),
       },
+    );
+
+    final events = getEvents(response);
+    return events;
+  }
+
+  Future<List<Event>> getEventsByCriteria(Map<String, dynamic> criteria) async {
+    final cleanedCriteria = Map<String, dynamic>.from(criteria)
+      ..removeWhere((key, value) => value == null || value.toString().isEmpty);
+
+    final response = await api.request(
+      endpoint: ApiCommands.getEvents.value,
+      method: 'GET',
+      queryParams: cleanedCriteria,
     );
 
     final events = getEvents(response);

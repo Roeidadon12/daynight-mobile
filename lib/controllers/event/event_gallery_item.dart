@@ -5,13 +5,15 @@ import '../../constants.dart';
 class EventGalleryItem extends StatelessWidget {
   final Event event;
   final VoidCallback? onTap;
-  final double heightFactor;
+  final double width;
+  final double height;
 
   const EventGalleryItem({
     super.key,
     required this.event,
     this.onTap,
-    this.heightFactor = 1.0,
+    this.width = 300,
+    this.height = 200,
   });
 
   Widget _buildDefaultImage() {
@@ -26,19 +28,27 @@ class EventGalleryItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 200,
+        width: width,
+        height: height,
         margin: EdgeInsets.zero,
-
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Stack(
             children: [
-              Positioned.fill(
+              SizedBox(
+                width: width,
+                height: height,
                 child: Image.network(
-                      event.thumbnail,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => _buildDefaultImage(),
-                    ),
+                  event.thumbnail,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => _buildDefaultImage(),
+                  loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    }
+                    return _buildDefaultImage();
+                  },
+                ),
               ),
             ],
           ),

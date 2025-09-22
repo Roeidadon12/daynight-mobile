@@ -12,6 +12,7 @@ import '../services/event_service.dart';
 import '../controllers/event/event_list_item.dart';
 import '../providers/search_provider.dart';
 
+
 class SearchTab extends StatefulWidget {
   const SearchTab({super.key});
 
@@ -22,6 +23,7 @@ class SearchTab extends StatefulWidget {
 class _SearchTabState extends State<SearchTab> with AutomaticKeepAliveClientMixin {
   late final SearchProvider _searchProvider;
   bool _isVisible = false;
+  final Map<String, dynamic> _searchResult = {};
 
   @override
   bool get wantKeepAlive => true;
@@ -82,7 +84,7 @@ class _SearchTabState extends State<SearchTab> with AutomaticKeepAliveClientMixi
                 Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Text(
-                    AppLocalizations.of(context).get('search-events'),
+                    AppLocalizations.of(context).get('search'),
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -150,35 +152,31 @@ class _SearchTabState extends State<SearchTab> with AutomaticKeepAliveClientMixi
   void _onSearchCriteriaSelected(SearchCriteria criteria) async {
     switch (criteria.type) {
       case SearchCriteriaType.dateCrieteria:
-        final result = await showCustomDatePicker(context);
-        if (result != null &&
-            result['start'] != null &&
-            result['end'] != null) {
-          final DateTime startDate = result['start']!;
-          final DateTime endDate = result['end']!;
+        final searchResult = await showCustomDatePicker(context);
+        if (searchResult != null &&
+            searchResult['start_date'] != null &&
+            searchResult['end_date'] != null) {
+
+          _searchResult['start_date'] = searchResult['start_date']?.toIso8601String().split('T')[0];
+          _searchResult['end_date'] = searchResult['end_date']?.toIso8601String().split('T')[0];
+
           final eventService = EventService();
-          final events = await eventService.getEventsByDateRange(
-            startDate,
-            endDate,
-          );
+          final events = await eventService.getEventsByCriteria(_searchResult);
          _searchProvider.setSearchResults(events);
         }
         break;
       case SearchCriteriaType.priceCriteria:
-        final result = await showCustomPriceRange(context);
-        if (result != null &&
-            result['min'] != null &&
-            result['max'] != null &&
-            result['currency'] != null) {
-          final double minPrice = result['min'] as double;
-          final double maxPrice = result['max'] as double;
-          final ValidCurrency currency = result['currency'] as ValidCurrency;
+        final priceResult = await showCustomPriceRange(context);
+        if (priceResult != null &&
+            priceResult['min'] != null &&
+            priceResult['max'] != null &&
+            priceResult['currency'] != null) {
+          _searchResult['min'] = priceResult['min'];
+          _searchResult['max'] = priceResult['max'];
+          _searchResult['currency'] = priceResult['currency'];
+          
           final eventService = EventService();
-          final events = await eventService.getEventsByPrice(
-            minPrice,
-            maxPrice,
-            currency: currency,
-          );
+          final events = await eventService.getEventsByCriteria(_searchResult);
           _searchProvider.setSearchResults(events);
         }
         break;
@@ -186,5 +184,8 @@ class _SearchTabState extends State<SearchTab> with AutomaticKeepAliveClientMixi
         // TODO: Implement event type search
         break;
     }
+    
+    // Trigger a rebuild if needed
+    setState(() {});
   }
 }

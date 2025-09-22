@@ -76,7 +76,7 @@ class _HomeTabState extends State<HomeTab> {
       }
     }
 
-    // If this is the first load, automatically select the first available button
+    // If this is the first load, automatically select the first available content
     if (_isFirstLoad) {
       _isFirstLoad = false;
       
@@ -89,13 +89,29 @@ class _HomeTabState extends State<HomeTab> {
         // Get categories and trigger the first category if available
         final categories = getCategoriesByLanguage();
         if (categories.isNotEmpty) {
-          //onCategoryPressed(categories.first);
+          onCategoryPressed(categories.first);
         }
       }
-    } else {
-      setState(() {
-        displayedEvents = todayEvents;
-      });
+    } else if (_currentView == HomeTabView.today && todayEvents.isEmpty) {
+      // If currently showing today view but no today events, switch to next available view
+      if (weekEvents.isNotEmpty) {
+        onButtonPressed(HomeTabButtonType.week);
+      } else {
+        final categories = getCategoriesByLanguage();
+        if (categories.isNotEmpty) {
+          onCategoryPressed(categories.first);
+        }
+      }
+    } else if (_currentView == HomeTabView.week && weekEvents.isEmpty) {
+      // If currently showing week view but no week events, switch to next available view
+      if (todayEvents.isNotEmpty) {
+        onButtonPressed(HomeTabButtonType.today);
+      } else {
+        final categories = getCategoriesByLanguage();
+        if (categories.isNotEmpty) {
+          onCategoryPressed(categories.first);
+        }
+      }
     }
   }
 
@@ -153,10 +169,12 @@ class _HomeTabState extends State<HomeTab> {
   @override
   Widget build(BuildContext context) {
     final categories = getCategoriesByLanguage();
-    // Always include the event type buttons, regardless of content
+    // Only include buttons for event types that have events
     final labels = <String>[
-      AppLocalizations.of(context).get('today-events'),
-      AppLocalizations.of(context).get('week-events'),
+      if (todayEvents.isNotEmpty)
+        AppLocalizations.of(context).get('today-events'),
+      if (weekEvents.isNotEmpty)
+        AppLocalizations.of(context).get('week-events'),
       ...categories.map((c) => c.name),
     ];
     return SafeArea(
@@ -189,22 +207,25 @@ class _HomeTabState extends State<HomeTab> {
                   HorizontalButtonsController(
                     labels: labels,
                     delegates: {
-                    // Always include event type buttons
-                    AppLocalizations.of(context).get('today-events'): () =>
-                        onButtonPressed(HomeTabButtonType.today),
-                    AppLocalizations.of(context).get('week-events'): () =>
-                        onButtonPressed(HomeTabButtonType.week),
-                    ...{
-                      for (final cat in categories)
-                        cat.name: () => onCategoryPressed(cat),
+                      // Only include delegates for event types that have events
+                      if (todayEvents.isNotEmpty)
+                        AppLocalizations.of(context).get('today-events'): () =>
+                            onButtonPressed(HomeTabButtonType.today),
+                      if (weekEvents.isNotEmpty)
+                        AppLocalizations.of(context).get('week-events'): () =>
+                            onButtonPressed(HomeTabButtonType.week),
+                      ...{
+                        for (final cat in categories)
+                          cat.name: () => onCategoryPressed(cat),
+                      },
                     },
-                  },
                   height: 56,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
                   child: HorizontalEventGallery(
                     events: displayedEvents,
+                    itemSize: 400,
                     onEventTap: (event) {
                       Navigator.push(
                         context,
@@ -214,7 +235,6 @@ class _HomeTabState extends State<HomeTab> {
                       );
                     },
                     onRefresh: _fetchEvents,
-                    height: 160,
                     title: AppLocalizations.of(context).get('events'),
                     subtitle: AppLocalizations.of(context).get('tap-to-view'),
                     emptyStateMessage: _getEmptyStateMessage(context),
@@ -264,6 +284,7 @@ class _HomeTabState extends State<HomeTab> {
                   padding: const EdgeInsets.only(top: 16.0),
                   child: HorizontalEventGallery(
                     events: upcomingEvents,
+                    itemSize: 300,
                     onEventTap: (event) {
                       Navigator.push(
                         context,
@@ -273,7 +294,6 @@ class _HomeTabState extends State<HomeTab> {
                       );
                     },
                     onRefresh: _fetchEvents,
-                    height: 120,
                     title: AppLocalizations.of(context).get('upcoming-events'),
                     subtitle: AppLocalizations.of(context).get('tap-to-view'),
                     emptyStateMessage: _getEmptyStateMessage(context, 'no-upcoming-events'),
