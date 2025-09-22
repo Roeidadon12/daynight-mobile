@@ -9,16 +9,16 @@ import 'package:day_night/services/event_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class CheckoutRoundsPage extends StatefulWidget {
+class CheckoutTicketsPage extends StatefulWidget {
   final Event event;
 
-  const CheckoutRoundsPage({super.key, required this.event});
+  const CheckoutTicketsPage({super.key, required this.event});
 
   @override
-  State<CheckoutRoundsPage> createState() => _CheckoutRoundsPageState();
+  State<CheckoutTicketsPage> createState() => _CheckoutTicketsPageState();
 }
 
-class _CheckoutRoundsPageState extends State<CheckoutRoundsPage> {
+class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
   EventDetails? eventDetails;
   bool isLoading = true;
 

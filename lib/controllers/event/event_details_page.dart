@@ -205,17 +205,6 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          '${widget.event.price} ${AppLocalizations.of(context).get('currency')}',
-                                          style: TextStyle(
-                                            color: Colors.grey[500],
-                                            fontSize: 14,
-                                            decoration:
-                                                TextDecoration.lineThrough,
-                                            decorationColor: Colors.white,
-                                          ),
-                                        ),
                                       ],
                                     ),
                                     const SizedBox(height: 8),
@@ -233,7 +222,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                     Navigator.push(
                                       context,
                                       SlidePageRoute(
-                                        page: CheckoutRoundsPage(
+                                        page: CheckoutTicketsPage(
                                           event: widget.event,
                                         ),
                                       ),
