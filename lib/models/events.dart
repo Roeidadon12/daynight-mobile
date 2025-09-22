@@ -147,7 +147,10 @@ class Event {
 
   /// Returns the complete location string combining city (if available) and country
   String get location {
-    if (city != null && city!.isNotEmpty) {
+    if (address.isNotEmpty) {
+      return address;
+    }
+    else if (city != null && city!.isNotEmpty) {
       return '$city, $country';
     }
     return country;
