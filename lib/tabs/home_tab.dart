@@ -44,6 +44,9 @@ class _HomeTabState extends State<HomeTab> {
 
   Future<void> _fetchEvents() async {
     final eventService = EventService();
+    final currentView = _currentView;
+    final currentCategory = _currentCategory;
+    
     setState(() {
       _isLoading = true;
       todayEvents.clear();
@@ -54,17 +57,40 @@ class _HomeTabState extends State<HomeTab> {
     
     try {
       // Fetch all event types in parallel
-      final results = await Future.wait([
+      final futures = [
         eventService.getEventsByDate('today'),
         eventService.getEventsByDate('week'),
         eventService.getEventsByDate('upcoming'),
-      ]);
+      ];
+      
+      // If we're in category view, also fetch category events
+      if (currentView == HomeTabView.category && currentCategory != null) {
+        futures.add(eventService.getEventsByCategory(kAppLanguageId, currentCategory.id));
+      }
+      
+      final results = await Future.wait(futures);
       
       if (mounted) {
         setState(() {
           todayEvents = results[0];
           weekEvents = results[1];
           upcomingEvents = results[2];
+          
+          // Restore the current view with fresh data
+          switch (currentView) {
+            case HomeTabView.today:
+              displayedEvents = todayEvents;
+              break;
+            case HomeTabView.week:
+              displayedEvents = weekEvents;
+              break;
+            case HomeTabView.category:
+              if (currentCategory != null && results.length > 3) {
+                displayedEvents = results[3];
+              }
+              break;
+          }
+          
           _isLoading = false;
         });
       }
@@ -182,10 +208,12 @@ class _HomeTabState extends State<HomeTab> {
         color: kMainBackgroundColor,
         child: Directionality(
           textDirection: Directionality.of(context),
-          child: SingleChildScrollView(
-            // Added this wrapper
-            child: Column(
-              children: [
+          child: RefreshIndicator(
+            onRefresh: _fetchEvents,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
                 ChangeNotifierProvider(
                   create: (_) => UserController(),
                   child: Consumer<UserController>(
@@ -304,6 +332,6 @@ class _HomeTabState extends State<HomeTab> {
           ),
         ),
       ),
-    );
+    ));
   }
 }
