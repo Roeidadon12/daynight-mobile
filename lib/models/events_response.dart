@@ -59,24 +59,34 @@ class Events {
   });
 
   factory Events.fromJson(Map<String, dynamic> json) {
-    return Events(
-      currentPage: json['current_page'],
-      data: (json['data'] as List).map((event) => Event.fromJson(event)).toList(),
-      firstPageUrl: json['first_page_url'],
-      from: json['from'],
-      lastPage: json['last_page'],
-      lastPageUrl: json['last_page_url'],
-      links: (json['links'] as List)
-          .map((link) => PaginationLink.fromJson(link))
-          .toList(),
-      nextPageUrl: json['next_page_url'],
-      path: json['path'],
-      perPage: json['per_page'],
-      prevPageUrl: json['prev_page_url'],
-      to: json['to'],
-      total: json['total'],
-    );
+    late Events event;
+
+    try {
+        event = Events(
+          currentPage: json['current_page'] ?? 1,
+          data: (json['data'] as List? ?? []).map((event) => Event.fromJson(event)).toList(),
+          firstPageUrl: json['first_page_url'] ?? '',
+          from: json['from'] ?? 0,
+          lastPage: json['last_page'] ?? 1,
+          lastPageUrl: json['last_page_url'] ?? '',
+          links: (json['links'] as List? ?? [])
+              .map((link) => PaginationLink.fromJson(link))
+              .toList(),
+          nextPageUrl: json['next_page_url'],
+          path: json['path'] ?? '',
+          perPage: json['per_page'] ?? 10,
+          prevPageUrl: json['prev_page_url'],
+          to: json['to'] ?? 0,
+          total: json['total'] ?? 0,
+        );
+    }
+    catch (e) {
+      rethrow;
+    }
+  
+    return event;
   }
+
 }
 
 class Event {

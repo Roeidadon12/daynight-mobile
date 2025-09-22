@@ -195,8 +195,14 @@ class EventService {
   }
 }
 
-List<Event> getEvents(Map<String, dynamic> response) {
+List<Event> getEvents(Map<String, dynamic>? response) {
   try {
+
+    if (response == null) {
+      Logger.error('Response is null', 'EventService');
+      throw Exception('Response is null');
+    }
+
     if (!response.containsKey('events')) {
       Logger.error('Response missing events key', 'EventService');
       throw Exception('Response missing events key');
@@ -216,7 +222,6 @@ List<Event> getEvents(Map<String, dynamic> response) {
         'EventService',
       );
     }
-
     return events;
   } catch (e) {
     Logger.error('Error parsing events: $e', 'EventService');
