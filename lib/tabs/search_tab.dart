@@ -11,8 +11,6 @@ import '../controllers/search/show_price_range.dart';
 import '../services/event_service.dart';
 import '../controllers/event/event_list_item.dart';
 import '../providers/search_provider.dart';
-import 'package:day_night/constants.dart';
-
 
 class SearchTab extends StatefulWidget {
   const SearchTab({super.key});
