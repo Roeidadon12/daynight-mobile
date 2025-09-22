@@ -3,7 +3,7 @@ import 'package:day_night/controllers/event/event_summary_tile.dart';
 import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/controllers/shared/primary_button.dart';
 import 'package:day_night/controllers/ticket/list_tickets.dart';
-import 'package:day_night/models/event.dart';
+import 'package:day_night/models/ticket.dart';
 import 'package:day_night/models/events_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
