@@ -148,9 +148,14 @@ Widget build(BuildContext context) {
   // Prevent negative or invalid clamp if there are no events
   final clampedPage = widget.events.isEmpty ? 0 : _currentPage.clamp(0, widget.events.length - 1);
   
+  final screenWidth = MediaQuery.of(context).size.width;
+  final itemWidth = screenWidth * 0.85 - 16.0;
+  
   return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Expanded(
+      SizedBox(
+        height: widget.size,
         child: PageView.builder(
           controller: widget.pageController,
           physics: const ClampingScrollPhysics(),
@@ -164,7 +169,7 @@ Widget build(BuildContext context) {
             // The active event is the one closest to the center (current page)
             final isActive = (index == _currentPage);
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0,  horizontal: 8.0),
+              padding: const EdgeInsets.only(top: 4.0, left: 8.0, right: 8.0),
               child: AnimatedScale(
                 scale: isActive ? 1.0 : 0.9,
                 duration: const Duration(milliseconds: 250),
@@ -180,45 +185,27 @@ Widget build(BuildContext context) {
           },
         ),
       ),
-      const SizedBox(height: 12),
       
       // Event label/title
       if (widget.events.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        Container(
+          width: itemWidth,
+          margin: EdgeInsets.only(left: screenWidth * 0.075 + 8.0),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: Column(
               key: ValueKey(clampedPage),
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.events[clampedPage].title, // Assuming your Event model has a title property
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  AppLocalizations.of(context).get('Oren Yahalom'),
                 ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Text(
-                      widget.events[clampedPage].eventLocationDateTime,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withAlpha(179),
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
               ],
             ),
           ),
         ),
-      
-      const SizedBox(height: 16),
+
+      const SizedBox(height: 8),
       
       // Page indicator dots
       if (widget.events.isNotEmpty)

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/enums.dart';
 import '../models/search_criteria.dart';
 import '../services/event_service.dart';
+import 'package:day_night/constants.dart';
 
 class SearchProvider extends ChangeNotifier {
   static final SearchProvider _instance = SearchProvider._internal();
@@ -128,7 +129,7 @@ class SearchProvider extends ChangeNotifier {
           case SearchCriteriaType.dateCrieteria:
             final startDate = _lastSearchParams!['start'] as DateTime;
             final endDate = _lastSearchParams!['end'] as DateTime;
-            results = await eventService.getEventsByDateRange(startDate, endDate);
+            results = await eventService.getEventsByDateRange(kAppLanguageId, startDate, endDate);
             break;
           case SearchCriteriaType.priceCriteria:
             // Implement when price search is available

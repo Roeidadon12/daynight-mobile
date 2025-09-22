@@ -11,6 +11,7 @@ import '../controllers/search/show_price_range.dart';
 import '../services/event_service.dart';
 import '../controllers/event/event_list_item.dart';
 import '../providers/search_provider.dart';
+import 'package:day_night/constants.dart';
 
 
 class SearchTab extends StatefulWidget {
@@ -161,7 +162,7 @@ class _SearchTabState extends State<SearchTab> with AutomaticKeepAliveClientMixi
           _searchResult['end_date'] = searchResult['end_date']?.toIso8601String().split('T')[0];
 
           final eventService = EventService();
-          final events = await eventService.getEventsByCriteria(_searchResult);
+          final events = await eventService.getEventsByCriteria(kAppLanguageId, _searchResult);
          _searchProvider.setSearchResults(events);
         }
         break;
@@ -176,7 +177,7 @@ class _SearchTabState extends State<SearchTab> with AutomaticKeepAliveClientMixi
           _searchResult['currency'] = priceResult['currency'];
           
           final eventService = EventService();
-          final events = await eventService.getEventsByCriteria(_searchResult);
+          final events = await eventService.getEventsByCriteria(kAppLanguageId, _searchResult);
           _searchProvider.setSearchResults(events);
         }
         break;

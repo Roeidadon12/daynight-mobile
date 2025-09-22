@@ -3,6 +3,7 @@ import '../constants.dart';
 import '../utils/logger.dart';
 import '../models/enums.dart';
 import '../models/events.dart';
+import '../models/event_details.dart';
 
 /// Service class responsible for handling all event-related API operations.
 ///
@@ -64,7 +65,7 @@ class EventService {
     }
 
     final eventService = EventService();
-    final events = await eventService.getEventsByCriteria(searchResult);
+    final events = await eventService.getEventsByCriteria(kAppLanguageId, searchResult);
 
     return events;
   }
@@ -121,6 +122,7 @@ class EventService {
   Future<List<Event>> getEventsByPriceRange(
     double rangeFromPrice,
     double rangeToPrice,
+    int language_id,
   ) async {
     if (rangeFromPrice < 0 ||
         rangeToPrice < 0 ||
@@ -135,6 +137,7 @@ class EventService {
       queryParams: {
         'start_price': rangeFromPrice.toString(),
         'end_price': rangeToPrice.toString(),
+        'language_id': language_id.toString(),
       },
     );
 
@@ -143,6 +146,7 @@ class EventService {
   }
 
   Future<List<Event>> getEventsByDateRange(
+    int language_id,
     DateTime startDate,
     DateTime endDate,
   ) async {
@@ -159,7 +163,11 @@ class EventService {
     final response = await api.request(
       endpoint: ApiCommands.getEvents.value,
       method: 'GET',
-      queryParams: {'start_date': startDateStr, 'end_date': endDateStr},
+      queryParams: {
+        'start_date': startDateStr,
+        'end_date': endDateStr,
+        'language_id': language_id.toString(),
+      },
     );
 
     final events = getEvents(response);
@@ -180,9 +188,13 @@ class EventService {
     return events;
   }
 
-  Future<List<Event>> getEventsByCriteria(Map<String, dynamic> criteria) async {
+  Future<List<Event>> getEventsByCriteria(
+    int language_id,
+    Map<String, dynamic> criteria,
+  ) async {
     final cleanedCriteria = Map<String, dynamic>.from(criteria)
-      ..removeWhere((key, value) => value == null || value.toString().isEmpty);
+      ..removeWhere((key, value) => value == null || value.toString().isEmpty)
+      ..addAll({'language_id': language_id.toString()});
 
     final response = await api.request(
       endpoint: ApiCommands.getEvents.value,
@@ -193,6 +205,32 @@ class EventService {
     final events = getEvents(response);
     return events;
   }
+
+  Future<EventDetails?> getEventById(int language_id, int eventId) async {
+    final response = await api.request(
+      endpoint: ApiCommands.getEventDetails.value,
+      method: 'GET',
+      queryParams: {
+        'language_id': language_id.toString(),
+        'event_id': eventId.toString(),
+      },
+    );
+
+    try {
+      if (!response.containsKey('status')) {
+        Logger.error('Response missing status', 'EventService');
+        return null;
+      }
+
+      final eventDetails = EventDetails.fromJson(response);
+      Logger.info('Successfully fetched event details with ID $eventId', 'EventService');
+      return eventDetails;
+    } catch (e) {
+      Logger.error('Error parsing event details: $e', 'EventService');
+      return null;
+    }
+  }
+
 }
 
 List<Event> getEvents(Map<String, dynamic>? response) {

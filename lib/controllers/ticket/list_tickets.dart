@@ -1,7 +1,7 @@
 import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/ticket/ticket_round.dart';
 import 'package:flutter/material.dart';
-import '../../models/ticket.dart';
+import '../../models/event_details.dart';
 
 class ListTickets extends StatefulWidget {
   final Ticket ticket;

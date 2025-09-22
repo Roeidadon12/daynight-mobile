@@ -3,20 +3,44 @@ import 'package:day_night/controllers/event/event_summary_tile.dart';
 import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/controllers/shared/primary_button.dart';
 import 'package:day_night/controllers/ticket/list_tickets.dart';
-import 'package:day_night/models/ticket.dart';
 import 'package:day_night/models/events.dart';
+import 'package:day_night/models/event_details.dart';
+import 'package:day_night/services/event_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class CheckoutRoundsPage extends StatelessWidget {
+class CheckoutRoundsPage extends StatefulWidget {
   final Event event;
 
   const CheckoutRoundsPage({super.key, required this.event});
 
   @override
-  Widget build(BuildContext context) {
-    final List<Ticket> tickets = []; //event.tickets ?? [];
+  State<CheckoutRoundsPage> createState() => _CheckoutRoundsPageState();
+}
 
+class _CheckoutRoundsPageState extends State<CheckoutRoundsPage> {
+  EventDetails? eventDetails;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEventDetails();
+  }
+
+  Future<void> _loadEventDetails() async {
+    final eventService = EventService();
+    final details = await eventService.getEventById(kAppLanguageId, widget.event.id);
+    if (mounted) {
+      setState(() {
+        eventDetails = details;
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -36,17 +60,26 @@ class CheckoutRoundsPage extends StatelessWidget {
 
               /// Main content (summary + list)
               Expanded(
-                child: ListView(
-                  children: [
-                    EventSummaryTile(event: event),
-
-                    ...tickets.map((t) => ListTickets(ticket: t)),
-                  ],
-                ),
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : eventDetails == null
+                        ? const Center(child: Text('Failed to load event details'))
+                        : ListView(
+                            children: [
+                              EventSummaryTile(event: widget.event),
+                              ...eventDetails!.tickets.map(
+                                (ticket) => ListTickets(
+                                  ticket: ticket,
+                                ),
+                              ),
+   
+                            ],
+                          ),
               ),
 
               /// Bottom Button
-              Padding(
+              if (!isLoading && eventDetails != null)
+                Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SizedBox(
                   width: double.infinity,

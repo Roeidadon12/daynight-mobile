@@ -1,5 +1,5 @@
-import 'package:day_night/models/ticket.dart';
 import 'package:flutter/material.dart';
+import '../../models/event_details.dart';
 
 class TicketRound extends StatefulWidget {
   final Ticket ticket;
