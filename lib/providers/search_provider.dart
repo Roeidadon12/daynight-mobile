@@ -1,4 +1,4 @@
-import 'package:day_night/models/events_response.dart';
+import 'package:day_night/models/events.dart';
 import 'package:flutter/material.dart';
 import '../models/enums.dart';
 import '../models/search_criteria.dart';

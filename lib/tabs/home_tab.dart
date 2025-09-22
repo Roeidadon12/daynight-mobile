@@ -1,6 +1,6 @@
 import 'package:day_night/controllers/event/horizontal_event_gallery.dart';
 import 'package:day_night/controllers/event/event_details_page.dart';
-import 'package:day_night/models/events_response.dart';
+import 'package:day_night/models/events.dart';
 import 'package:day_night/utils/slide_page_route.dart';
 import 'package:flutter/material.dart';
 import '../app_localizations.dart';

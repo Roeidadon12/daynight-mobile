@@ -1,5 +1,5 @@
 import 'package:day_night/controllers/event/event_summary_tile.dart';
-import 'package:day_night/models/events_response.dart';
+import 'package:day_night/models/events.dart';
 import 'package:flutter/material.dart';
 import 'event_details_page.dart';
 import '../../utils/slide_page_route.dart';

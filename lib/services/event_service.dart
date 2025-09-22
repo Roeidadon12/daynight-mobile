@@ -2,7 +2,7 @@ import '../api_service.dart';
 import '../constants.dart';
 import '../utils/logger.dart';
 import '../models/enums.dart';
-import '../models/events_response.dart';
+import '../models/events.dart';
 
 /// Service class responsible for handling all event-related API operations.
 ///
