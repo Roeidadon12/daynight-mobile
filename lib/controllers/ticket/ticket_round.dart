@@ -44,13 +44,13 @@ class _TicketRoundState extends State<TicketRound> {
           children: [
             Expanded(
               child: Text(
-                widget.ticket.title ?? 'No Title',
+                widget.ticket.title,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
             IconButton(
               icon: const Icon(Icons.remove),
-              onPressed: () => _updateAmount(_amount - (widget.ticket.increment ?? 1)),
+              onPressed: () => _updateAmount(_amount - (widget.ticket.increment)),
             ),
             Text(
               '$_amount',
@@ -58,7 +58,7 @@ class _TicketRoundState extends State<TicketRound> {
             ),
             IconButton(
               icon: const Icon(Icons.add),
-              onPressed: () => _updateAmount(_amount + (widget.ticket.increment ?? 1)),
+              onPressed: () => _updateAmount(_amount + (widget.ticket.increment)),
             ),
           ],
         ),
