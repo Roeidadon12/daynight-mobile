@@ -8,12 +8,14 @@ class RegularPrice extends StatelessWidget {
   final EventDetails eventDetails;
   final Ticket ticket;
   final bool soldOut;
+  final bool isSelected;
 
   const RegularPrice({
     super.key,
     required this.eventDetails,
     required this.ticket,
     required this.soldOut,
+    required this.isSelected,
   });
 
   String _getTicketPrice() {
@@ -32,7 +34,7 @@ class RegularPrice extends StatelessWidget {
     return Text(
       price,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        color: Colors.white,
+        color: isSelected ? Colors.white : Colors.white.withAlpha(77),
       ),
     );
   }
@@ -43,14 +45,15 @@ class RoundPrice extends StatelessWidget {
   final EventDetails eventDetails;
   final Ticket ticket;
   final bool soldOut;
+  final bool isSelected;
 
-  const RoundPrice({super.key, required this.eventDetails, required this.ticket, required this.soldOut});
+  const RoundPrice({super.key, required this.eventDetails, required this.ticket, required this.soldOut, required this.isSelected});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        RegularPrice(eventDetails: eventDetails, ticket: ticket, soldOut: soldOut),
+        RegularPrice(eventDetails: eventDetails, ticket: ticket, soldOut: soldOut, isSelected: isSelected),
         const SizedBox(width: 8), // Add spacing
         Text(
           ticket.rounds![0].price.toString(),
@@ -139,12 +142,12 @@ class _TicketItemState extends State<TicketItem> {
                     style: Theme.of(
                       context,
                     ).textTheme.titleMedium?.copyWith(
-                      color: widget.isSelected ? kBrandPrimary : Colors.black.withAlpha(200),
+                      color: widget.isSelected ? kBrandPrimary : Colors.white.withAlpha(77),
                     ),
                   ),
                   widget.ticket.pricingType == 'rounds'
-                      ? RoundPrice(eventDetails: widget.eventDetails, soldOut: _isSoldOut, ticket: widget.ticket)
-                      : RegularPrice(eventDetails: widget.eventDetails, soldOut: _isSoldOut, ticket: widget.ticket),
+                      ? RoundPrice(eventDetails: widget.eventDetails, soldOut: _isSoldOut, ticket: widget.ticket, isSelected: widget.isSelected)
+                      : RegularPrice(eventDetails: widget.eventDetails, soldOut: _isSoldOut, ticket: widget.ticket, isSelected: widget.isSelected),
                   const SizedBox(height: 4),
 
                   Row(
@@ -152,15 +155,7 @@ class _TicketItemState extends State<TicketItem> {
                       Text(
                         AppLocalizations.of(context).get('processing-fee'),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withAlpha(150),
-                        ),
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        widget.eventDetails.eventInformation.prcessingFee
-                            .toString(),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withAlpha(150),
+                          color: widget.isSelected ? Colors.white : Colors.white.withAlpha(77),
                         ),
                       ),
                       const SizedBox(width: 3),
@@ -169,7 +164,7 @@ class _TicketItemState extends State<TicketItem> {
                               '%',
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
-                                    color: Colors.white.withAlpha(150),
+                                    color: widget.isSelected ? Colors.white :Colors.white.withAlpha(77),
                                   ),
                             )
                           : Text(
@@ -178,9 +173,16 @@ class _TicketItemState extends State<TicketItem> {
                               ).get('currency-symbol'),
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
-                                    color: Colors.white.withAlpha(150),
+                                    color: widget.isSelected ? Colors.white :Colors.white.withAlpha(77),
                                   ),
                             ),
+                      Text(
+                        widget.eventDetails.eventInformation.prcessingFee
+                            .toString(),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: widget.isSelected ? Colors.white : Colors.white.withAlpha(77),
+                        ),
+                      ),
                     ],
                   ),
                 ],
