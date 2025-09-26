@@ -35,5 +35,8 @@ const Map<String, String> heTexts = {
   'no-week-events': 'אין אירועים השבוע',
   'no-category-events': 'אין אירועים בקטגוריה זו',
   'no-upcoming-events': 'אין אירועים קרובים',
-
+  'sold-out': 'אזל מהמלאי',
+  'proceed-to-payment': 'המשך לתשלום',
+  'processing-fee': 'דמי טיפול',
+  'currency-symbol': '₪',
 };

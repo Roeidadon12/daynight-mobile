@@ -35,4 +35,8 @@ const Map<String, String> enTexts = {
   'no-upcoming-events': 'No upcoming events available',
   'GBP': 'British Pound (£)', // British Pound
   'buy-tickets': 'Buy Tickets',
+  'sold-out': 'Sold Out',
+  'proceed-to-payment': 'Proceed to Payment',
+  'processing-fee': 'Processing Fee',
+  'currency-symbol': '₪',
 };
