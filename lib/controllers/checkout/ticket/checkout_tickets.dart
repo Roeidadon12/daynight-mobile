@@ -2,7 +2,7 @@ import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/event/event_summary_tile.dart';
 import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/controllers/shared/primary_button.dart';
-import 'package:day_night/controllers/ticket/list_tickets.dart';
+import 'package:day_night/controllers/checkout/ticket/list_tickets.dart';
 import 'package:day_night/models/events.dart';
 import 'package:day_night/models/event_details.dart';
 import 'package:day_night/services/event_service.dart';

@@ -1,5 +1,5 @@
 import 'package:day_night/constants.dart';
-import 'package:day_night/controllers/ticket/ticket_item.dart';
+import 'package:day_night/controllers/checkout/ticket/ticket_item.dart';
 import 'package:day_night/models/event_details.dart';
 import 'package:flutter/material.dart';
 

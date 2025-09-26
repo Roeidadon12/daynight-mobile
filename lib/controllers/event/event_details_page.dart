@@ -1,4 +1,3 @@
-import 'package:day_night/controllers/ticket/checkout/checkout_tickets.dart';
 import 'package:day_night/models/events.dart';
 import 'package:day_night/utils/slide_page_route.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import '../../constants.dart';
 import '../shared/custom_app_bar.dart';
 import '../shared/primary_button.dart';
 import 'package:flutter/services.dart';
+import 'package:day_night/controllers/checkout/ticket/checkout_tickets.dart';
 
 class EventDetailsPage extends StatefulWidget {
   final Event event;
