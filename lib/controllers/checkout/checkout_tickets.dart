@@ -3,6 +3,7 @@ import 'package:day_night/controllers/event/event_summary_tile.dart';
 import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/controllers/shared/primary_button.dart';
 import 'package:day_night/controllers/checkout/ticket/list_tickets.dart';
+import 'package:day_night/controllers/checkout/checkout_tickets_controller.dart';
 import 'package:day_night/models/events.dart';
 import 'package:day_night/models/event_details.dart';
 import 'package:day_night/services/event_service.dart';
@@ -21,6 +22,7 @@ class CheckoutTicketsPage extends StatefulWidget {
 class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
   EventDetails? eventDetails;
   bool isLoading = true;
+  late CheckoutTicketsController controller;
 
   @override
   void initState() {
@@ -31,9 +33,10 @@ class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
   Future<void> _loadEventDetails() async {
     final eventService = EventService();
     final details = await eventService.getEventById(kAppLanguageId, widget.event.id);
-    if (mounted) {
+    if (mounted && details != null) {
       setState(() {
         eventDetails = details;
+        controller = CheckoutTicketsController(eventDetails: details);
         isLoading = false;
       });
     }
