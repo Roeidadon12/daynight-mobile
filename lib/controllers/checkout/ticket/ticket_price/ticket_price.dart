@@ -1,3 +1,4 @@
+import 'package:day_night/models/ticket.dart';
 import 'package:flutter/material.dart';
 import '../../../../models/event_details.dart';
 import 'ticket_sold_out.dart';

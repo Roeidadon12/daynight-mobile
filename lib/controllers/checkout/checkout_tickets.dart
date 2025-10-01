@@ -6,6 +6,8 @@ import 'package:day_night/controllers/checkout/ticket/list_tickets.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets_controller.dart';
 import 'package:day_night/models/events.dart';
 import 'package:day_night/models/event_details.dart';
+import 'package:day_night/models/ticket.dart';
+import 'package:day_night/models/ticket_item.dart';
 import 'package:day_night/services/event_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,7 +24,41 @@ class CheckoutTicketsPage extends StatefulWidget {
 class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
   EventDetails? eventDetails;
   bool isLoading = true;
-  late CheckoutTicketsController controller;
+  late CheckoutTicketsController orderInfo;
+  final Map<String, TicketItem> selectedTickets = {};
+
+  void _handleTicketSelection(Ticket? selectedTicket, int amount) {
+    if (selectedTicket != null) {
+      final ticketId = selectedTicket.id.toString();
+      
+      if (amount > 0) {
+        // Create or update ticket item
+        final ticketItem = TicketItem(
+          id: ticketId,
+          name: selectedTicket.title,
+          price: double.parse(selectedTicket.price ?? '0'),
+          quantity: amount
+        );
+        
+        setState(() {
+          selectedTickets[ticketId] = ticketItem;
+          // Update basket with all current tickets
+          orderInfo.currentBasket.addTickets(selectedTickets.values.toList());
+        });
+      } else {
+        // Remove ticket if amount is 0
+        setState(() {
+          selectedTickets.remove(ticketId);
+          if (selectedTickets.isEmpty) {
+            orderInfo.resetBasket();
+          } else {
+            // Update basket with remaining tickets
+            orderInfo.currentBasket.addTickets(selectedTickets.values.toList());
+          }
+        });
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -36,7 +72,7 @@ class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
     if (mounted && details != null) {
       setState(() {
         eventDetails = details;
-        controller = CheckoutTicketsController(eventDetails: details);
+        orderInfo = CheckoutTicketsController(eventDetails: details);
         isLoading = false;
       });
     }
@@ -73,12 +109,7 @@ class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
                               ListTickets(
                                 eventDetails: eventDetails!,
                                 tickets: eventDetails!.tickets,
-                                onTicketSelected: (selectedTicket) {
-                                  // Handle ticket selection
-                                  setState(() {
-                                    // You can store the selected ticket in a state variable if needed
-                                  });
-                                },
+                                onTicketSelected: _handleTicketSelection,
                               ),
    
                             ],
