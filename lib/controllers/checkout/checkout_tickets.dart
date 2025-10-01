@@ -4,6 +4,7 @@ import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/controllers/shared/primary_button.dart';
 import 'package:day_night/controllers/checkout/ticket/list_tickets.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets_controller.dart';
+import 'package:day_night/controllers/checkout/participant/participant_info_page.dart';
 import 'package:day_night/models/events.dart';
 import 'package:day_night/models/event_details.dart';
 import 'package:day_night/models/ticket.dart';
@@ -27,35 +28,43 @@ class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
   late CheckoutTicketsController orderInfo;
   final Map<String, TicketItem> selectedTickets = {};
 
+  bool hasValidTickets() {
+    return selectedTickets.values.any((ticket) => ticket.quantity > 0);
+  }
+
   void _handleTicketSelection(Ticket? selectedTicket, int amount) {
     if (selectedTicket != null) {
       final ticketId = selectedTicket.id.toString();
       
-      if (amount > 0) {
-        // Create or update ticket item
-        final ticketItem = TicketItem(
-          id: ticketId,
-          ticket: selectedTicket,
-          quantity: amount
-        );
+      setState(() {
+        // Update or create ticket entry regardless of amount
+        if (selectedTickets.containsKey(ticketId)) {
+          selectedTickets[ticketId]!.quantity = amount;
+        } else {
+          selectedTickets[ticketId] = TicketItem(
+            id: ticketId,
+            ticket: selectedTicket,
+            quantity: amount
+          );
+        }
         
-        setState(() {
-          selectedTickets[ticketId] = ticketItem;
-          // Update basket with all current tickets
+        // Clean up any tickets with zero quantity
+        selectedTickets.removeWhere((id, ticket) => ticket.quantity <= 0);
+        
+        // Update basket based on remaining tickets
+        if (selectedTickets.isEmpty || !hasValidTickets()) {
+          orderInfo.resetBasket();
+        } else {
           orderInfo.currentBasket.addTickets(selectedTickets.values.toList());
-        });
-      } else {
-        // Remove ticket if amount is 0
-        setState(() {
-          selectedTickets.remove(ticketId);
-          if (selectedTickets.isEmpty) {
-            orderInfo.resetBasket();
-          } else {
-            // Update basket with remaining tickets
-            orderInfo.currentBasket.addTickets(selectedTickets.values.toList());
-          }
-        });
-      }
+        }
+      });
+    }
+    else {
+      setState(() {
+        // If no ticket is selected, clear all selections
+        selectedTickets.clear();
+        orderInfo.resetBasket();
+      });
     }
   }
 
@@ -123,10 +132,19 @@ class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
                   width: double.infinity,
                   child: PrimaryButton(
                     onPressed: () {
-                      // Handle button press
-                      print('Proceed to payment');
+                      if (hasValidTickets()) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ParticipantInfoPage(
+                              orderInfo: orderInfo,
+                            ),
+                          ),
+                        );
+                      }
                     },
-                    textKey: 'proceed-to-payment',
+                    disabled: !hasValidTickets(),
+                    textKey: 'add-items',
                     trailingIcon: Icons.arrow_forward,
                     flexible: false,
                     height: 50,

@@ -8,6 +8,7 @@ class PrimaryButton extends StatelessWidget {
   final IconData? trailingIcon;
   final double height;
   final bool flexible;
+  final bool disabled;
 
   const PrimaryButton({
     super.key,
@@ -16,6 +17,7 @@ class PrimaryButton extends StatelessWidget {
     this.trailingIcon,
     this.height = 56,
     this.flexible = true,
+    this.disabled = false,
   });
 
   @override
@@ -25,10 +27,10 @@ class PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: kBrandPrimary,
+          backgroundColor: disabled ? Colors.grey : kBrandPrimary,
           foregroundColor: Colors.white,
           side: BorderSide(
-            color: kBrandPrimary,
+            color: disabled ? Colors.grey : kBrandPrimary,
             width: 2,
           ),
           elevation: 0,

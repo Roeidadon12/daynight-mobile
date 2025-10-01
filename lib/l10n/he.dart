@@ -39,4 +39,5 @@ const Map<String, String> heTexts = {
   'proceed-to-payment': 'המשך לתשלום',
   'processing-fee': 'דמי טיפול',
   'currency-symbol': '₪',
+  'add-items': 'הוסף פריטים',
 };

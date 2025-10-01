@@ -39,4 +39,5 @@ const Map<String, String> enTexts = {
   'proceed-to-payment': 'Proceed to Payment',
   'processing-fee': 'Processing Fee',
   'currency-symbol': '₪',
+  'add-items': 'Add Items',
 };
