@@ -35,8 +35,7 @@ class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
         // Create or update ticket item
         final ticketItem = TicketItem(
           id: ticketId,
-          name: selectedTicket.title,
-          price: double.parse(selectedTicket.price ?? '0'),
+          ticket: selectedTicket,
           quantity: amount
         );
         
