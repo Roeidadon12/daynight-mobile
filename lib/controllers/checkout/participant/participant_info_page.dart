@@ -1,8 +1,10 @@
 import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/checkout/participant/participant_info_controller.dart';
 import 'package:day_night/controllers/shared/custom_app_bar.dart';
+import 'package:day_night/app_localizations.dart';
 import 'package:day_night/controllers/shared/primary_button.dart';
 import 'package:day_night/controllers/shared/primary_text_form_field.dart';
+import 'package:day_night/controllers/shared/primary_dropdown_field.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets_controller.dart';
 import 'package:flutter/material.dart';
 
@@ -27,6 +29,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
   final _participantIdController = TextEditingController();
   final _participantDateOfBirthController = TextEditingController();
   final _participantGenderController = TextEditingController();
+  Gender? _selectedGender;
 
   bool get needsIdNumber {
     return widget.orderInfo.currentBasket.ticketInfo?.tickets.any((t) => t.ticket.requiredIdNumber == 1) ?? false;
@@ -49,7 +52,13 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       selectedTickets: widget.orderInfo.currentBasket.ticketInfo?.tickets ?? [],
       eventDetails: widget.orderInfo.eventDetails,
     );
-    return;
+    
+    // Add listener to update UI when name changes
+    _participantNameController.addListener(() {
+      setState(() {
+        // Trigger rebuild to update the name display
+      });
+    });
   }
 
   @override
@@ -101,6 +110,34 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                 child: ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
+                    // Participant Header
+                    Row(
+                      children: [
+                        Text(
+                          '${AppLocalizations.of(context).get('participant')} 01',
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            _participantNameController.text.isEmpty 
+                              ? '...' 
+                              : _participantNameController.text,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
                     // Purchaser Information Fields
                     PrimaryTextFormField(
                       controller: _participantNameController,
@@ -144,8 +181,34 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                           controller: _participantDateOfBirthController,
                           labelText: 'Date of Birth',
                           readOnly: true,
-                          onTap: () {
-                            // TODO: Show date picker
+                          onTap: () async {
+                            final date = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)), // Start at 18 years ago
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                              builder: (context, child) {
+                                return Theme(
+                                  data: Theme.of(context).copyWith(
+                                    colorScheme: ColorScheme.dark(
+                                      primary: kBrandPrimary,
+                                      onPrimary: Colors.white,
+                                      surface: Colors.grey[900]!,
+                                      onSurface: Colors.white,
+                                    ),
+                                    dialogBackgroundColor: Colors.grey[850],
+                                  ),
+                                  child: child!,
+                                );
+                              },
+                            );
+                            
+                            if (date != null) {
+                              setState(() {
+                                _participantDateOfBirthController.text = 
+                                    '${date.day}/${date.month}/${date.year}';
+                              });
+                            }
                           },
                           suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
                         ),
@@ -153,14 +216,19 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                     if (needsGender)
                       Padding(
                         padding: const EdgeInsets.only(top: 16),
-                        child: PrimaryTextFormField(
-                          controller: _participantGenderController,
+                        child: PrimaryDropdownField<Gender>(
                           labelText: 'Gender',
-                          readOnly: true,
-                          onTap: () {
-                            // TODO: Show gender selection dialog
+                          value: _selectedGender,
+                          items: Gender.values,
+                          onChanged: (gender) {
+                            setState(() {
+                              _selectedGender = gender;
+                              if (gender != null) {
+                                _participantGenderController.text = gender.getLabel(context);
+                              }
+                            });
                           },
-                          suffixIcon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                          getLabel: (gender, context) => gender.getLabel(context),
                         ),
                       ),
                     const SizedBox(height: 24),

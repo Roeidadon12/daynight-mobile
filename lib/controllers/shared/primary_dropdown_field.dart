@@ -1,0 +1,110 @@
+import 'package:flutter/material.dart';
+import '../../constants.dart';
+import '../../app_localizations.dart';
+
+class PrimaryDropdownField<T> extends StatelessWidget {
+  final String labelText;
+  final T? value;
+  final List<T> items;
+  final void Function(T?) onChanged;
+  final String Function(T, BuildContext) getLabel;
+  final bool isRequired;
+  final String? Function(T?)? validator;
+
+  const PrimaryDropdownField({
+    super.key,
+    required this.labelText,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    required this.getLabel,
+    this.isRequired = true,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(32);
+    final outlineBorder = OutlineInputBorder(
+      borderRadius: borderRadius,
+      borderSide: BorderSide(
+        color: Colors.grey[800]!,
+        width: 1,
+      ),
+    );
+
+    return DropdownButtonFormField<T>(
+      value: value,
+      items: items.map((item) {
+        return DropdownMenuItem<T>(
+          value: item,
+          child: Text(
+            getLabel(item, context),
+            style: const TextStyle(color: Colors.white),
+          ),
+        );
+      }).toList(),
+      onChanged: onChanged,
+      style: const TextStyle(color: Colors.white),
+      dropdownColor: Colors.black.withAlpha(240),
+      decoration: InputDecoration(
+        labelText: isRequired ? '$labelText *' : labelText,
+        labelStyle: TextStyle(
+          color: Colors.grey[400],
+          fontSize: 16,
+        ),
+        filled: true,
+        fillColor: Colors.black.withAlpha(77),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        border: outlineBorder,
+        enabledBorder: outlineBorder,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: borderRadius,
+          borderSide: BorderSide(
+            color: kBrandPrimary,
+            width: 2,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: borderRadius,
+          borderSide: BorderSide(
+            color: Colors.red[400]!,
+            width: 1,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: borderRadius,
+          borderSide: BorderSide(
+            color: Colors.red[400]!,
+            width: 2,
+          ),
+        ),
+      ),
+      validator: validator ?? (isRequired 
+        ? (value) {
+            if (value == null) {
+              return 'Please select ${labelText.toLowerCase()}';
+            }
+            return null;
+          }
+        : null),
+    );
+  }
+}
+
+enum Gender {
+  male,
+  female,
+  nonBinary;
+
+  String getLabel(BuildContext context) {
+    switch (this) {
+      case Gender.male:
+        return AppLocalizations.of(context).get('gender-male');
+      case Gender.female:
+        return AppLocalizations.of(context).get('gender-female');
+      case Gender.nonBinary:
+        return AppLocalizations.of(context).get('gender-non-binary');
+    }
+  }
+}
