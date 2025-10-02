@@ -1,9 +1,8 @@
 import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/checkout/participant/participant_info_controller.dart';
 import 'package:day_night/controllers/shared/custom_app_bar.dart';
-import 'package:day_night/app_localizations.dart';
+import 'package:day_night/controllers/checkout/participant/participant_item.dart';
 import 'package:day_night/controllers/shared/primary_button.dart';
-import 'package:day_night/controllers/shared/primary_text_form_field.dart';
 import 'package:day_night/controllers/shared/primary_dropdown_field.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets_controller.dart';
 import 'package:day_night/models/ticket_item.dart';
@@ -28,6 +27,12 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
   // Map to store controllers for each participant
   final Map<String, Map<String, dynamic>> _participantControllers = {};
   late final List<(TicketItem, int)> _flattenedTickets; // List of (ticket, participantIndex)
+  final Set<int> _expandedItems = {}; // Track which items are expanded
+
+  // Helper to convert TextEditingController to ValueNotifier for gender
+  ValueNotifier<Gender?> _createGenderNotifier() {
+    return ValueNotifier<Gender?>(null);
+  }
   
   List<(TicketItem, int)> _getFlattenedTickets(List<TicketItem> tickets) {
     final flattened = <(TicketItem, int)>[];
@@ -45,10 +50,11 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       for (int i = 0; i < ticket.quantity; i++) {
         final participantKey = '${ticket.id}_$participantIndex';
         _participantControllers[participantKey] = {
-          'name': TextEditingController(),
+          'firstName': TextEditingController(),
+          'lastName': TextEditingController(),
           'id': TextEditingController(),
           'dateOfBirth': TextEditingController(),
-          'gender': null, // This will store the Gender value
+          'gender': _createGenderNotifier(), // Use ValueNotifier for gender
         };
         participantIndex++;
       }
@@ -65,6 +71,25 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
 
   bool needsGender(TicketItem ticket) {
     return ticket.ticket.requiredGender == 1;
+  }
+
+  bool _isParticipantValid(String participantKey, TicketItem ticket) {
+    final controllers = _participantControllers[participantKey];
+    if (controllers == null) return false;
+
+    // Both first and last names are required
+    if (controllers['firstName'].text.isEmpty || controllers['lastName'].text.isEmpty) return false;
+
+    // Check ID if required
+    if (needsIdNumber(ticket) && controllers['id'].text.isEmpty) return false;
+
+    // Check Date of Birth if required
+    if (needsDateOfBirth(ticket) && controllers['dateOfBirth'].text.isEmpty) return false;
+
+    // Check Gender if required
+    if (needsGender(ticket) && controllers['gender'] == null) return false;
+
+    return true;
   }
 
   @override
@@ -86,9 +111,11 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
   void dispose() {
     // Dispose all controllers
     for (final controllers in _participantControllers.values) {
-      controllers['name']?.dispose();
+      controllers['firstName']?.dispose();
+      controllers['lastName']?.dispose();
       controllers['id']?.dispose();
       controllers['dateOfBirth']?.dispose();
+      (controllers['gender'] as ValueNotifier<Gender?>).dispose();
     }
     super.dispose();
   }
@@ -107,7 +134,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
         );
 
         participantsInfo.addParticipant(
-          fullName: controllers['name'].text,
+          fullName: '${controllers['firstName'].text} ${controllers['lastName'].text}'.trim(),
           idNumber: needsIdNumber(ticket) && controllers['id'].text.isNotEmpty 
             ? controllers['id'].text 
             : null,
@@ -152,106 +179,22 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                     final (ticket, _) = _flattenedTickets[index];
                     final participantKey = '${ticket.id}_$index';
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      color: Colors.black.withAlpha(77),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    '${ticket.name} - ${AppLocalizations.of(context).get('participant')} ${(index + 1).toString().padLeft(2, '0')}',
-                                    style: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            PrimaryTextFormField(
-                              controller: _participantControllers[participantKey]!['name'],
-                              labelText: 'Full Name',
-                              keyboardType: TextInputType.name,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter the participant name';
-                                }
-                                return null;
-                              },
-                            ),
-                            if (needsIdNumber(ticket))
-                              Padding(
-                                padding: const EdgeInsets.only(top: 16),
-                                child: PrimaryTextFormField(
-                                  controller: _participantControllers[participantKey]!['id'],
-                                  labelText: 'ID Number',
-                                  keyboardType: TextInputType.text,
-                                ),
-                              ),
-                            if (needsDateOfBirth(ticket))
-                              Padding(
-                                padding: const EdgeInsets.only(top: 16),
-                                child: PrimaryTextFormField(
-                                  controller: _participantControllers[participantKey]!['dateOfBirth'],
-                                  labelText: 'Date of Birth',
-                                  readOnly: true,
-                                  onTap: () async {
-                                    final date = await showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
-                                      firstDate: DateTime(1900),
-                                      lastDate: DateTime.now(),
-                                      builder: (context, child) {
-                                        return Theme(
-                                          data: Theme.of(context).copyWith(
-                                            colorScheme: ColorScheme.dark(
-                                              primary: kBrandPrimary,
-                                              onPrimary: Colors.white,
-                                              surface: Colors.grey[900]!,
-                                              onSurface: Colors.white,
-                                            ),
-                                            dialogBackgroundColor: Colors.grey[850],
-                                          ),
-                                          child: child!,
-                                        );
-                                      },
-                                    );
-                                    
-                                    if (date != null) {
-                                      setState(() {
-                                        _participantControllers[participantKey]!['dateOfBirth'].text = 
-                                            '${date.day}/${date.month}/${date.year}';
-                                      });
-                                    }
-                                  },
-                                  suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
-                                ),
-                              ),
-                            if (needsGender(ticket))
-                              Padding(
-                                padding: const EdgeInsets.only(top: 16),
-                                child: PrimaryDropdownField<Gender>(
-                                  labelText: 'Gender',
-                                  value: _participantControllers[participantKey]!['gender'],
-                                  items: Gender.values,
-                                  onChanged: (gender) {
-                                    setState(() {
-                                      _participantControllers[participantKey]!['gender'] = gender;
-                                    });
-                                  },
-                                  getLabel: (gender, context) => gender.getLabel(context),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
+                    return ParticipantItem(
+                      ticket: ticket,
+                      participantIndex: index,
+                      participantKey: participantKey,
+                      controllers: _participantControllers[participantKey]!,
+                      isExpanded: _expandedItems.contains(index),
+                      onToggleExpand: () {
+                        setState(() {
+                          if (_expandedItems.contains(index)) {
+                            _expandedItems.remove(index);
+                          } else {
+                            _expandedItems.add(index);
+                          }
+                        });
+                      },
+                      isValid: _isParticipantValid(participantKey, ticket),
                     );
                   },
                 ),
