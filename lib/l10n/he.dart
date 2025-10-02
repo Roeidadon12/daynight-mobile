@@ -57,4 +57,6 @@ const Map<String, String> heTexts = {
   'participant': 'משתתף',
   'phone-number': 'מספר טלפון',
   'id-card-image': 'יש לצרף תעודת זהות',
+  'please-fill-in-all-required-fields': 'אנא מלא את כל השדות הנדרשים',
+  'event-details': 'פרטי האירוע',
 };

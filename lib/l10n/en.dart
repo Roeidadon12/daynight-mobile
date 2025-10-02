@@ -57,4 +57,6 @@ const Map<String, String> enTexts = {
   'participant': 'Participant',
   'phone-number': 'Phone Number',
   'id-card-image': 'Please add ID Card',
+  'please-fill-in-all-required-fields': 'Please fill in all required fields',
+  'event-details': 'Event Details',
 };

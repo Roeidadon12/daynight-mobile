@@ -26,7 +26,7 @@ class CustomAppBar extends StatelessWidget {
         color: kMainBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withAlpha(26),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -38,9 +38,7 @@ class CustomAppBar extends StatelessWidget {
           // Back Button
           IconButton(
             icon: Icon(
-              Directionality.of(context) == TextDirection.ltr
-                  ? Icons.arrow_back_ios
-                  : Icons.arrow_forward_ios,
+              Icons.arrow_back_ios,
               color: Colors.white,
               size: 20,
             ),
