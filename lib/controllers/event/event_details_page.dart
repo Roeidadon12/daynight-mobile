@@ -1,6 +1,8 @@
 import 'package:day_night/models/events.dart';
 import 'package:day_night/utils/slide_page_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
+import '../shared/flip_card.dart';
 import '../../app_localizations.dart';
 import '../../constants.dart';
 import '../shared/custom_app_bar.dart';
@@ -66,16 +68,68 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                         automaticallyImplyLeading: false,
                         backgroundColor: kMainBackgroundColor,
                         flexibleSpace: FlexibleSpaceBar(
-                          background: ClipRRect(
-                            child: Image.network(
-                                  widget.event.thumbnail,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => 
-                                    Image.asset(
-                                      kDefaultEventImage,
-                                      fit: BoxFit.cover,
+                          background: FlipCard(
+                            height: MediaQuery.of(context).size.width,
+                            front: ClipRRect(
+                              child: Stack(
+                                children: [
+                                  Image.network(
+                                    widget.event.thumbnail,
+                                    fit: BoxFit.cover,
+                                    height: MediaQuery.of(context).size.width,
+                                    width: double.infinity,
+                                    errorBuilder: (context, error, stackTrace) => 
+                                      Image.asset(
+                                        kDefaultEventImage,
+                                        fit: BoxFit.cover,
+                                      ),
+                                  ),
+                                  Positioned(
+                                    right: 16,
+                                    bottom: 16,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withAlpha(120),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: const Icon(
+                                        Icons.touch_app,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
                                     ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            back: Container(
+                              color: kMainBackgroundColor,
+                              height: MediaQuery.of(context).size.width,
+                              child: SingleChildScrollView(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Html(
+                                    data: widget.event.description,
+                                    style: {
+                                      "body": Style(
+                                        color: Colors.white,
+                                        fontSize: FontSize(14.0),
+                                        margin: Margins.all(0),
+                                        padding: HtmlPaddings.all(0),
+                                      ),
+                                      "p": Style(
+                                        margin: Margins.all(0),
+                                        padding: HtmlPaddings.all(0),
+                                      ),
+                                      "a": Style(
+                                        color: kBrandPrimary,
+                                      ),
+                                    },
+                                  ),
                                 ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -233,6 +287,14 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                 ),
                               ],
                             ),
+                            Text(
+                              widget.event.address,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
                           ],
                         ),
                       ),
