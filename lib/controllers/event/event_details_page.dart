@@ -7,6 +7,7 @@ import '../../app_localizations.dart';
 import '../../constants.dart';
 import '../shared/custom_app_bar.dart';
 import '../shared/primary_button.dart';
+import '../shared/address_map_widget.dart';
 import 'package:flutter/services.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets.dart';
 
@@ -287,14 +288,27 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                 ),
                               ],
                             ),
-                            Text(
-                              widget.event.address,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
+                            const SizedBox(height: 24),
+
+                            // Address and Map
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                AddressMapWidget(
+                                  address: widget.event.address,
+                                  height: 200,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  widget.event.address,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
