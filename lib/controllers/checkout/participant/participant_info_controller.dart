@@ -1,5 +1,6 @@
 import 'package:day_night/models/event_details.dart';
 import 'package:day_night/models/purchase/participant_info.dart';
+import 'package:day_night/controllers/shared/primary_dropdown_field.dart';
 import 'package:day_night/models/purchase/personal_info.dart';
 import 'package:day_night/models/ticket_item.dart';
 
@@ -48,12 +49,16 @@ class ParticipantInfoController {
   void addParticipant({
     required String fullName,
     String? idNumber,
+    String? dateOfBirth,
+    Gender? gender,
   }) {
     if (participants.length < totalParticipants - 1) {
       participants.add(
         ParticipantInfo(
           fullName: fullName,
           idNumber: idNumber,
+          dateOfBirth: dateOfBirth,
+          gender: gender,
         ),
       );
     }
