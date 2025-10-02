@@ -1,4 +1,4 @@
-import 'package:day_night/app_localizations.dart' as app_l10n;
+import 'package:day_night/app_localizations.dart';
 import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/shared/primary_dropdown_field.dart';
 import 'package:day_night/controllers/shared/primary_text_form_field.dart';
@@ -97,7 +97,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${app_l10n.AppLocalizations.of(context).get('participant')} ${(widget.participantIndex + 1).toString().padLeft(2, '0')}',
+                              '${AppLocalizations.of(context).get('participant')} ${(widget.participantIndex + 1).toString().padLeft(2, '0')}',
                               style: TextStyle(
                                 color: Colors.white.withAlpha(220),
                                 fontSize: 16,
@@ -141,7 +141,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                   Expanded(
                     child: PrimaryTextFormField(
                       controller: firstNameController,
-                      labelText: 'First Name',
+                      labelKey: 'first-name',
                       keyboardType: TextInputType.name,
                       hasError: widget.errors['firstName'] ?? false,
                       validator: (value) {
@@ -156,7 +156,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                   Expanded(
                     child: PrimaryTextFormField(
                       controller: lastNameController,
-                      labelText: 'Last Name',
+                      labelKey: 'last-name',
                       keyboardType: TextInputType.name,
                       hasError: widget.errors['lastName'] ?? false,
                       validator: (value) {
@@ -173,7 +173,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                 padding: const EdgeInsets.only(top: 16),
                 child: PrimaryTextFormField(
                   controller: widget.controllers['id'],
-                  labelText: 'Phone Number',
+                  labelKey: 'phone-number',
                   keyboardType: TextInputType.phone,
                 ),
               ),              
@@ -184,7 +184,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                       padding: const EdgeInsets.only(top: 16),
                       child: PrimaryTextFormField(
                         controller: widget.controllers['id'],
-                        labelText: 'ID Number',
+                        labelKey: 'id-number',
                         keyboardType: TextInputType.text,
                         hasError: widget.errors['id'] ?? false,
                       ),
@@ -195,7 +195,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                         children: [
                           PrimaryTextFormField(
                             controller: TextEditingController(),
-                            labelText: 'ID Card Image',
+                            labelKey: 'id-card-image',
                             readOnly: true,
                             suffixIcon: const Icon(
                               Icons.upload_file,
@@ -224,7 +224,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                   padding: const EdgeInsets.only(top: 16),
                   child: PrimaryTextFormField(
                     controller: widget.controllers['dateOfBirth'],
-                    labelText: 'Date of Birth',
+                    labelKey: 'date-of-birth',
                     readOnly: true,
                     onTap: () async {
                       final date = await showDatePicker(
@@ -263,7 +263,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                     builder: (context, selectedGender, child) {
                       return PrimaryDropdownField<gender_model.Gender>(
                         value: selectedGender,
-                        labelText: 'Gender',
+                        labelKey: 'gender',
                         items: gender_model.Gender.values,
                         getLabel: (gender, context) => gender.getLabel(context),
                         onChanged: (value) {

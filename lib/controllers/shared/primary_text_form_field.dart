@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../constants.dart';
+import '../../app_localizations.dart';
 
 class PrimaryTextFormField extends StatelessWidget {
   final TextEditingController controller;
-  final String labelText;
+  final String labelKey;
   final String? Function(String?)? validator;
   final bool isRequired;
   final TextInputType? keyboardType;
@@ -15,7 +16,7 @@ class PrimaryTextFormField extends StatelessWidget {
   const PrimaryTextFormField({
     super.key,
     required this.controller,
-    required this.labelText,
+    required this.labelKey,
     this.validator,
     this.isRequired = true,
     this.keyboardType,
@@ -42,7 +43,9 @@ class PrimaryTextFormField extends StatelessWidget {
       onTap: onTap,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
-        labelText: isRequired ? '$labelText *' : labelText,
+        labelText: isRequired 
+          ? '${AppLocalizations.of(context).get(labelKey)} *' 
+          : AppLocalizations.of(context).get(labelKey),
         labelStyle: TextStyle(
           color: hasError ? Colors.red[400] : Colors.grey[400],
           fontSize: 16,
@@ -85,7 +88,8 @@ class PrimaryTextFormField extends StatelessWidget {
       validator: validator ?? (isRequired 
         ? (value) {
             if (value == null || value.isEmpty) {
-              return 'Please enter ${labelText.toLowerCase()}';
+              final fieldName = AppLocalizations.of(context).get(labelKey).toLowerCase();
+              return AppLocalizations.of(context).get('please-enter-field').replaceAll('{field}', fieldName);
             }
             return null;
           }

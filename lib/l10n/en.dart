@@ -54,4 +54,7 @@ const Map<String, String> enTexts = {
   'total-participants': 'Total Participants',
   'total-amount': 'Total Amount',
   'payment-of': 'Payment of',
+  'participant': 'Participant',
+  'phone-number': 'Phone Number',
+  'id-card-image': 'Please add ID Card',
 };

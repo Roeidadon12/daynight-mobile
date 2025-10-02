@@ -54,4 +54,7 @@ const Map<String, String> heTexts = {
   'total-participants': 'סך כל המשתתפים',
   'total-amount': 'סכום כולל',
   'payment-of': 'תשלום של',
+  'participant': 'משתתף',
+  'phone-number': 'מספר טלפון',
+  'id-card-image': 'יש לצרף תעודת זהות',
 };

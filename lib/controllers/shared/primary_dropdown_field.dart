@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../constants.dart';
+import '../../app_localizations.dart';
 
 class PrimaryDropdownField<T> extends StatelessWidget {
-  final String labelText;
+  final String labelKey;
   final T? value;
   final List<T> items;
   final void Function(T?) onChanged;
@@ -13,7 +14,7 @@ class PrimaryDropdownField<T> extends StatelessWidget {
 
   const PrimaryDropdownField({
     super.key,
-    required this.labelText,
+    required this.labelKey,
     required this.value,
     required this.items,
     required this.onChanged,
@@ -49,7 +50,9 @@ class PrimaryDropdownField<T> extends StatelessWidget {
       style: const TextStyle(color: Colors.white),
       dropdownColor: Colors.black.withAlpha(240),
       decoration: InputDecoration(
-        labelText: isRequired ? '$labelText *' : labelText,
+        labelText: isRequired 
+          ? '${AppLocalizations.of(context).get(labelKey)} *'
+          : AppLocalizations.of(context).get(labelKey),
         labelStyle: TextStyle(
           color: Colors.grey[400],
           fontSize: 16,
@@ -84,7 +87,8 @@ class PrimaryDropdownField<T> extends StatelessWidget {
       validator: validator ?? (isRequired 
         ? (value) {
             if (value == null) {
-              return 'Please select ${labelText.toLowerCase()}';
+              final fieldName = AppLocalizations.of(context).get(labelKey).toLowerCase();
+              return AppLocalizations.of(context).get('please-select-field').replaceAll('{field}', fieldName);
             }
             return null;
           }

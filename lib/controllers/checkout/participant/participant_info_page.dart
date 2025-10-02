@@ -246,71 +246,93 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
     return Scaffold(
       backgroundColor: kMainBackgroundColor,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            CustomAppBar(
-              titleKey: 'participant-info',
-              onBackPressed: () => Navigator.pop(context),
-            ),
-            Expanded(
-              child: Form(
-                key: _formKey,
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _flattenedTickets.length,
-                  itemBuilder: (context, index) {
-                    final (ticket, _) = _flattenedTickets[index];
-                    final participantKey = '${ticket.id}_$index';
-
-                    return ParticipantItem(
-                      ticket: ticket,
-                      participantIndex: index,
-                      participantKey: participantKey,
-                      controllers: _participantControllers[participantKey]!,
-                      errors: {
-                        'firstName': _participantControllers[participantKey]!['firstNameError'] as bool,
-                        'lastName': _participantControllers[participantKey]!['lastNameError'] as bool,
-                        'id': _participantControllers[participantKey]!['idError'] as bool,
-                        'dateOfBirth': _participantControllers[participantKey]!['dateOfBirthError'] as bool,
-                        'gender': _participantControllers[participantKey]!['genderError'] as bool,
-                      },
-                      isExpanded: _expandedIndex == index,
-                      onToggleExpand: () {
-                        setState(() {
-                          if (_expandedIndex == index) {
-                            _expandedIndex = -1; // Close current item
-                          } else {
-                            _expandedIndex = index; // Open clicked item
-                          }
-                        });
-                      },
-                      isValid: _isParticipantValid(participantKey, ticket),
-                    );
-                  },
+            Column(
+              children: [
+                CustomAppBar(
+                  titleKey: 'participant-info',
+                  onBackPressed: () => Navigator.pop(context),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                height: 56,
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _handleContinue,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: kBrandPrimary,
-                    foregroundColor: Colors.white,
-                    side: BorderSide(
-                      color: kBrandPrimary,
-                      width: 2,
+                Expanded(
+                  child: Form(
+                    key: _formKey,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 88), // Extra bottom padding for the button
+                      itemCount: _flattenedTickets.length,
+                      itemBuilder: (context, index) {
+                        final (ticket, _) = _flattenedTickets[index];
+                        final participantKey = '${ticket.id}_$index';
+
+                        return ParticipantItem(
+                          ticket: ticket,
+                          participantIndex: index,
+                          participantKey: participantKey,
+                          controllers: _participantControllers[participantKey]!,
+                          errors: {
+                            'firstName': _participantControllers[participantKey]!['firstNameError'] as bool,
+                            'lastName': _participantControllers[participantKey]!['lastNameError'] as bool,
+                            'id': _participantControllers[participantKey]!['idError'] as bool,
+                            'dateOfBirth': _participantControllers[participantKey]!['dateOfBirthError'] as bool,
+                            'gender': _participantControllers[participantKey]!['genderError'] as bool,
+                          },
+                          isExpanded: _expandedIndex == index,
+                          onToggleExpand: () {
+                            setState(() {
+                              if (_expandedIndex == index) {
+                                _expandedIndex = -1; // Close current item
+                              } else {
+                                _expandedIndex = index; // Open clicked item
+                              }
+                            });
+                          },
+                          isValid: _isParticipantValid(participantKey, ticket),
+                        );
+                      },
                     ),
-                    elevation: 0,
                   ),
-                  child: Text(
-                    '${AppLocalizations.of(context).get('payment-of')} ${totalAmount.toStringAsFixed(2)} ₪',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                ),
+              ],
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      kMainBackgroundColor.withAlpha(0),
+                      kMainBackgroundColor.withAlpha(204), // 0.8 * 255 = 204
+                      kMainBackgroundColor,
+                    ],
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                    height: 56,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _handleContinue,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kBrandPrimary,
+                        foregroundColor: Colors.white,
+                        side: BorderSide(
+                          color: kBrandPrimary,
+                          width: 2,
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        '${AppLocalizations.of(context).get('payment-of')} ${totalAmount.toStringAsFixed(2)} ₪',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
