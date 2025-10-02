@@ -1,8 +1,8 @@
 import 'package:day_night/models/event_details.dart';
 import 'package:day_night/models/purchase/participant_info.dart';
-import 'package:day_night/controllers/shared/primary_dropdown_field.dart';
 import 'package:day_night/models/purchase/personal_info.dart';
 import 'package:day_night/models/ticket_item.dart';
+import 'package:day_night/models/gender.dart' as gender_model;
 
 class ParticipantInfoController {
   final List<TicketItem> selectedTickets;
@@ -50,7 +50,7 @@ class ParticipantInfoController {
     required String fullName,
     String? idNumber,
     String? dateOfBirth,
-    Gender? gender,
+    gender_model.Gender? gender,
   }) {
     if (participants.length < totalParticipants - 1) {
       participants.add(

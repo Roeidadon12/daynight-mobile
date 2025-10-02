@@ -1,11 +1,11 @@
+import 'package:day_night/app_localizations.dart';
 import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/checkout/participant/participant_info_controller.dart';
 import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/controllers/checkout/participant/participant_item.dart';
-import 'package:day_night/controllers/shared/primary_button.dart';
-import 'package:day_night/controllers/shared/primary_dropdown_field.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets_controller.dart';
 import 'package:day_night/models/ticket_item.dart';
+import 'package:day_night/models/gender.dart' as gender_model;
 import 'package:flutter/material.dart';
 
 class ParticipantInfoPage extends StatefulWidget {
@@ -28,10 +28,19 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
   final Map<String, Map<String, dynamic>> _participantControllers = {};
   late final List<(TicketItem, int)> _flattenedTickets; // List of (ticket, participantIndex)
   int _expandedIndex = 0; // Track which item is currently expanded
+  
+  // Calculate total amount from all tickets
+  double get totalAmount {
+    return _flattenedTickets.fold(0.0, (sum, ticketItem) {
+      final (ticket, _) = ticketItem;
+      final price = double.tryParse(ticket.ticket.price ?? '0') ?? 0.0;
+      return sum + price;
+    });
+  }
 
   // Helper to convert TextEditingController to ValueNotifier for gender
-  ValueNotifier<Gender?> _createGenderNotifier() {
-    return ValueNotifier<Gender?>(null);
+  ValueNotifier<gender_model.Gender?> _createGenderNotifier() {
+    return ValueNotifier<gender_model.Gender?>(null);
   }
   
   List<(TicketItem, int)> _getFlattenedTickets(List<TicketItem> tickets) {
@@ -50,11 +59,32 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       for (int i = 0; i < ticket.quantity; i++) {
         final participantKey = '${ticket.id}_$participantIndex';
         _participantControllers[participantKey] = {
-          'firstName': TextEditingController(),
-          'lastName': TextEditingController(),
-          'id': TextEditingController(),
-          'dateOfBirth': TextEditingController(),
+          'firstName': TextEditingController()..addListener(() {
+            setState(() {
+              _participantControllers[participantKey]!['firstNameError'] = false;
+            });
+          }),
+          'lastName': TextEditingController()..addListener(() {
+            setState(() {
+              _participantControllers[participantKey]!['lastNameError'] = false;
+            });
+          }),
+          'id': TextEditingController()..addListener(() {
+            setState(() {
+              _participantControllers[participantKey]!['idError'] = false;
+            });
+          }),
+          'dateOfBirth': TextEditingController()..addListener(() {
+            setState(() {
+              _participantControllers[participantKey]!['dateOfBirthError'] = false;
+            });
+          }),
           'gender': _createGenderNotifier(), // Use ValueNotifier for gender
+          'firstNameError': false,
+          'lastNameError': false,
+          'idError': false,
+          'dateOfBirthError': false,
+          'genderError': false,
         };
         participantIndex++;
       }
@@ -115,12 +145,72 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       controllers['lastName']?.dispose();
       controllers['id']?.dispose();
       controllers['dateOfBirth']?.dispose();
-      (controllers['gender'] as ValueNotifier<Gender?>).dispose();
+      (controllers['gender'] as ValueNotifier<gender_model.Gender?>).dispose();
     }
     super.dispose();
   }
 
   void _handleContinue() {
+    // First check if all participants are valid
+    bool allParticipantsValid = true;
+    int invalidIndex = -1;
+
+    for (int i = 0; i < _flattenedTickets.length; i++) {
+      final (ticket, _) = _flattenedTickets[i];
+      final participantKey = '${ticket.id}_$i';
+      final controllers = _participantControllers[participantKey]!;
+      
+      // Reset all error states first
+      controllers['firstNameError'] = false;
+      controllers['lastNameError'] = false;
+      controllers['idError'] = false;
+      controllers['dateOfBirthError'] = false;
+      controllers['genderError'] = false;
+
+      // Check each field and set error state
+      if (controllers['firstName'].text.isEmpty) {
+        controllers['firstNameError'] = true;
+        allParticipantsValid = false;
+      }
+      if (controllers['lastName'].text.isEmpty) {
+        controllers['lastNameError'] = true;
+        allParticipantsValid = false;
+      }
+      if (needsIdNumber(ticket) && controllers['id'].text.isEmpty) {
+        controllers['idError'] = true;
+        allParticipantsValid = false;
+      }
+      if (needsDateOfBirth(ticket) && controllers['dateOfBirth'].text.isEmpty) {
+        controllers['dateOfBirthError'] = true;
+        allParticipantsValid = false;
+      }
+      if (needsGender(ticket) && controllers['gender'].value == null) {
+        controllers['genderError'] = true;
+        allParticipantsValid = false;
+      }
+
+      if (!allParticipantsValid) {
+        invalidIndex = i;
+        break;
+      }
+    }
+
+    if (!allParticipantsValid) {
+      // Show error and expand the invalid participant
+      setState(() {
+        _expandedIndex = invalidIndex;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please fill in all required fields'),
+          backgroundColor: Colors.red[700],
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     if (_formKey.currentState?.validate() ?? false) {
       // Save all participant information
       for (final ticketEntry in _participantControllers.entries) {
@@ -141,7 +231,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
           dateOfBirth: needsDateOfBirth(ticket) && controllers['dateOfBirth'].text.isNotEmpty 
             ? controllers['dateOfBirth'].text 
             : null,
-          gender: needsGender(ticket) ? controllers['gender'] as Gender? : null,
+          gender: needsGender(ticket) ? (controllers['gender'] as ValueNotifier<gender_model.Gender?>).value : null,
         );
       }
       
@@ -162,13 +252,6 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
               titleKey: 'participant-info',
               onBackPressed: () => Navigator.pop(context),
             ),
-            Text(
-              'Total Participants: ${_flattenedTickets.length}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-            ),
             Expanded(
               child: Form(
                 key: _formKey,
@@ -184,6 +267,13 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                       participantIndex: index,
                       participantKey: participantKey,
                       controllers: _participantControllers[participantKey]!,
+                      errors: {
+                        'firstName': _participantControllers[participantKey]!['firstNameError'] as bool,
+                        'lastName': _participantControllers[participantKey]!['lastNameError'] as bool,
+                        'id': _participantControllers[participantKey]!['idError'] as bool,
+                        'dateOfBirth': _participantControllers[participantKey]!['dateOfBirthError'] as bool,
+                        'gender': _participantControllers[participantKey]!['genderError'] as bool,
+                      },
                       isExpanded: _expandedIndex == index,
                       onToggleExpand: () {
                         setState(() {
@@ -202,9 +292,28 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
             ),
             Padding(
               padding: const EdgeInsets.all(16),
-              child: PrimaryButton(
-                onPressed: _handleContinue,
-                textKey: 'continue',
+              child: SizedBox(
+                height: 56,
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _handleContinue,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kBrandPrimary,
+                    foregroundColor: Colors.white,
+                    side: BorderSide(
+                      color: kBrandPrimary,
+                      width: 2,
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    '${AppLocalizations.of(context).get('payment-of')} ${totalAmount.toStringAsFixed(2)} ₪',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

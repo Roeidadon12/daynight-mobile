@@ -1,8 +1,9 @@
-import 'package:day_night/app_localizations.dart';
+import 'package:day_night/app_localizations.dart' as app_l10n;
 import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/shared/primary_dropdown_field.dart';
 import 'package:day_night/controllers/shared/primary_text_form_field.dart';
 import 'package:day_night/models/ticket_item.dart';
+import 'package:day_night/models/gender.dart' as gender_model;
 import 'package:flutter/material.dart';
 
 class ParticipantItem extends StatefulWidget {
@@ -10,6 +11,7 @@ class ParticipantItem extends StatefulWidget {
   final int participantIndex;
   final String participantKey;
   final Map<String, dynamic> controllers;
+  final Map<String, bool> errors;
   final bool isExpanded;
   final VoidCallback onToggleExpand;
   final bool isValid;
@@ -20,6 +22,7 @@ class ParticipantItem extends StatefulWidget {
     required this.participantIndex,
     required this.participantKey,
     required this.controllers,
+    required this.errors,
     required this.isExpanded,
     required this.onToggleExpand,
     required this.isValid,
@@ -94,7 +97,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${AppLocalizations.of(context).get('participant')} ${(widget.participantIndex + 1).toString().padLeft(2, '0')}',
+                              '${app_l10n.AppLocalizations.of(context).get('participant')} ${(widget.participantIndex + 1).toString().padLeft(2, '0')}',
                               style: TextStyle(
                                 color: Colors.white.withAlpha(220),
                                 fontSize: 16,
@@ -140,6 +143,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                       controller: firstNameController,
                       labelText: 'First Name',
                       keyboardType: TextInputType.name,
+                      hasError: widget.errors['firstName'] ?? false,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Required';
@@ -154,6 +158,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                       controller: lastNameController,
                       labelText: 'Last Name',
                       keyboardType: TextInputType.name,
+                      hasError: widget.errors['lastName'] ?? false,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Required';
@@ -164,52 +169,56 @@ class _ParticipantItemState extends State<ParticipantItem> {
                   ),
                 ],
               ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: PrimaryTextFormField(
-                    controller: widget.controllers['id'],
-                    labelText: 'Phone Number',
-                    keyboardType: TextInputType.phone,
-                  ),
-                ),              
-              if (needsIdNumber(widget.ticket)) ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: PrimaryTextFormField(
-                    controller: widget.controllers['id'],
-                    labelText: 'ID Number',
-                    keyboardType: TextInputType.text,
-                  ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: PrimaryTextFormField(
+                  controller: widget.controllers['id'],
+                  labelText: 'Phone Number',
+                  keyboardType: TextInputType.phone,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Stack(
-                    children: [
-                      PrimaryTextFormField(
-                        controller: TextEditingController(),
-                        labelText: 'ID Card Image',
-                        readOnly: true,
-                        suffixIcon: const Icon(
-                          Icons.upload_file,
-                          color: Colors.grey,
-                        ),
+              ),              
+              if (needsIdNumber(widget.ticket))
+                Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: PrimaryTextFormField(
+                        controller: widget.controllers['id'],
+                        labelText: 'ID Number',
+                        keyboardType: TextInputType.text,
+                        hasError: widget.errors['id'] ?? false,
                       ),
-                      Positioned.fill(
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(32),
-                            onTap: () {
-                              // TODO: Implement image picker
-                              print('Upload ID Card image');
-                            },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Stack(
+                        children: [
+                          PrimaryTextFormField(
+                            controller: TextEditingController(),
+                            labelText: 'ID Card Image',
+                            readOnly: true,
+                            suffixIcon: const Icon(
+                              Icons.upload_file,
+                              color: Colors.grey,
+                            ),
                           ),
-                        ),
+                          Positioned.fill(
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(32),
+                                onTap: () {
+                                  // TODO: Implement image picker
+                                  print('Upload ID Card image');
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
               if (needsDateOfBirth(widget.ticket))
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
@@ -249,17 +258,17 @@ class _ParticipantItemState extends State<ParticipantItem> {
               if (needsGender(widget.ticket))
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
-                  child: ValueListenableBuilder<Gender?>(
-                    valueListenable: widget.controllers['gender'] as ValueNotifier<Gender?>,
-                    builder: (context, gender, _) {
-                      return PrimaryDropdownField<Gender>(
+                  child: ValueListenableBuilder<gender_model.Gender?>(
+                    valueListenable: widget.controllers['gender'] as ValueNotifier<gender_model.Gender?>,
+                    builder: (context, selectedGender, child) {
+                      return PrimaryDropdownField<gender_model.Gender>(
+                        value: selectedGender,
                         labelText: 'Gender',
-                        value: gender,
-                        items: Gender.values,
-                        onChanged: (value) {
-                          (widget.controllers['gender'] as ValueNotifier<Gender?>).value = value;
-                        },
+                        items: gender_model.Gender.values,
                         getLabel: (gender, context) => gender.getLabel(context),
+                        onChanged: (value) {
+                          (widget.controllers['gender'] as ValueNotifier<gender_model.Gender?>).value = value;
+                        },
                       );
                     },
                   ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../constants.dart';
-import '../../app_localizations.dart';
 
 class PrimaryDropdownField<T> extends StatelessWidget {
   final String labelText;
@@ -10,6 +9,7 @@ class PrimaryDropdownField<T> extends StatelessWidget {
   final String Function(T, BuildContext) getLabel;
   final bool isRequired;
   final String? Function(T?)? validator;
+  final bool hasError;
 
   const PrimaryDropdownField({
     super.key,
@@ -20,6 +20,7 @@ class PrimaryDropdownField<T> extends StatelessWidget {
     required this.getLabel,
     this.isRequired = true,
     this.validator,
+    this.hasError = false,
   });
 
   @override
@@ -92,19 +93,4 @@ class PrimaryDropdownField<T> extends StatelessWidget {
   }
 }
 
-enum Gender {
-  male,
-  female,
-  nonBinary;
-
-  String getLabel(BuildContext context) {
-    switch (this) {
-      case Gender.male:
-        return AppLocalizations.of(context).get('gender-male');
-      case Gender.female:
-        return AppLocalizations.of(context).get('gender-female');
-      case Gender.nonBinary:
-        return AppLocalizations.of(context).get('gender-non-binary');
-    }
-  }
-}
+// Gender enum moved to models/gender.dart

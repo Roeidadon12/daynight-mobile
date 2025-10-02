@@ -10,6 +10,7 @@ class PrimaryTextFormField extends StatelessWidget {
   final bool readOnly;
   final VoidCallback? onTap;
   final Widget? suffixIcon;
+  final bool hasError;
 
   const PrimaryTextFormField({
     super.key,
@@ -21,6 +22,7 @@ class PrimaryTextFormField extends StatelessWidget {
     this.readOnly = false,
     this.onTap,
     this.suffixIcon,
+    this.hasError = false,
   });
 
   @override
@@ -42,7 +44,7 @@ class PrimaryTextFormField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: isRequired ? '$labelText *' : labelText,
         labelStyle: TextStyle(
-          color: Colors.grey[400],
+          color: hasError ? Colors.red[400] : Colors.grey[400],
           fontSize: 16,
         ),
         suffixIcon: suffixIcon,
@@ -50,7 +52,14 @@ class PrimaryTextFormField extends StatelessWidget {
         fillColor: Colors.black.withAlpha(77),
         contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         border: outlineBorder,
-        enabledBorder: outlineBorder,
+        enabledBorder: hasError 
+          ? outlineBorder.copyWith(
+              borderSide: BorderSide(
+                color: Colors.red[400]!,
+                width: 1,
+              ),
+            )
+          : outlineBorder,
         focusedBorder: OutlineInputBorder(
           borderRadius: borderRadius,
           borderSide: BorderSide(
