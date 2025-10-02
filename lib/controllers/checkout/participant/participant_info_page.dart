@@ -27,7 +27,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
   // Map to store controllers for each participant
   final Map<String, Map<String, dynamic>> _participantControllers = {};
   late final List<(TicketItem, int)> _flattenedTickets; // List of (ticket, participantIndex)
-  final Set<int> _expandedItems = {}; // Track which items are expanded
+  int _expandedIndex = 0; // Track which item is currently expanded
 
   // Helper to convert TextEditingController to ValueNotifier for gender
   ValueNotifier<Gender?> _createGenderNotifier() {
@@ -184,13 +184,13 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                       participantIndex: index,
                       participantKey: participantKey,
                       controllers: _participantControllers[participantKey]!,
-                      isExpanded: _expandedItems.contains(index),
+                      isExpanded: _expandedIndex == index,
                       onToggleExpand: () {
                         setState(() {
-                          if (_expandedItems.contains(index)) {
-                            _expandedItems.remove(index);
+                          if (_expandedIndex == index) {
+                            _expandedIndex = -1; // Close current item
                           } else {
-                            _expandedItems.add(index);
+                            _expandedIndex = index; // Open clicked item
                           }
                         });
                       },
