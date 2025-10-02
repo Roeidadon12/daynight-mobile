@@ -54,7 +54,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
 
   String get participantName {
     if (firstNameController.text.isEmpty && lastNameController.text.isEmpty) {
-      return '${AppLocalizations.of(context).get('participant')} ${(widget.participantIndex + 1).toString().padLeft(2, '0')}';
+      return '';
     }
     final nameParts = [firstNameController.text, lastNameController.text].where((part) => part.isNotEmpty);
     return nameParts.join(' ');
@@ -88,19 +88,31 @@ class _ParticipantItemState extends State<ParticipantItem> {
                 children: [
                   Expanded(
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(
-                          widget.isValid
-                            ? Icons.check_circle
-                            : Icons.radio_button_unchecked,
-                          size: 20,
-                          color: widget.isValid
-                            ? Colors.green
-                            : Colors.grey[600],
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${AppLocalizations.of(context).get('participant')} ${(widget.participantIndex + 1).toString().padLeft(2, '0')}',
+                              style: TextStyle(
+                                color: Colors.white.withAlpha(220),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.ticket.name,
+                              style: TextStyle(
+                                color: Colors.white.withAlpha(220),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
                         Text(
-                          '${widget.ticket.name} - $participantName',
+                          participantName,
                           style: TextStyle(
                             color: Colors.grey[400],
                             fontSize: 16,
@@ -152,7 +164,15 @@ class _ParticipantItemState extends State<ParticipantItem> {
                   ),
                 ],
               ),
-              if (needsIdNumber(widget.ticket))
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: PrimaryTextFormField(
+                    controller: widget.controllers['id'],
+                    labelText: 'Phone Number',
+                    keyboardType: TextInputType.phone,
+                  ),
+                ),              
+              if (needsIdNumber(widget.ticket)) ...[
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: PrimaryTextFormField(
@@ -161,6 +181,35 @@ class _ParticipantItemState extends State<ParticipantItem> {
                     keyboardType: TextInputType.text,
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Stack(
+                    children: [
+                      PrimaryTextFormField(
+                        controller: TextEditingController(),
+                        labelText: 'ID Card Image',
+                        readOnly: true,
+                        suffixIcon: const Icon(
+                          Icons.upload_file,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      Positioned.fill(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(32),
+                            onTap: () {
+                              // TODO: Implement image picker
+                              print('Upload ID Card image');
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               if (needsDateOfBirth(widget.ticket))
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
