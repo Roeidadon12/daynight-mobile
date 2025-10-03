@@ -1,4 +1,5 @@
 import 'ticket.dart';
+import 'related_event.dart';
 
 class EventDetails {
   final String status;
@@ -145,35 +146,6 @@ class EventInformation {
       prcessingFeeStatus: json['prcessing_fee_status'],
       prcessingFeeType: json['prcessing_fee_type'],
       prcessingFee: json['prcessing_fee'],
-    );
-  }
-}
-
-class RelatedEvent {
-  final int id;
-  final String thumbnail;
-  final String title;
-  final String description;
-  final String? city;
-  final String country;
-
-  RelatedEvent({
-    required this.id,
-    required this.thumbnail,
-    required this.title,
-    required this.description,
-    this.city,
-    required this.country,
-  });
-
-  factory RelatedEvent.fromJson(Map<String, dynamic> json) {
-    return RelatedEvent(
-      id: json['id'],
-      thumbnail: json['thumbnail'],
-      title: json['title'],
-      description: json['description'],
-      city: json['city'],
-      country: json['country'],
     );
   }
 }

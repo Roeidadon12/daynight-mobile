@@ -1,3 +1,4 @@
+import 'package:day_night/controllers/event/horizontal_related_event_gallery.dart';
 import 'package:day_night/models/events.dart';
 import 'package:day_night/utils/slide_page_route.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,8 @@ import '../shared/primary_button.dart';
 import '../shared/address_map_widget.dart';
 import 'package:flutter/services.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets.dart';
+import 'package:day_night/services/event_service.dart';
+import 'package:day_night/models/event_details.dart';
 
 class EventDetailsPage extends StatefulWidget {
   final Event event;
@@ -22,6 +25,8 @@ class EventDetailsPage extends StatefulWidget {
 
 class _EventDetailsPageState extends State<EventDetailsPage> {
   bool isLiked = false;
+  EventDetails? eventDetails;
+  bool isLoading = true;
 
   void _handleShare() {
     // TODO: Implement share functionality
@@ -32,6 +37,29 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
       isLiked = !isLiked;
     });
     // TODO: Implement like functionality with backend
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEventDetails();
+  }
+
+  Future<void> _loadEventDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+    
+    final eventService = EventService();
+    final details = await eventService.getEventById(kAppLanguageId, widget.event.id);
+    
+    if (mounted) {
+      setState(() {
+        eventDetails = details;
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -55,9 +83,15 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                 onLikePressed: _handleLike,
               ),
 
-              // Scrollable Content
+              // Show loading or content
               Expanded(
-                child: CustomScrollView(
+                child: isLoading 
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(kBrandPrimary),
+                      ),
+                    )
+                  : CustomScrollView(
                   slivers: [
                     // Image Header with safe area
                     SliverSafeArea(
@@ -75,7 +109,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                               child: Stack(
                                 children: [
                                   Image.network(
-                                    widget.event.thumbnail,
+                                    eventDetails!.eventInformation.coverImage,
                                     fit: BoxFit.cover,
                                     height: MediaQuery.of(context).size.width,
                                     width: double.infinity,
@@ -111,7 +145,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(16.0),
                                   child: Html(
-                                    data: widget.event.description,
+                                    data: eventDetails!.eventInformation.description,
                                     style: {
                                       "body": Style(
                                         color: Colors.white,
@@ -145,7 +179,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                           children: [
                             // Title
                             Text(
-                              widget.event.title,
+                              eventDetails!.eventInformation.title,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 24,
@@ -169,7 +203,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        widget.event.formattedStartDate,
+                                        eventDetails!.eventInformation.startDate,
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 14,
@@ -202,7 +236,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                     children: [
                                       Flexible(
                                         child: Text(
-                                          widget.event.location,
+                                          eventDetails!.eventInformation.address,
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 14,
@@ -295,12 +329,12 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 AddressMapWidget(
-                                  address: widget.event.address,
+                                  address: eventDetails!.eventInformation.address,
                                   height: 200,
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  widget.event.address,
+                                  eventDetails!.eventInformation.address,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -309,8 +343,14 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                 ),
                               ],
                             ),
+
+                            HorizontalRelatedEventGallery(
+                              events: eventDetails!.relatedEvents,
+                              itemSize: 150,
+                              onEventTap: (event) {},
+                            ),
                           ],
-                        ),
+                         ),
                       ),
                     ),
                   ],
