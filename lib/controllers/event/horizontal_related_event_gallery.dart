@@ -59,7 +59,7 @@ class _HorizontalRelatedEventGalleryState extends State<HorizontalRelatedEventGa
   @override
   Widget build(BuildContext context) {
     // Container dimensions based on item size plus padding
-    final containerHeight = widget.itemSize + 70;  // Extra space for title only
+    final containerHeight = (widget.itemSize * 1.3) + 30;  // Accommodate taller items
     final containerWidth = MediaQuery.of(context).size.width;  // Full width of the screen
 
     if (widget.events.isEmpty) {
@@ -118,79 +118,93 @@ class _HorizontalEventGalleryWithDotsState extends State<_HorizontalEventGallery
 
   // Performance optimized event card builder
   Widget _buildEventCard(RelatedEvent event, double size) {
-    return AspectRatio(
-      aspectRatio: 1.0, // Ensure perfect square
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(51), // 0.2 * 255 ≈ 51
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Optimized image loading
-            Image.network(
-              event.thumbnail,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Container(
-                  color: Colors.grey[800],
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) => Container(
-                color: Colors.grey[800],
-                child: const Icon(Icons.image_not_supported, color: Colors.white54, size: 48),
-              ),
-            ),
-            // Gradient overlay
-            Container(
+    return SizedBox(
+      width: size,
+      height: size * 1.5, // Make item 30% taller
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Image container at top center - keeping original size
+          AspectRatio(
+            aspectRatio: 1.0, // Ensure perfect square
+            child: Container(
+              width: size,
+              height: size,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withAlpha(179)], // 0.7 * 255 ≈ 179
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(51), // 0.2 * 255 ≈ 51
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Optimized image loading
+                    Image.network(
+                      event.thumbnail,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          color: Colors.grey[800],
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: Colors.grey[800],
+                        child: const Icon(Icons.image_not_supported, color: Colors.white54, size: 48),
+                      ),
+                    ),
+                    // Gradient overlay
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.transparent, Colors.black.withAlpha(179)], // 0.7 * 255 ≈ 179
+                        ),
+                      ),
+                    ),
+
+                  ],
                 ),
               ),
             ),
-            // Event info
-            Positioned(
-              bottom: 12,
-              left: 12,
-              right: 12,
+          ),
+          
+          // Extra space below the image
+          Expanded(
+            child: Container(
+              width: size,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
                 children: [
+                  const SizedBox(height: 8),
+                  // Additional content can be added here
                   Text(
                     event.title,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                     ),
                     textAlign: TextAlign.center,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (event.city != null) ...[
+                  if (event.country != null && event.country != '') ...[
                     const SizedBox(height: 4),
                     Text(
-                      event.city!,
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      event.country,
+                      style: const TextStyle(color: Colors.white70, fontSize: 10),
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -199,10 +213,9 @@ class _HorizontalEventGalleryWithDotsState extends State<_HorizontalEventGallery
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
     );
   }
 
@@ -234,8 +247,6 @@ void didUpdateWidget(covariant _HorizontalEventGalleryWithDots oldWidget) {
 @override
 Widget build(BuildContext context) {
   // Prevent negative or invalid clamp if there are no events
-  final clampedPage = widget.events.isEmpty ? 0 : _currentPage.clamp(0, widget.events.length - 1);
-    
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -266,27 +277,6 @@ Widget build(BuildContext context) {
           },
         ),
       ),
-      
-      const SizedBox(height: 16),
-      
-      // Event title - Optimized without AnimatedSwitcher
-      if (widget.events.isNotEmpty)
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            widget.events[clampedPage].title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      
-
     ],
   );
 }
