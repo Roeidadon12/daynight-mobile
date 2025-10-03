@@ -59,7 +59,7 @@ class _HorizontalRelatedEventGalleryState extends State<HorizontalRelatedEventGa
   @override
   Widget build(BuildContext context) {
     // Container dimensions based on item size plus padding
-    final containerHeight = widget.itemSize + 100;  // Extra space for title and dots
+    final containerHeight = widget.itemSize + 70;  // Extra space for title only
     final containerWidth = MediaQuery.of(context).size.width;  // Full width of the screen
 
     if (widget.events.isEmpty) {
@@ -172,7 +172,7 @@ class _HorizontalEventGalleryWithDotsState extends State<_HorizontalEventGallery
               left: 12,
               right: 12,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
@@ -182,6 +182,7 @@ class _HorizontalEventGalleryWithDotsState extends State<_HorizontalEventGallery
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
+                    textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -190,6 +191,7 @@ class _HorizontalEventGalleryWithDotsState extends State<_HorizontalEventGallery
                     Text(
                       event.city!,
                       style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -204,43 +206,7 @@ class _HorizontalEventGalleryWithDotsState extends State<_HorizontalEventGallery
     );
   }
 
-  // Performance optimized dot indicator
-  Widget _buildDotIndicator(int count, int currentIndex, Function(int) onDotTap) {
-    // Limit dots to prevent performance issues
-    const maxDots = 10;
-    if (count > maxDots) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.black26,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          '${currentIndex + 1} / $count',
-          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
-        ),
-      );
-    }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(count, (index) {
-        final isActive = currentIndex == index;
-        return GestureDetector(
-          onTap: () => onDotTap(index),
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: isActive ? kBrandPrimary : kBrandPrimaryInvert,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-        );
-      }),
-    );
-  }
 
 @override
 void didUpdateWidget(covariant _HorizontalEventGalleryWithDots oldWidget) {
@@ -320,21 +286,7 @@ Widget build(BuildContext context) {
           ),
         ),
       
-      const SizedBox(height: 16),
-      
-      // Optimized page indicator dots
-      if (widget.events.isNotEmpty)
-        _buildDotIndicator(
-          widget.events.length,
-          clampedPage,
-          (index) {
-            widget.pageController.animateToPage(
-              index,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
-          },
-        ),
+
     ],
   );
 }
