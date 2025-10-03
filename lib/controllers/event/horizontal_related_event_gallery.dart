@@ -200,7 +200,7 @@ class _HorizontalEventGalleryWithDotsState extends State<_HorizontalEventGallery
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (event.country != null && event.country != '') ...[
+                  if (event.country != '') ...[
                     const SizedBox(height: 4),
                     Text(
                       event.country,
