@@ -10,7 +10,7 @@ import '../../constants.dart';
 import '../shared/custom_app_bar.dart';
 import '../shared/primary_button.dart';
 import '../shared/address_map_widget.dart';
-import 'package:day_night/controllers/checkout/checkout_tickets.dart';
+import 'package:day_night/controllers/checkout/checkout_tickets_page.dart';
 import 'package:day_night/services/event_service.dart';
 import 'package:day_night/models/event_details.dart';
 
@@ -340,9 +340,11 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                             ),
 
                             // Organizer Info
-                            OrganizerInfoCard(
-                              organizer: eventDetails!.organizer,
-                            ),
+                            if (eventDetails!.organizer != null) ...[
+                              OrganizerInfoCard(
+                                organizer: eventDetails!.organizer!,
+                              ),
+                            ],
 
                             HorizontalRelatedEventGallery(
                               events: eventDetails!.relatedEvents,

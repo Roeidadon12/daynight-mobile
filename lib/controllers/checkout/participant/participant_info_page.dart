@@ -1,15 +1,16 @@
 import 'package:day_night/app_localizations.dart';
 import 'package:day_night/constants.dart';
-import 'package:day_night/controllers/checkout/participant/participant_info_controller.dart';
+import 'package:day_night/controllers/checkout/participant/participant_info.dart';
 import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/controllers/checkout/participant/participant_item.dart';
-import 'package:day_night/controllers/checkout/checkout_tickets_controller.dart';
+import 'package:day_night/controllers/checkout/checkout_tickets.dart';
+import 'package:day_night/controllers/checkout/payment/payment_page.dart';
 import 'package:day_night/models/ticket_item.dart';
 import 'package:day_night/models/gender.dart' as gender_model;
 import 'package:flutter/material.dart';
 
 class ParticipantInfoPage extends StatefulWidget {
-  final CheckoutTicketsController orderInfo;
+  final CheckoutTickets orderInfo;
 
   const ParticipantInfoPage({
     super.key,
@@ -21,7 +22,7 @@ class ParticipantInfoPage extends StatefulWidget {
 }
 
 class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
-  late final ParticipantInfoController participantsInfo;
+  late final ParticipantInfo participantsInfo;
   final _formKey = GlobalKey<FormState>();
   
   // Map to store controllers for each participant
@@ -69,11 +70,17 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
               _participantControllers[participantKey]!['lastNameError'] = false;
             });
           }),
-          'id': TextEditingController()..addListener(() {
+          'phoneNumber': TextEditingController()..addListener(() {
             setState(() {
-              _participantControllers[participantKey]!['idError'] = false;
+              _participantControllers[participantKey]!['phoneNumberError'] = false;
             });
           }),
+          'idNumber': TextEditingController()..addListener(() {
+            setState(() {
+              _participantControllers[participantKey]!['idNumberError'] = false;
+            });
+          }),
+          'idCardImage': TextEditingController(),
           'dateOfBirth': TextEditingController()..addListener(() {
             setState(() {
               _participantControllers[participantKey]!['dateOfBirthError'] = false;
@@ -82,7 +89,8 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
           'gender': _createGenderNotifier(), // Use ValueNotifier for gender
           'firstNameError': false,
           'lastNameError': false,
-          'idError': false,
+          'phoneNumberError': false,
+          'idNumberError': false,
           'dateOfBirthError': false,
           'genderError': false,
         };
@@ -111,7 +119,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
     if (controllers['firstName'].text.isEmpty || controllers['lastName'].text.isEmpty) return false;
 
     // Check ID if required
-    if (needsIdNumber(ticket) && controllers['id'].text.isEmpty) return false;
+    if (needsIdNumber(ticket) && controllers['idNumber'].text.isEmpty) return false;
 
     // Check Date of Birth if required
     if (needsDateOfBirth(ticket) && controllers['dateOfBirth'].text.isEmpty) return false;
@@ -125,7 +133,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
   @override
   void initState() {
     super.initState();
-    participantsInfo = ParticipantInfoController(   
+    participantsInfo = ParticipantInfo(   
       selectedTickets: widget.orderInfo.currentBasket.ticketInfo?.tickets ?? [],
       eventDetails: widget.orderInfo.eventDetails,
     );
@@ -143,7 +151,9 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
     for (final controllers in _participantControllers.values) {
       controllers['firstName']?.dispose();
       controllers['lastName']?.dispose();
-      controllers['id']?.dispose();
+      controllers['phoneNumber']?.dispose();
+      controllers['idNumber']?.dispose();
+      controllers['idCardImage']?.dispose();
       controllers['dateOfBirth']?.dispose();
       (controllers['gender'] as ValueNotifier<gender_model.Gender?>).dispose();
     }
@@ -163,7 +173,8 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       // Reset all error states first
       controllers['firstNameError'] = false;
       controllers['lastNameError'] = false;
-      controllers['idError'] = false;
+      controllers['phoneNumberError'] = false;
+      controllers['idNumberError'] = false;
       controllers['dateOfBirthError'] = false;
       controllers['genderError'] = false;
 
@@ -176,8 +187,8 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
         controllers['lastNameError'] = true;
         allParticipantsValid = false;
       }
-      if (needsIdNumber(ticket) && controllers['id'].text.isEmpty) {
-        controllers['idError'] = true;
+      if (needsIdNumber(ticket) && controllers['idNumber'].text.isEmpty) {
+        controllers['idNumberError'] = true;
         allParticipantsValid = false;
       }
       if (needsDateOfBirth(ticket) && controllers['dateOfBirth'].text.isEmpty) {
@@ -225,8 +236,8 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
 
         participantsInfo.addParticipant(
           fullName: '${controllers['firstName'].text} ${controllers['lastName'].text}'.trim(),
-          idNumber: needsIdNumber(ticket) && controllers['id'].text.isNotEmpty 
-            ? controllers['id'].text 
+          idNumber: needsIdNumber(ticket) && controllers['idNumber'].text.isNotEmpty 
+            ? controllers['idNumber'].text 
             : null,
           dateOfBirth: needsDateOfBirth(ticket) && controllers['dateOfBirth'].text.isNotEmpty 
             ? controllers['dateOfBirth'].text 
@@ -235,9 +246,16 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
         );
       }
       
-      // TODO: Implement navigation to payment page
-      // For now, we'll just print the participants info
-      print('Successfully collected ${participantsInfo.participants.length} participant details');
+      // Navigate to payment page
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentPage(
+            orderInfo: widget.orderInfo,
+            flattenedTickets: _flattenedTickets,
+          ),
+        ),
+      );
     }
   }
 
@@ -251,7 +269,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
             Column(
               children: [
                 CustomAppBar(
-                  titleKey: 'participant-info',
+                  titleKey: 'buy-tickets',
                   onBackPressed: () => Navigator.pop(context),
                 ),
                 Expanded(
@@ -272,7 +290,8 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                           errors: {
                             'firstName': _participantControllers[participantKey]!['firstNameError'] as bool,
                             'lastName': _participantControllers[participantKey]!['lastNameError'] as bool,
-                            'id': _participantControllers[participantKey]!['idError'] as bool,
+                            'phoneNumber': _participantControllers[participantKey]!['phoneNumberError'] as bool,
+                            'idNumber': _participantControllers[participantKey]!['idNumberError'] as bool,
                             'dateOfBirth': _participantControllers[participantKey]!['dateOfBirthError'] as bool,
                             'gender': _participantControllers[participantKey]!['genderError'] as bool,
                           },
@@ -327,7 +346,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                         elevation: 0,
                       ),
                       child: Text(
-                        '${AppLocalizations.of(context).get('payment-of')} ${totalAmount.toStringAsFixed(2)} ₪',
+                        '${AppLocalizations.of(context).get('to-payment-of')} ${totalAmount.toStringAsFixed(2)} ₪',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

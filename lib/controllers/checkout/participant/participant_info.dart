@@ -1,16 +1,16 @@
 import 'package:day_night/models/event_details.dart';
-import 'package:day_night/models/purchase/participant_info.dart';
+import 'package:day_night/models/purchase/participant.dart';
 import 'package:day_night/models/purchase/personal_info.dart';
 import 'package:day_night/models/ticket_item.dart';
 import 'package:day_night/models/gender.dart' as gender_model;
 
-class ParticipantInfoController {
+class ParticipantInfo {
   final List<TicketItem> selectedTickets;
   final EventDetails eventDetails;
   PersonalInfo? purchaserInfo;
-  final List<ParticipantInfo> participants = [];
+  final List<Participant> participants = [];
 
-  ParticipantInfoController({
+  ParticipantInfo({
     required this.selectedTickets,
     required this.eventDetails,
   });
@@ -54,7 +54,7 @@ class ParticipantInfoController {
   }) {
     if (participants.length < totalParticipants - 1) {
       participants.add(
-        ParticipantInfo(
+        Participant(
           fullName: fullName,
           idNumber: idNumber,
           dateOfBirth: dateOfBirth,

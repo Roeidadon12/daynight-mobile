@@ -1,12 +1,12 @@
 import 'package:day_night/models/gender.dart' as gender_model;
 
-class ParticipantInfo {
+class Participant {
   final String fullName;
   final String? idNumber;
   final String? dateOfBirth;
   final gender_model.Gender? gender;
 
-  const ParticipantInfo({
+  const Participant({
     required this.fullName,
     this.idNumber,
     this.dateOfBirth,

@@ -5,14 +5,14 @@ import 'organizer.dart';
 class EventDetails {
   final String status;
   final EventInformation eventInformation;
-  final Organizer organizer;
+  final Organizer? organizer;
   final List<RelatedEvent> relatedEvents;
   final List<Ticket> tickets;
 
   EventDetails({
     required this.status,
     required this.eventInformation,
-    required this.organizer,
+    this.organizer,
     required this.relatedEvents,
     required this.tickets,
   });
@@ -21,7 +21,7 @@ class EventDetails {
     return EventDetails(
       status: json['status'],
       eventInformation: EventInformation.fromJson(json['event_information']),
-      organizer: Organizer.fromJson(json['organizer']),
+      organizer: _parseOrganizer(json['organizer']),
       relatedEvents: (json['related_events'] as List)
           .map((event) => RelatedEvent.fromJson(event))
           .toList(),
@@ -29,6 +29,15 @@ class EventDetails {
           .map((ticket) => Ticket.fromJson(ticket))
           .toList(),
     );
+  }
+
+  static Organizer? _parseOrganizer(dynamic organizerData) {
+    if (organizerData == null) return null;
+    if (organizerData is String && organizerData.isEmpty) return null;
+    if (organizerData is Map<String, dynamic>) {
+      return Organizer.fromJson(organizerData);
+    }
+    return null;
   }
 }
 
@@ -136,10 +145,10 @@ class EventInformation {
       endDateTime: json['end_date_time'],
       isFeatured: json['is_featured'],
       minAge: json['min_age'],
-      isRequiredIdNumber: json['is_required_id_number'],
-      isRequiredFacebookUsername: json['is_required_facebook_username'],
-      isRequiredInstagramUsername: json['is_required_instagram_username'],
-      isRequiredFacebookOrInstagram: json['is_required_facebook_or_instagram'],
+      isRequiredIdNumber: json['is_required_id_number'] ?? 0,
+      isRequiredFacebookUsername: json['is_required_facebook_username'] ?? 0,
+      isRequiredInstagramUsername: json['is_required_instagram_username'] ?? 0,
+      isRequiredFacebookOrInstagram: json['is_required_facebook_or_instagram'] ?? 0,
       imageOfIdStatus: json['image_of_id_status'],
       coverImage: json['cover_image'],
       mapStatus: json['map_status'],

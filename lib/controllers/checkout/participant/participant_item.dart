@@ -5,6 +5,8 @@ import 'package:day_night/controllers/shared/primary_text_form_field.dart';
 import 'package:day_night/models/ticket_item.dart';
 import 'package:day_night/models/gender.dart' as gender_model;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ParticipantItem extends StatefulWidget {
   final TicketItem ticket;
@@ -35,6 +37,8 @@ class ParticipantItem extends StatefulWidget {
 class _ParticipantItemState extends State<ParticipantItem> {
   late final TextEditingController firstNameController;
   late final TextEditingController lastNameController;
+  final ImagePicker _picker = ImagePicker();
+  XFile? _idCardImage;
   
   @override
   void initState() {
@@ -73,6 +77,141 @@ class _ParticipantItemState extends State<ParticipantItem> {
 
   bool needsGender(TicketItem ticket) {
     return ticket.ticket.requiredGender == 1;
+  }
+
+  Future<void> _pickIdCardImage() async {
+    final source = await _showImageSourceDialog();
+    if (source == null) return;
+
+    try {
+      print('Attempting to pick image from: ${source.name}');
+      
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        maxWidth: 1800,
+        maxHeight: 1800,
+        imageQuality: 85,
+        requestFullMetadata: false, // This can help with performance and privacy
+      );
+      
+      if (pickedFile != null) {
+        print('Image picked successfully: ${pickedFile.path}');
+        setState(() {
+          _idCardImage = pickedFile;
+        });
+        
+        // Store the image path in the controller for parent component access
+        if (widget.controllers.containsKey('idCardImage')) {
+          (widget.controllers['idCardImage'] as TextEditingController).text = pickedFile.path;
+        }
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('ID card image selected successfully'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        print('No image was selected');
+      }
+    } on PlatformException catch (e) {
+      print('PlatformException: $e');
+      print('Error code: ${e.code}');
+      print('Error message: ${e.message}');
+      
+      if (mounted) {
+        String errorMessage = 'Failed to access ${source == ImageSource.camera ? 'camera' : 'gallery'}';
+        
+        // Handle specific platform exceptions
+        switch (e.code) {
+          case 'photo_access_denied':
+            errorMessage = 'Photo library access denied. Please grant permission in Settings.';
+            break;
+          case 'camera_access_denied':
+            errorMessage = 'Camera access denied. Please grant permission in Settings.';
+            break;
+          case 'invalid_image':
+            errorMessage = 'The selected file is not a valid image.';
+            break;
+          default:
+            if (e.message != null) {
+              errorMessage = 'Error: ${e.message}';
+            }
+        }
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Settings',
+              textColor: Colors.white,
+              onPressed: () {
+                // This will open app settings on most devices
+                // You might want to add app_settings package for better control
+              },
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      print('General error picking image: $e');
+      print('Error type: ${e.runtimeType}');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Unexpected error occurred: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<ImageSource?> _showImageSourceDialog() async {
+    return showDialog<ImageSource>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.grey[900],
+          title: Text(
+            AppLocalizations.of(context).get('select-image-source'),
+            style: const TextStyle(color: Colors.white),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt, color: Colors.white),
+                title: Text(
+                  AppLocalizations.of(context).get('camera'),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library, color: Colors.white),
+                title: Text(
+                  AppLocalizations.of(context).get('gallery'),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -172,7 +311,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
               Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: PrimaryTextFormField(
-                  controller: widget.controllers['id'],
+                  controller: widget.controllers['phoneNumber'] ?? TextEditingController(),
                   labelKey: 'phone-number',
                   keyboardType: TextInputType.phone,
                 ),
@@ -183,10 +322,10 @@ class _ParticipantItemState extends State<ParticipantItem> {
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
                       child: PrimaryTextFormField(
-                        controller: widget.controllers['id'],
+                        controller: widget.controllers['idNumber'] ?? TextEditingController(),
                         labelKey: 'id-number',
                         keyboardType: TextInputType.text,
-                        hasError: widget.errors['id'] ?? false,
+                        hasError: widget.errors['idNumber'] ?? false,
                       ),
                     ),
                     Padding(
@@ -194,12 +333,16 @@ class _ParticipantItemState extends State<ParticipantItem> {
                       child: Stack(
                         children: [
                           PrimaryTextFormField(
-                            controller: TextEditingController(),
+                            controller: TextEditingController(
+                              text: _idCardImage != null 
+                                  ? _idCardImage!.name 
+                                  : '',
+                            ),
                             labelKey: 'id-card-image',
                             readOnly: true,
-                            suffixIcon: const Icon(
-                              Icons.upload_file,
-                              color: Colors.grey,
+                            suffixIcon: Icon(
+                              _idCardImage != null ? Icons.check_circle : Icons.upload_file,
+                              color: _idCardImage != null ? Colors.green : Colors.grey,
                             ),
                           ),
                           Positioned.fill(
@@ -207,10 +350,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                               color: Colors.transparent,
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(32),
-                                onTap: () {
-                                  // TODO: Implement image picker
-                                  print('Upload ID Card image');
-                                },
+                                onTap: _pickIdCardImage,
                               ),
                             ),
                           ),
@@ -223,7 +363,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: PrimaryTextFormField(
-                    controller: widget.controllers['dateOfBirth'],
+                    controller: widget.controllers['dateOfBirth'] ?? TextEditingController(),
                     labelKey: 'date-of-birth',
                     readOnly: true,
                     onTap: () async {
@@ -241,7 +381,9 @@ class _ParticipantItemState extends State<ParticipantItem> {
                                 surface: Colors.grey[900]!,
                                 onSurface: Colors.white,
                               ),
-                              dialogBackgroundColor: Colors.grey[850],
+                              dialogTheme: DialogThemeData(
+                                backgroundColor: Colors.grey[850],
+                              ),
                             ),
                             child: child!,
                           );

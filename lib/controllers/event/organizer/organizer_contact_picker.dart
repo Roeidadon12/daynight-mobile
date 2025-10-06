@@ -94,7 +94,7 @@ class OrganizerContactPicker extends StatelessWidget {
             const SizedBox(height: 8),
             
             Text(
-              AppLocalizations.of(context).get('event-organizer'),
+              AppLocalizations.of(context).get('contact-organizer'),
               style: TextStyle(
                 color: Colors.grey[300],
                 fontSize: 14,

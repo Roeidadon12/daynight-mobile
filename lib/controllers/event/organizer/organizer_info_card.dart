@@ -14,6 +14,16 @@ class OrganizerInfoCard extends StatelessWidget {
     this.onTap,
   });
 
+  String _getDisplayName(BuildContext context) {
+    if (organizer.productionName.isNotEmpty) {
+      return organizer.productionName;
+    }
+    if (organizer.username != null && organizer.username!.isNotEmpty) {
+      return organizer.username!;
+    }
+    return AppLocalizations.of(context).get('organizer');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -26,17 +36,6 @@ class OrganizerInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with title
-          Text(
-            AppLocalizations.of(context).get('organizer'),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          
           // Organizer info row
           GestureDetector(
             onTap: onTap,
@@ -70,22 +69,37 @@ class OrganizerInfoCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        organizer.displayName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                      if (organizer.productionName.isNotEmpty) ...[
+                        Text(
+                          organizer.productionName,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        AppLocalizations.of(context).get('event-organizer'),
-                        style: TextStyle(
-                          color: Colors.grey[300],
-                          fontSize: 14,
+                      ],
+                      if (organizer.username != null && organizer.username!.isNotEmpty) ...[
+                        Text(
+                          organizer.username!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
+                      ],
+                      if (organizer.productionName.isEmpty && 
+                          (organizer.username == null || organizer.username!.isEmpty)) ...[
+                        Text(
+                          AppLocalizations.of(context).get('organizer'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

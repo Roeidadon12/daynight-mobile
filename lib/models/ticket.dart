@@ -1,7 +1,7 @@
 class Round {
   final String uniqueId;
-  final String price;
-  final String allocation;
+  final double price;
+  final int allocation;
   final String eventOffSale;
   final String zeroSetByAdmin;
 
@@ -16,19 +16,43 @@ class Round {
   factory Round.fromJson(Map<String, dynamic> json) {
     return Round(
       uniqueId: json['unique_id'],
-      price: json['price'],
-      allocation: json['allocation'],
+      price: _parsePrice(json['price']),
+      allocation: _parseAllocation(json['allocation']),
       eventOffSale: json['event_off_sale'],
       zeroSetByAdmin: json['zero_set_by_admin'],
     );
   }
+
+  static double _parsePrice(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      final parsed = double.tryParse(value);
+      return parsed ?? 0.0;
+    }
+    return 0.0;
+  }
+
+  static int _parseAllocation(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is String) {
+      final parsed = int.tryParse(value);
+      return parsed ?? 0;
+    }
+    return 0;
+  }
+
+  // Helper method to display price as whole number
+  int get priceAsInt => price.round();
 }
 
 class Ticket {
   final int id;
   final String pricingType;
   final int increment;
-  final String saleLimit;
+  final int saleLimit;
   final int requiredGender;
   final int requiredDob;
   final int requiredIdNumber;
@@ -68,7 +92,7 @@ class Ticket {
       id: json['id'],
       pricingType: json['pricing_type'],
       increment: json['increment'],
-      saleLimit: json['sale_limit'],
+      saleLimit: _parseSaleLimit(json['sale_limit']),
       requiredGender: json['required_gender'],
       requiredDob: json['required_dob'],
       requiredIdNumber: json['required_id_number'],
@@ -87,5 +111,15 @@ class Ticket {
           ? Round.fromJson(json['active_round'])
           : null,
     );
+  }
+
+  static int _parseSaleLimit(dynamic value) {
+    if (value == null) return 999;
+    if (value is int) return value;
+    if (value is String) {
+      final parsed = int.tryParse(value);
+      return parsed ?? 999;
+    }
+    return 999;
   }
 }

@@ -53,5 +53,9 @@ class Organizer {
   String? get photoUrl => hasPhoto ? '$kOrganizerImageBaseUrl/$photo' : null;
 
   // Helper method to get display name
-  String get displayName => productionName.isNotEmpty ? productionName : email;
+  String get displayName {
+    if (productionName.isNotEmpty) return productionName;
+    if (username != null && username!.isNotEmpty) return username!;
+    return email; // fallback to email if no production name or username
+  }
 }

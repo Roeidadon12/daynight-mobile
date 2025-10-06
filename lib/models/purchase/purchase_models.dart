@@ -1,12 +1,12 @@
 import '../ticket_item.dart';
 import 'personal_info.dart';
-import 'participant_info.dart';
+import 'participant.dart';
 import 'ticket_info.dart';
 
 class PurchaseBasket {
   TicketInfo? _ticketInfo;
   PersonalInfo? _personalInfo;
-  final List<ParticipantInfo> _participants = [];
+  final List<Participant> _participants = [];
 
   /// Adds tickets to the basket
   void addTickets(List<TicketItem> tickets) {
@@ -34,7 +34,7 @@ class PurchaseBasket {
     String? idNumber,
   }) {
     _participants.add(
-      ParticipantInfo(
+      Participant(
         fullName: fullName,
         idNumber: idNumber,
       ),
@@ -60,7 +60,7 @@ class PurchaseBasket {
   PersonalInfo? get purchaserInfo => _personalInfo;
 
   /// Gets the list of participants
-  List<ParticipantInfo> get participants => List.unmodifiable(_participants);
+  List<Participant> get participants => List.unmodifiable(_participants);
 
   /// Gets the total price of the purchase
   double get totalPrice => _ticketInfo?.totalPrice ?? 0.0;

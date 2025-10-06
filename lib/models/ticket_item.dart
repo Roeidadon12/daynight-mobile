@@ -13,9 +13,9 @@ class TicketItem {
 
   double get price {
     if (ticket.pricingType == 'rounds' && ticket.activeRound != null) {
-      return double.parse(ticket.activeRound!.price);
+      return ticket.activeRound!.price;
     }
-    return double.parse(ticket.price ?? '0');
+    return ticket.price != null ? double.tryParse(ticket.price!) ?? 0.0 : 0.0;
   }
 
   String get name => ticket.title;

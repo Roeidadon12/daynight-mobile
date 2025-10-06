@@ -24,7 +24,7 @@ class TicketPrice extends StatelessWidget {
   });
 
   Widget _buildCounterState(BuildContext context) {
-    final limit = int.tryParse(ticket.saleLimit) ?? 999;
+    final limit = ticket.saleLimit;
     return TicketAmountSelector(
       amount: amount,
       increment: ticket.increment,
