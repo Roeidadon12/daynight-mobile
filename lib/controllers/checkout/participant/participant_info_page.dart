@@ -80,7 +80,11 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
               _participantControllers[participantKey]!['idNumberError'] = false;
             });
           }),
-          'idCardImage': TextEditingController(),
+          'idCardImage': TextEditingController()..addListener(() {
+            setState(() {
+              _participantControllers[participantKey]!['idCardImageError'] = false;
+            });
+          }),
           'dateOfBirth': TextEditingController()..addListener(() {
             setState(() {
               _participantControllers[participantKey]!['dateOfBirthError'] = false;
@@ -91,6 +95,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
           'lastNameError': false,
           'phoneNumberError': false,
           'idNumberError': false,
+          'idCardImageError': false,
           'dateOfBirthError': false,
           'genderError': false,
         };
@@ -175,6 +180,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       controllers['lastNameError'] = false;
       controllers['phoneNumberError'] = false;
       controllers['idNumberError'] = false;
+      controllers['idCardImageError'] = false;
       controllers['dateOfBirthError'] = false;
       controllers['genderError'] = false;
 
@@ -187,9 +193,20 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
         controllers['lastNameError'] = true;
         allParticipantsValid = false;
       }
-      if (needsIdNumber(ticket) && controllers['idNumber'].text.isEmpty) {
-        controllers['idNumberError'] = true;
+      if (controllers['phoneNumber'].text.isEmpty) {
+        controllers['phoneNumberError'] = true;
         allParticipantsValid = false;
+      }
+      if (needsIdNumber(ticket)) {
+        if (controllers['idNumber'].text.isEmpty) {
+          controllers['idNumberError'] = true;
+          allParticipantsValid = false;
+        }
+        // Check if ID card image is required and missing
+        if (controllers['idCardImage'].text.isEmpty) {
+          controllers['idCardImageError'] = true;
+          allParticipantsValid = false;
+        }
       }
       if (needsDateOfBirth(ticket) && controllers['dateOfBirth'].text.isEmpty) {
         controllers['dateOfBirthError'] = true;
@@ -290,8 +307,9 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                           errors: {
                             'firstName': _participantControllers[participantKey]!['firstNameError'] as bool,
                             'lastName': _participantControllers[participantKey]!['lastNameError'] as bool,
-                            'phoneNumber': _participantControllers[participantKey]!['phoneNumberError'] as bool,
+                            'phoneNumberError': _participantControllers[participantKey]!['phoneNumberError'] as bool,
                             'idNumber': _participantControllers[participantKey]!['idNumberError'] as bool,
+                            'idCardImageError': _participantControllers[participantKey]!['idCardImageError'] as bool,
                             'dateOfBirth': _participantControllers[participantKey]!['dateOfBirthError'] as bool,
                             'gender': _participantControllers[participantKey]!['genderError'] as bool,
                           },

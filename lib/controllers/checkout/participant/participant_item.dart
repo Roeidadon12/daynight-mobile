@@ -314,6 +314,11 @@ class _ParticipantItemState extends State<ParticipantItem> {
                   controller: widget.controllers['phoneNumber'] ?? TextEditingController(),
                   labelKey: 'phone-number',
                   keyboardType: TextInputType.phone,
+                  hasError: widget.errors['phoneNumberError'] ?? false,
+                  validator: (value) {
+                    // We handle validation manually, so always return null here
+                    return null;
+                  },
                 ),
               ),              
               if (needsIdNumber(widget.ticket))
@@ -340,6 +345,11 @@ class _ParticipantItemState extends State<ParticipantItem> {
                             ),
                             labelKey: 'id-card-image',
                             readOnly: true,
+                            hasError: widget.errors['idCardImageError'] ?? false,
+                            validator: (value) {
+                              // We handle validation manually, so always return null here
+                              return null;
+                            },
                             suffixIcon: Icon(
                               _idCardImage != null ? Icons.check_circle : Icons.upload_file,
                               color: _idCardImage != null ? Colors.green : Colors.grey,
@@ -366,6 +376,11 @@ class _ParticipantItemState extends State<ParticipantItem> {
                     controller: widget.controllers['dateOfBirth'] ?? TextEditingController(),
                     labelKey: 'date-of-birth',
                     readOnly: true,
+                    hasError: widget.errors['dateOfBirth'] ?? false,
+                    validator: (value) {
+                      // We handle validation manually, so always return null here
+                      return null;
+                    },
                     onTap: () async {
                       final date = await showDatePicker(
                         context: context,
@@ -408,6 +423,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                         labelKey: 'gender',
                         items: gender_model.Gender.values,
                         getLabel: (gender, context) => gender.getLabel(context),
+                        hasError: widget.errors['gender'] ?? false,
                         onChanged: (value) {
                           (widget.controllers['gender'] as ValueNotifier<gender_model.Gender?>).value = value;
                         },

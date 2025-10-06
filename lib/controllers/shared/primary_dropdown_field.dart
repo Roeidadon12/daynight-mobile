@@ -54,14 +54,21 @@ class PrimaryDropdownField<T> extends StatelessWidget {
           ? '${AppLocalizations.of(context).get(labelKey)} *'
           : AppLocalizations.of(context).get(labelKey),
         labelStyle: TextStyle(
-          color: Colors.grey[400],
+          color: hasError ? kBrandNegativePrimary : Colors.grey[400],
           fontSize: 16,
         ),
         filled: true,
         fillColor: Colors.black.withAlpha(77),
         contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         border: outlineBorder,
-        enabledBorder: outlineBorder,
+        enabledBorder: hasError 
+          ? outlineBorder.copyWith(
+              borderSide: BorderSide(
+                color: kBrandNegativePrimary,
+                width: 1,
+              ),
+            )
+          : outlineBorder,
         focusedBorder: OutlineInputBorder(
           borderRadius: borderRadius,
           borderSide: BorderSide(
