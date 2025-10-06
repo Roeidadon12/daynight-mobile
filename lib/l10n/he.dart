@@ -64,4 +64,8 @@ const Map<String, String> heTexts = {
   'select-image-source': 'בחר מקור תמונה',
   'camera': 'מצלמה',
   'gallery': 'גלריה',
+  'promo-code': 'קוד הנחה',
+  'ok': 'אישור',
+  'coupon-applied-successfully': 'הקופון הוזן בהצלחה',
+  'invalid-coupon': 'קופון לא חוקי',
 };

@@ -47,7 +47,7 @@ class PrimaryTextFormField extends StatelessWidget {
           ? '${AppLocalizations.of(context).get(labelKey)} *' 
           : AppLocalizations.of(context).get(labelKey),
         labelStyle: TextStyle(
-          color: hasError ? Colors.red[400] : Colors.grey[400],
+          color: hasError ? kBrandNegativePrimary : Colors.grey[400],
           fontSize: 16,
         ),
         suffixIcon: suffixIcon,
@@ -58,7 +58,7 @@ class PrimaryTextFormField extends StatelessWidget {
         enabledBorder: hasError 
           ? outlineBorder.copyWith(
               borderSide: BorderSide(
-                color: Colors.red[400]!,
+                color: kBrandNegativePrimary,
                 width: 1,
               ),
             )
@@ -73,14 +73,14 @@ class PrimaryTextFormField extends StatelessWidget {
         errorBorder: OutlineInputBorder(
           borderRadius: borderRadius,
           borderSide: BorderSide(
-            color: Colors.red[400]!,
+            color: kBrandNegativePrimary,
             width: 1,
           ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: borderRadius,
           borderSide: BorderSide(
-            color: Colors.red[400]!,
+            color: kBrandNegativePrimary,
             width: 2,
           ),
         ),

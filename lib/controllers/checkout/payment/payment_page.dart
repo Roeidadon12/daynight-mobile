@@ -3,6 +3,7 @@ import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/app_localizations.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets.dart';
+import 'package:day_night/controllers/checkout/payment/promo_code_controller.dart';
 import 'package:day_night/models/ticket_item.dart';
   
 class PaymentPage extends StatefulWidget {
@@ -16,12 +17,54 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-    double get totalAmount {
+  bool _isPromoCodeLoading = false;
+  String? _promoCodeError;
+  String? _promoCodeSuccess;
+
+  double get totalAmount {
     return widget.flattenedTickets.fold(0.0, (sum, ticketItem) {
       final (ticket, _) = ticketItem;
       final price = double.tryParse(ticket.ticket.price ?? '0') ?? 0.0;
       return sum + price;
     });
+  }
+
+  void _clearPromoCodeMessages() {
+    setState(() {
+      _promoCodeError = null;
+      _promoCodeSuccess = null;
+    });
+  }
+
+  void _handlePromoCodeApplied(String promoCode) async {
+    setState(() {
+      _isPromoCodeLoading = true;
+      _promoCodeError = null;
+      _promoCodeSuccess = null;
+    });
+
+    try {
+      // TODO: Implement actual promo code validation API call
+      await Future.delayed(const Duration(milliseconds: 800)); // Simulate API call
+      
+      // For now, simulate success for valid promo codes
+      if (promoCode.toUpperCase() == 'DN10OFF' || promoCode.toLowerCase() == 'demo') {
+        setState(() {
+          _promoCodeSuccess = AppLocalizations.of(context).get('coupon-applied-successfully');
+          _isPromoCodeLoading = false;
+        });
+      } else {
+        setState(() {
+          _promoCodeError = AppLocalizations.of(context).get('invalid-coupon');
+          _isPromoCodeLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _promoCodeError = AppLocalizations.of(context).get('invalid-coupon');
+        _isPromoCodeLoading = false;
+      });
+    }
   }
 
 
@@ -39,10 +82,30 @@ class _PaymentPageState extends State<PaymentPage> {
                   onBackPressed: () => Navigator.pop(context),
                 ),
                 Expanded(
-                  child: Center(
-                    child: Text(
-                      'Payment Page Content Here',
-                      style: TextStyle(color: Colors.white),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Promo Code Field - First field in the page
+                        PromoCodeField(
+                          onPromoCodeApplied: _handlePromoCodeApplied,
+                          onTextChanged: _clearPromoCodeMessages,
+                          isLoading: _isPromoCodeLoading,
+                          errorMessage: _promoCodeError,
+                          successMessage: _promoCodeSuccess,
+                        ),
+                        const SizedBox(height: 24),
+                        // TODO: Add other payment fields here
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              'Other Payment Fields Will Go Here',
+                              style: TextStyle(color: Colors.grey[400]),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),],

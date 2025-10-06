@@ -12,6 +12,7 @@ abstract class AppConfig {
   
   // Theme Configuration
   Color get mainBackgroundColor;
+  Color get brandNegativePrimary;
   Color get brandPrimary;
   Color get brandPrimaryInvert;
   

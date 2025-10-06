@@ -14,6 +14,7 @@ int kAppLanguageId = config.defaultLanguageId; // Can be updated at runtime
 // Colors
 Color get kMainBackgroundColor => config.mainBackgroundColor;
 Color get kBrandPrimary => config.brandPrimary;
+Color get kBrandNegativePrimary => config.brandNegativePrimary;
 Color get kBrandPrimaryInvert => config.brandPrimaryInvert;
 
 // Assets

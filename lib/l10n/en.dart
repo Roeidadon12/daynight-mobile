@@ -64,4 +64,8 @@ const Map<String, String> enTexts = {
   'select-image-source': 'Select Image Source',
   'camera': 'Camera',
   'gallery': 'Gallery',
+  'promo-code': 'Promo Code',
+  'ok': 'OK',
+  'coupon-applied-successfully': 'Coupon applied successfully',
+  'invalid-coupon': 'Invalid coupon',
 };

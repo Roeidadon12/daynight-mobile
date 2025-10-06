@@ -215,7 +215,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context).get('please-fill-in-all-required-fields')),
-          backgroundColor: Colors.red[700],
+          backgroundColor: kBrandNegativePrimary,
           behavior: SnackBarBehavior.floating,
         ),
       );

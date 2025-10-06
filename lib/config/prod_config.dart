@@ -21,6 +21,9 @@ class ProdConfig implements AppConfig {
   Color get mainBackgroundColor => const Color(0x0C0E12FF);
   
   @override
+  Color get brandNegativePrimary => const Color(0xFFF97066);
+
+  @override
   Color get brandPrimary => const Color(0xFF6200EE);
   
   @override

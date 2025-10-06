@@ -145,7 +145,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
-            backgroundColor: Colors.red,
+            backgroundColor: kBrandNegativePrimary,
             duration: const Duration(seconds: 4),
             action: SnackBarAction(
               label: 'Settings',
@@ -166,7 +166,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Unexpected error occurred: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: kBrandNegativePrimary,
             duration: const Duration(seconds: 3),
           ),
         );

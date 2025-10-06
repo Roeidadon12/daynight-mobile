@@ -72,14 +72,14 @@ class PrimaryDropdownField<T> extends StatelessWidget {
         errorBorder: OutlineInputBorder(
           borderRadius: borderRadius,
           borderSide: BorderSide(
-            color: Colors.red[400]!,
+            color: kBrandNegativePrimary,
             width: 1,
           ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: borderRadius,
           borderSide: BorderSide(
-            color: Colors.red[400]!,
+            color: kBrandNegativePrimary,
             width: 2,
           ),
         ),
