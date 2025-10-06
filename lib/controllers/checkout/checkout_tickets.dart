@@ -9,22 +9,20 @@ import 'package:day_night/models/events.dart';
 import 'package:day_night/models/event_details.dart';
 import 'package:day_night/models/ticket.dart';
 import 'package:day_night/models/ticket_item.dart';
-import 'package:day_night/services/event_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class CheckoutTicketsPage extends StatefulWidget {
   final Event event;
+  final EventDetails eventDetails;
 
-  const CheckoutTicketsPage({super.key, required this.event});
+  const CheckoutTicketsPage({super.key, required this.event, required this.eventDetails});
 
   @override
   State<CheckoutTicketsPage> createState() => _CheckoutTicketsPageState();
 }
 
 class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
-  EventDetails? eventDetails;
-  bool isLoading = true;
+  late EventDetails eventDetails;
   late CheckoutTicketsController orderInfo;
   final Map<String, TicketItem> selectedTickets = {};
 
@@ -71,32 +69,15 @@ class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
   @override
   void initState() {
     super.initState();
-    _loadEventDetails();
-  }
-
-  Future<void> _loadEventDetails() async {
-    final eventService = EventService();
-    final details = await eventService.getEventById(kAppLanguageId, widget.event.id);
-    if (mounted && details != null) {
-      setState(() {
-        eventDetails = details;
-        orderInfo = CheckoutTicketsController(eventDetails: details);
-        isLoading = false;
-      });
-    }
+    eventDetails = widget.eventDetails;
+    orderInfo = CheckoutTicketsController(eventDetails: widget.eventDetails);
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.light,
-      ),
-      child: Scaffold(
-        backgroundColor: kMainBackgroundColor,
-        body: SafeArea(
+    return Scaffold(
+      backgroundColor: kMainBackgroundColor,
+      body: SafeArea(
           child: Column(
             children: [
               /// Top App Bar
@@ -107,26 +88,20 @@ class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
 
               /// Main content (summary + list)
               Expanded(
-                child: isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : eventDetails == null
-                        ? const Center(child: Text('Failed to load event details'))
-                        : ListView(
-                            children: [
-                              EventSummaryTile(event: widget.event),
-                              ListTickets(
-                                eventDetails: eventDetails!,
-                                tickets: eventDetails!.tickets,
-                                onTicketSelected: _handleTicketSelection,
-                              ),
-   
-                            ],
-                          ),
+                child: ListView(
+                  children: [
+                    EventSummaryTile(event: widget.event),
+                    ListTickets(
+                      eventDetails: eventDetails,
+                      tickets: eventDetails.tickets,
+                      onTicketSelected: _handleTicketSelection,
+                    ),
+                  ],
+                ),
               ),
 
               /// Bottom Button
-              if (!isLoading && eventDetails != null)
-                Padding(
+              Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SizedBox(
                   width: double.infinity,
@@ -154,7 +129,6 @@ class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }

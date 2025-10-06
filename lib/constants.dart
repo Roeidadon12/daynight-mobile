@@ -8,6 +8,7 @@ final config = ConfigManager.get();
 String get kBaseUrl => config.baseUrl;
 String get kApiBaseUrl => config.apiBaseUrl;
 String get kCoverImageBaseUrl => config.coverImageBaseUrl;
+String get kOrganizerImageBaseUrl => config.organizerImageBaseUrl;
 int kAppLanguageId = config.defaultLanguageId; // Can be updated at runtime
 
 // Colors

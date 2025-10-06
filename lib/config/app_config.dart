@@ -5,6 +5,7 @@ abstract class AppConfig {
   String get baseUrl;
   String get apiBaseUrl;
   String get coverImageBaseUrl;
+  String get organizerImageBaseUrl;
   
   // Default Settings
   int get defaultLanguageId;

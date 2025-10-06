@@ -1,10 +1,11 @@
 import 'ticket.dart';
 import 'related_event.dart';
+import 'organizer.dart';
 
 class EventDetails {
   final String status;
   final EventInformation eventInformation;
-  final String organizer;
+  final Organizer organizer;
   final List<RelatedEvent> relatedEvents;
   final List<Ticket> tickets;
 
@@ -20,7 +21,7 @@ class EventDetails {
     return EventDetails(
       status: json['status'],
       eventInformation: EventInformation.fromJson(json['event_information']),
-      organizer: json['organizer'] ?? '',
+      organizer: Organizer.fromJson(json['organizer']),
       relatedEvents: (json['related_events'] as List)
           .map((event) => RelatedEvent.fromJson(event))
           .toList(),

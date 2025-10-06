@@ -14,6 +14,9 @@ class DevConfig implements AppConfig {
   
   @override
   String get coverImageBaseUrl => '$baseUrl/assets/admin/img/event/cover-image';
+
+  @override
+  String get organizerImageBaseUrl => '$baseUrl/assets/admin/img/organizer-photo';
   
   @override
   int get defaultLanguageId => 22;

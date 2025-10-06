@@ -1,4 +1,5 @@
 import 'package:day_night/controllers/event/horizontal_related_event_gallery.dart';
+import 'package:day_night/controllers/event/organizer/organizer_info_card.dart';
 import 'package:day_night/models/events.dart';
 import 'package:day_night/utils/slide_page_route.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,6 @@ import '../../constants.dart';
 import '../shared/custom_app_bar.dart';
 import '../shared/primary_button.dart';
 import '../shared/address_map_widget.dart';
-import 'package:flutter/services.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets.dart';
 import 'package:day_night/services/event_service.dart';
 import 'package:day_night/models/event_details.dart';
@@ -64,15 +64,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent, // background behind status bar
-        statusBarIconBrightness: Brightness.light, // icons color
-        statusBarBrightness: Brightness.light, // iOS top bar
-      ), // <-- Forces white status bar icons
-      child: Scaffold(
-        backgroundColor: kMainBackgroundColor,
-        body: SafeArea(
+    return Scaffold(
+      backgroundColor: kMainBackgroundColor,
+      body: SafeArea(
           child: Column(
             children: [
               // Custom App Bar
@@ -313,6 +307,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                       SlidePageRoute(
                                         page: CheckoutTicketsPage(
                                           event: widget.event,
+                                          eventDetails: eventDetails!,
                                         ),
                                       ),
                                     );
@@ -344,11 +339,18 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                               ],
                             ),
 
+                            // Organizer Info
+                            OrganizerInfoCard(
+                              organizer: eventDetails!.organizer,
+                            ),
+
                             HorizontalRelatedEventGallery(
                               events: eventDetails!.relatedEvents,
                               itemSize: 150,
                               onEventTap: (event) {},
                             ),
+
+                            
                           ],
                          ),
                       ),
@@ -359,7 +361,6 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }
