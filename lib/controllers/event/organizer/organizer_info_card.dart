@@ -14,16 +14,6 @@ class OrganizerInfoCard extends StatelessWidget {
     this.onTap,
   });
 
-  String _getDisplayName(BuildContext context) {
-    if (organizer.productionName.isNotEmpty) {
-      return organizer.productionName;
-    }
-    if (organizer.username != null && organizer.username!.isNotEmpty) {
-      return organizer.username!;
-    }
-    return AppLocalizations.of(context).get('organizer');
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
