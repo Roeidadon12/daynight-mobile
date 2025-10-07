@@ -68,4 +68,8 @@ const Map<String, String> enTexts = {
   'ok': 'OK',
   'coupon-applied-successfully': 'Coupon applied successfully',
   'invalid-coupon': 'Invalid coupon',
+  'order-summary': 'Order Summary',
+  'subtotal': 'Subtotal',
+  'discount': 'Discount',
+  'total': 'Total',
 };

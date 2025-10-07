@@ -3,6 +3,7 @@ import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/shared/primary_dropdown_field.dart';
 import 'package:day_night/controllers/shared/primary_text_form_field.dart';
 import 'package:day_night/models/ticket_item.dart';
+import 'package:day_night/models/participant_data.dart';
 import 'package:day_night/models/gender.dart' as gender_model;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,23 +12,19 @@ import 'package:image_picker/image_picker.dart';
 class ParticipantItem extends StatefulWidget {
   final TicketItem ticket;
   final int participantIndex;
-  final String participantKey;
-  final Map<String, dynamic> controllers;
-  final Map<String, bool> errors;
   final bool isExpanded;
   final VoidCallback onToggleExpand;
-  final bool isValid;
+  final Function(ParticipantData) onDataChanged;
+  final ParticipantData? initialData;
 
   const ParticipantItem({
     super.key,
     required this.ticket,
     required this.participantIndex,
-    required this.participantKey,
-    required this.controllers,
-    required this.errors,
     required this.isExpanded,
     required this.onToggleExpand,
-    required this.isValid,
+    required this.onDataChanged,
+    this.initialData,
   });
 
   @override
@@ -35,36 +32,156 @@ class ParticipantItem extends StatefulWidget {
 }
 
 class _ParticipantItemState extends State<ParticipantItem> {
-  late final TextEditingController firstNameController;
-  late final TextEditingController lastNameController;
+  late final ParticipantData _participantData;
+  late final TextEditingController _firstNameController;
+  late final TextEditingController _lastNameController;
+  late final TextEditingController _phoneNumberController;
+  late final TextEditingController _idNumberController;
+  late final TextEditingController _dateOfBirthController;
+  late final ValueNotifier<gender_model.Gender?> _genderNotifier;
   final ImagePicker _picker = ImagePicker();
   XFile? _idCardImage;
   
   @override
   void initState() {
     super.initState();
-    firstNameController = widget.controllers['firstName'] as TextEditingController;
-    lastNameController = widget.controllers['lastName'] as TextEditingController;
     
-    // Add listeners to rebuild when text changes
-    firstNameController.addListener(() => setState(() {}));
-    lastNameController.addListener(() => setState(() {}));
+    // Initialize participant data with initial data or empty
+    _participantData = widget.initialData?.copy() ?? ParticipantData(ticketId: widget.ticket.id);
+    
+    // Initialize controllers with existing data
+    _firstNameController = TextEditingController(text: _participantData.firstName);
+    _lastNameController = TextEditingController(text: _participantData.lastName);
+    _phoneNumberController = TextEditingController(text: _participantData.phoneNumber);
+    _idNumberController = TextEditingController(text: _participantData.idNumber);
+    _dateOfBirthController = TextEditingController(text: _participantData.dateOfBirth);
+    _genderNotifier = ValueNotifier<gender_model.Gender?>(_participantData.gender);
+    
+    // Set up image if exists
+    if (_participantData.idCardImagePath != null && _participantData.idCardImagePath!.isNotEmpty) {
+      _idCardImage = XFile(_participantData.idCardImagePath!);
+    }
+    
+    // Add listeners to update data and notify parent
+    _firstNameController.addListener(_onDataChanged);
+    _lastNameController.addListener(_onDataChanged);
+    _phoneNumberController.addListener(_onDataChanged);
+    _idNumberController.addListener(_onDataChanged);
+    _dateOfBirthController.addListener(_onDataChanged);
+    _genderNotifier.addListener(_onGenderChanged);
+  }
+
+  void _onDataChanged() {
+    // Update participant data
+    _participantData.firstName = _firstNameController.text;
+    _participantData.lastName = _lastNameController.text;
+    _participantData.phoneNumber = _phoneNumberController.text;
+    _participantData.idNumber = _idNumberController.text;
+    _participantData.dateOfBirth = _dateOfBirthController.text;
+    
+    // Clear errors when user starts typing
+    if (_firstNameController.text.isNotEmpty) _participantData.firstNameError = false;
+    if (_lastNameController.text.isNotEmpty) _participantData.lastNameError = false;
+    if (_phoneNumberController.text.isNotEmpty) _participantData.phoneNumberError = false;
+    if (_idNumberController.text.isNotEmpty) _participantData.idNumberError = false;
+    if (_dateOfBirthController.text.isNotEmpty) _participantData.dateOfBirthError = false;
+    
+    // Notify parent about data changes
+    widget.onDataChanged(_participantData);
+    
+    // Trigger rebuild
+    setState(() {});
+  }
+
+  void _onGenderChanged() {
+    // Update participant data
+    _participantData.gender = _genderNotifier.value;
+    if (_genderNotifier.value != null) _participantData.genderError = false;
+    
+    // Notify parent about data changes
+    widget.onDataChanged(_participantData);
+    
+    // Trigger rebuild
+    setState(() {});
   }
 
   @override
   void dispose() {
-    // Remove listeners to prevent memory leaks
-    firstNameController.removeListener(() => setState(() {}));
-    lastNameController.removeListener(() => setState(() {}));
+    // Remove listeners and dispose controllers
+    _firstNameController.removeListener(_onDataChanged);
+    _lastNameController.removeListener(_onDataChanged);
+    _phoneNumberController.removeListener(_onDataChanged);
+    _idNumberController.removeListener(_onDataChanged);
+    _dateOfBirthController.removeListener(_onDataChanged);
+    _genderNotifier.removeListener(_onGenderChanged);
+    
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _phoneNumberController.dispose();
+    _idNumberController.dispose();
+    _dateOfBirthController.dispose();
+    _genderNotifier.dispose();
+    
     super.dispose();
   }
 
   String get participantName {
-    if (firstNameController.text.isEmpty && lastNameController.text.isEmpty) {
-      return '';
+    return _participantData.fullName;
+  }
+
+  /// Validates this participant's data and returns true if valid
+  bool validateParticipant() {
+    _participantData.clearErrors();
+    bool isValid = true;
+
+    // Validate first name (required)
+    if (_participantData.firstName.isEmpty) {
+      _participantData.firstNameError = true;
+      isValid = false;
     }
-    final nameParts = [firstNameController.text, lastNameController.text].where((part) => part.isNotEmpty);
-    return nameParts.join(' ');
+
+    // Validate last name (required)
+    if (_participantData.lastName.isEmpty) {
+      _participantData.lastNameError = true;
+      isValid = false;
+    }
+
+    // Validate phone number (required)
+    if (_participantData.phoneNumber.isEmpty) {
+      _participantData.phoneNumberError = true;
+      isValid = false;
+    }
+
+    // Validate ID number if required
+    if (needsIdNumber(widget.ticket)) {
+      if (_participantData.idNumber.isEmpty) {
+        _participantData.idNumberError = true;
+        isValid = false;
+      }
+      // Check if ID card image is required and missing
+      if (_participantData.idCardImagePath == null || _participantData.idCardImagePath!.isEmpty) {
+        _participantData.idCardImageError = true;
+        isValid = false;
+      }
+    }
+
+    // Validate date of birth if required
+    if (needsDateOfBirth(widget.ticket) && _participantData.dateOfBirth.isEmpty) {
+      _participantData.dateOfBirthError = true;
+      isValid = false;
+    }
+
+    // Validate gender if required
+    if (needsGender(widget.ticket) && _participantData.gender == null) {
+      _participantData.genderError = true;
+      isValid = false;
+    }
+
+    // Notify parent about data changes and trigger rebuild
+    widget.onDataChanged(_participantData);
+    setState(() {});
+
+    return isValid;
   }
 
   bool needsIdNumber(TicketItem ticket) {
@@ -98,12 +215,12 @@ class _ParticipantItemState extends State<ParticipantItem> {
         print('Image picked successfully: ${pickedFile.path}');
         setState(() {
           _idCardImage = pickedFile;
+          _participantData.idCardImagePath = pickedFile.path;
+          _participantData.idCardImageError = false; // Clear error when image is selected
         });
         
-        // Store the image path in the controller for parent component access
-        if (widget.controllers.containsKey('idCardImage')) {
-          (widget.controllers['idCardImage'] as TextEditingController).text = pickedFile.path;
-        }
+        // Notify parent about data changes
+        widget.onDataChanged(_participantData);
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -279,10 +396,10 @@ class _ParticipantItemState extends State<ParticipantItem> {
                 children: [
                   Expanded(
                     child: PrimaryTextFormField(
-                      controller: firstNameController,
+                      controller: _firstNameController,
                       labelKey: 'first-name',
                       keyboardType: TextInputType.name,
-                      hasError: widget.errors['firstName'] ?? false,
+                      hasError: _participantData.firstNameError,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Required';
@@ -294,10 +411,10 @@ class _ParticipantItemState extends State<ParticipantItem> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: PrimaryTextFormField(
-                      controller: lastNameController,
+                      controller: _lastNameController,
                       labelKey: 'last-name',
                       keyboardType: TextInputType.name,
-                      hasError: widget.errors['lastName'] ?? false,
+                      hasError: _participantData.lastNameError,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Required';
@@ -311,10 +428,10 @@ class _ParticipantItemState extends State<ParticipantItem> {
               Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: PrimaryTextFormField(
-                  controller: widget.controllers['phoneNumber'] ?? TextEditingController(),
+                  controller: _phoneNumberController,
                   labelKey: 'phone-number',
                   keyboardType: TextInputType.phone,
-                  hasError: widget.errors['phoneNumberError'] ?? false,
+                  hasError: _participantData.phoneNumberError,
                   validator: (value) {
                     // We handle validation manually, so always return null here
                     return null;
@@ -327,10 +444,10 @@ class _ParticipantItemState extends State<ParticipantItem> {
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
                       child: PrimaryTextFormField(
-                        controller: widget.controllers['idNumber'] ?? TextEditingController(),
+                        controller: _idNumberController,
                         labelKey: 'id-number',
                         keyboardType: TextInputType.text,
-                        hasError: widget.errors['idNumber'] ?? false,
+                        hasError: _participantData.idNumberError,
                       ),
                     ),
                     Padding(
@@ -345,7 +462,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                             ),
                             labelKey: 'id-card-image',
                             readOnly: true,
-                            hasError: widget.errors['idCardImageError'] ?? false,
+                            hasError: _participantData.idCardImageError,
                             validator: (value) {
                               // We handle validation manually, so always return null here
                               return null;
@@ -373,10 +490,10 @@ class _ParticipantItemState extends State<ParticipantItem> {
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: PrimaryTextFormField(
-                    controller: widget.controllers['dateOfBirth'] ?? TextEditingController(),
+                    controller: _dateOfBirthController,
                     labelKey: 'date-of-birth',
                     readOnly: true,
-                    hasError: widget.errors['dateOfBirth'] ?? false,
+                    hasError: _participantData.dateOfBirthError,
                     validator: (value) {
                       // We handle validation manually, so always return null here
                       return null;
@@ -406,7 +523,11 @@ class _ParticipantItemState extends State<ParticipantItem> {
                       );
                       
                       if (date != null && context.mounted) {
-                        widget.controllers['dateOfBirth'].text = '${date.day}/${date.month}/${date.year}';
+                        _dateOfBirthController.text = '${date.day}/${date.month}/${date.year}';
+                        _participantData.dateOfBirth = _dateOfBirthController.text;
+                        _participantData.dateOfBirthError = false;
+                        widget.onDataChanged(_participantData);
+                        setState(() {});
                       }
                     },
                     suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
@@ -416,16 +537,16 @@ class _ParticipantItemState extends State<ParticipantItem> {
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: ValueListenableBuilder<gender_model.Gender?>(
-                    valueListenable: widget.controllers['gender'] as ValueNotifier<gender_model.Gender?>,
+                    valueListenable: _genderNotifier,
                     builder: (context, selectedGender, child) {
                       return PrimaryDropdownField<gender_model.Gender>(
                         value: selectedGender,
                         labelKey: 'gender',
                         items: gender_model.Gender.values,
                         getLabel: (gender, context) => gender.getLabel(context),
-                        hasError: widget.errors['gender'] ?? false,
+                        hasError: _participantData.genderError,
                         onChanged: (value) {
-                          (widget.controllers['gender'] as ValueNotifier<gender_model.Gender?>).value = value;
+                          _genderNotifier.value = value;
                         },
                       );
                     },

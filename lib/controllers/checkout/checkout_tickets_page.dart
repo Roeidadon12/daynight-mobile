@@ -113,6 +113,7 @@ class _CheckoutTicketsPageState extends State<CheckoutTicketsPage> {
                           MaterialPageRoute(
                             builder: (context) => ParticipantInfoPage(
                               orderInfo: orderInfo,
+                              eventDetails: eventDetails,
                             ),
                           ),
                         );

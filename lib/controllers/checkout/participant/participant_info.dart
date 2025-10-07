@@ -48,20 +48,22 @@ class ParticipantInfo {
 
   void addParticipant({
     required String fullName,
+    required String ticketId,
     String? idNumber,
     String? dateOfBirth,
+    String? phoneNumber,
     gender_model.Gender? gender,
   }) {
-    if (participants.length < totalParticipants - 1) {
-      participants.add(
-        Participant(
-          fullName: fullName,
-          idNumber: idNumber,
-          dateOfBirth: dateOfBirth,
-          gender: gender,
-        ),
-      );
-    }
+    participants.add(
+      Participant(
+        fullName: fullName,
+        idNumber: idNumber,
+        dateOfBirth: dateOfBirth,
+        phoneNumber: phoneNumber,
+        gender: gender,
+        ticketId: ticketId,
+      ),
+    );
   }
 
   void removeParticipant(int index) {

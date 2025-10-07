@@ -5,16 +5,19 @@ import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/controllers/checkout/participant/participant_item.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets.dart';
 import 'package:day_night/controllers/checkout/payment/payment_page.dart';
+import 'package:day_night/models/participant_data.dart';
 import 'package:day_night/models/ticket_item.dart';
-import 'package:day_night/models/gender.dart' as gender_model;
 import 'package:flutter/material.dart';
+import 'package:day_night/models/event_details.dart';
 
 class ParticipantInfoPage extends StatefulWidget {
   final CheckoutTickets orderInfo;
+  final EventDetails eventDetails;
 
   const ParticipantInfoPage({
     super.key,
     required this.orderInfo,
+    required this.eventDetails,
   });
 
   @override
@@ -25,8 +28,8 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
   late final ParticipantInfo participantsInfo;
   final _formKey = GlobalKey<FormState>();
   
-  // Map to store controllers for each participant
-  final Map<String, Map<String, dynamic>> _participantControllers = {};
+  // Store participant data for each participant
+  late final List<ParticipantData> _participantsData;
   late final List<(TicketItem, int)> _flattenedTickets; // List of (ticket, participantIndex)
   int _expandedIndex = 0; // Track which item is currently expanded
   
@@ -39,11 +42,6 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
     });
   }
 
-  // Helper to convert TextEditingController to ValueNotifier for gender
-  ValueNotifier<gender_model.Gender?> _createGenderNotifier() {
-    return ValueNotifier<gender_model.Gender?>(null);
-  }
-  
   List<(TicketItem, int)> _getFlattenedTickets(List<TicketItem> tickets) {
     final flattened = <(TicketItem, int)>[];
     for (final ticket in tickets) {
@@ -54,53 +52,11 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
     return flattened;
   }
 
-  void _initializeControllersForTickets() {
-    int participantIndex = 0;
-    for (final ticket in participantsInfo.selectedTickets) {
-      for (int i = 0; i < ticket.quantity; i++) {
-        final participantKey = '${ticket.id}_$participantIndex';
-        _participantControllers[participantKey] = {
-          'firstName': TextEditingController()..addListener(() {
-            setState(() {
-              _participantControllers[participantKey]!['firstNameError'] = false;
-            });
-          }),
-          'lastName': TextEditingController()..addListener(() {
-            setState(() {
-              _participantControllers[participantKey]!['lastNameError'] = false;
-            });
-          }),
-          'phoneNumber': TextEditingController()..addListener(() {
-            setState(() {
-              _participantControllers[participantKey]!['phoneNumberError'] = false;
-            });
-          }),
-          'idNumber': TextEditingController()..addListener(() {
-            setState(() {
-              _participantControllers[participantKey]!['idNumberError'] = false;
-            });
-          }),
-          'idCardImage': TextEditingController()..addListener(() {
-            setState(() {
-              _participantControllers[participantKey]!['idCardImageError'] = false;
-            });
-          }),
-          'dateOfBirth': TextEditingController()..addListener(() {
-            setState(() {
-              _participantControllers[participantKey]!['dateOfBirthError'] = false;
-            });
-          }),
-          'gender': _createGenderNotifier(), // Use ValueNotifier for gender
-          'firstNameError': false,
-          'lastNameError': false,
-          'phoneNumberError': false,
-          'idNumberError': false,
-          'idCardImageError': false,
-          'dateOfBirthError': false,
-          'genderError': false,
-        };
-        participantIndex++;
-      }
+  void _initializeParticipantsData() {
+    _participantsData = [];
+    for (int i = 0; i < _flattenedTickets.length; i++) {
+      final (ticket, _) = _flattenedTickets[i];
+      _participantsData.add(ParticipantData(ticketId: ticket.id));
     }
   }
 
@@ -116,23 +72,89 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
     return ticket.ticket.requiredGender == 1;
   }
 
-  bool _isParticipantValid(String participantKey, TicketItem ticket) {
-    final controllers = _participantControllers[participantKey];
-    if (controllers == null) return false;
+  /// Callback when participant data changes
+  void _onParticipantDataChanged(int index, ParticipantData data) {
+    _participantsData[index] = data;
+  }
 
-    // Both first and last names are required
-    if (controllers['firstName'].text.isEmpty || controllers['lastName'].text.isEmpty) return false;
+  /// Validates all participants and returns true if all are valid
+  bool _validateAllParticipants() {
+    bool allValid = true;
+    int firstInvalidIndex = -1;
+    
+    for (int index = 0; index < _flattenedTickets.length; index++) {
+      final (ticket, _) = _flattenedTickets[index];
+      final participantData = _participantsData[index];
+      
+      // Validate this participant's data
+      bool isParticipantValid = _validateSingleParticipant(participantData, ticket);
+      
+      if (!isParticipantValid) {
+        allValid = false;
+        if (firstInvalidIndex == -1) {
+          firstInvalidIndex = index;
+        }
+      }
+    }
+    
+    if (!allValid) {
+      setState(() {
+        _expandedIndex = firstInvalidIndex;
+      });
+    }
+    
+    return allValid;
+  }
 
-    // Check ID if required
-    if (needsIdNumber(ticket) && controllers['idNumber'].text.isEmpty) return false;
+  /// Validates a single participant's data based on ticket requirements
+  bool _validateSingleParticipant(ParticipantData data, TicketItem ticket) {
+    data.clearErrors();
+    bool isValid = true;
 
-    // Check Date of Birth if required
-    if (needsDateOfBirth(ticket) && controllers['dateOfBirth'].text.isEmpty) return false;
+    // Validate first name (required)
+    if (data.firstName.isEmpty) {
+      data.firstNameError = true;
+      isValid = false;
+    }
 
-    // Check Gender if required
-    if (needsGender(ticket) && controllers['gender'] == null) return false;
+    // Validate last name (required)
+    if (data.lastName.isEmpty) {
+      data.lastNameError = true;
+      isValid = false;
+    }
 
-    return true;
+    // Validate phone number (required)
+    if (data.phoneNumber.isEmpty) {
+      data.phoneNumberError = true;
+      isValid = false;
+    }
+
+    // Validate ID number if required
+    if (needsIdNumber(ticket)) {
+      if (data.idNumber.isEmpty) {
+        data.idNumberError = true;
+        isValid = false;
+      }
+      // Check if ID card image is required and missing
+      if (data.idCardImagePath == null || data.idCardImagePath!.isEmpty) {
+        data.idCardImageError = true;
+        isValid = false;
+      }
+    }
+
+    // Validate date of birth if required
+    if (needsDateOfBirth(ticket) && data.dateOfBirth.isEmpty) {
+      data.dateOfBirthError = true;
+      isValid = false;
+    }
+
+    // Validate gender if required
+    if (needsGender(ticket) && data.gender == null) {
+      data.genderError = true;
+      isValid = false;
+    }
+
+    return isValid;
   }
 
   @override
@@ -146,89 +168,22 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
     // Create flattened list of tickets
     _flattenedTickets = _getFlattenedTickets(participantsInfo.selectedTickets);
     
-    // Initialize controllers for all participants
-    _initializeControllersForTickets();
+    // Initialize participant data for all participants
+    _initializeParticipantsData();
   }
 
   @override
   void dispose() {
-    // Dispose all controllers
-    for (final controllers in _participantControllers.values) {
-      controllers['firstName']?.dispose();
-      controllers['lastName']?.dispose();
-      controllers['phoneNumber']?.dispose();
-      controllers['idNumber']?.dispose();
-      controllers['idCardImage']?.dispose();
-      controllers['dateOfBirth']?.dispose();
-      (controllers['gender'] as ValueNotifier<gender_model.Gender?>).dispose();
-    }
+    // No controllers to dispose - ParticipantItems manage their own
     super.dispose();
   }
 
   void _handleContinue() {
-    // First check if all participants are valid
-    bool allParticipantsValid = true;
-    int invalidIndex = -1;
+    // Validate all participants
+    bool allValid = _validateAllParticipants();
+    participantsInfo.clear();
 
-    for (int i = 0; i < _flattenedTickets.length; i++) {
-      final (ticket, _) = _flattenedTickets[i];
-      final participantKey = '${ticket.id}_$i';
-      final controllers = _participantControllers[participantKey]!;
-      
-      // Reset all error states first
-      controllers['firstNameError'] = false;
-      controllers['lastNameError'] = false;
-      controllers['phoneNumberError'] = false;
-      controllers['idNumberError'] = false;
-      controllers['idCardImageError'] = false;
-      controllers['dateOfBirthError'] = false;
-      controllers['genderError'] = false;
-
-      // Check each field and set error state
-      if (controllers['firstName'].text.isEmpty) {
-        controllers['firstNameError'] = true;
-        allParticipantsValid = false;
-      }
-      if (controllers['lastName'].text.isEmpty) {
-        controllers['lastNameError'] = true;
-        allParticipantsValid = false;
-      }
-      if (controllers['phoneNumber'].text.isEmpty) {
-        controllers['phoneNumberError'] = true;
-        allParticipantsValid = false;
-      }
-      if (needsIdNumber(ticket)) {
-        if (controllers['idNumber'].text.isEmpty) {
-          controllers['idNumberError'] = true;
-          allParticipantsValid = false;
-        }
-        // Check if ID card image is required and missing
-        if (controllers['idCardImage'].text.isEmpty) {
-          controllers['idCardImageError'] = true;
-          allParticipantsValid = false;
-        }
-      }
-      if (needsDateOfBirth(ticket) && controllers['dateOfBirth'].text.isEmpty) {
-        controllers['dateOfBirthError'] = true;
-        allParticipantsValid = false;
-      }
-      if (needsGender(ticket) && controllers['gender'].value == null) {
-        controllers['genderError'] = true;
-        allParticipantsValid = false;
-      }
-
-      if (!allParticipantsValid) {
-        invalidIndex = i;
-        break;
-      }
-    }
-
-    if (!allParticipantsValid) {
-      // Show error and expand the invalid participant
-      setState(() {
-        _expandedIndex = invalidIndex;
-      });
-      
+    if (!allValid) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context).get('please-fill-in-all-required-fields')),
@@ -241,34 +196,28 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
 
     if (_formKey.currentState?.validate() ?? false) {
       // Save all participant information
-      for (final ticketEntry in _participantControllers.entries) {
-        final parts = ticketEntry.key.split('_');
-        final ticketId = parts[0];
-        final controllers = ticketEntry.value;
-
-        // Find the ticket for this participant
-        final ticket = participantsInfo.selectedTickets.firstWhere(
-          (t) => t.id == ticketId,
-        );
-
+      for (int i = 0; i < _participantsData.length; i++) {
+        final participantData = _participantsData[i];
+        
         participantsInfo.addParticipant(
-          fullName: '${controllers['firstName'].text} ${controllers['lastName'].text}'.trim(),
-          idNumber: needsIdNumber(ticket) && controllers['idNumber'].text.isNotEmpty 
-            ? controllers['idNumber'].text 
-            : null,
-          dateOfBirth: needsDateOfBirth(ticket) && controllers['dateOfBirth'].text.isNotEmpty 
-            ? controllers['dateOfBirth'].text 
-            : null,
-          gender: needsGender(ticket) ? (controllers['gender'] as ValueNotifier<gender_model.Gender?>).value : null,
+          ticketId: participantData.ticketId,
+          fullName: participantData.fullName,
+          idNumber: participantData.idNumber.isNotEmpty ? participantData.idNumber : null,
+          dateOfBirth: participantData.dateOfBirth.isNotEmpty ? participantData.dateOfBirth : null,
+          phoneNumber: participantData.phoneNumber.isNotEmpty ? participantData.phoneNumber : null,
+          gender: participantData.gender,
         );
       }
-      
+
+      widget.orderInfo.currentBasket.setParticipantsInfo(participantsInfo);
+
       // Navigate to payment page
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => PaymentPage(
             orderInfo: widget.orderInfo,
+            eventDetails: widget.eventDetails,
             flattenedTickets: _flattenedTickets,
           ),
         ),
@@ -297,22 +246,10 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                       itemCount: _flattenedTickets.length,
                       itemBuilder: (context, index) {
                         final (ticket, _) = _flattenedTickets[index];
-                        final participantKey = '${ticket.id}_$index';
 
                         return ParticipantItem(
                           ticket: ticket,
                           participantIndex: index,
-                          participantKey: participantKey,
-                          controllers: _participantControllers[participantKey]!,
-                          errors: {
-                            'firstName': _participantControllers[participantKey]!['firstNameError'] as bool,
-                            'lastName': _participantControllers[participantKey]!['lastNameError'] as bool,
-                            'phoneNumberError': _participantControllers[participantKey]!['phoneNumberError'] as bool,
-                            'idNumber': _participantControllers[participantKey]!['idNumberError'] as bool,
-                            'idCardImageError': _participantControllers[participantKey]!['idCardImageError'] as bool,
-                            'dateOfBirth': _participantControllers[participantKey]!['dateOfBirthError'] as bool,
-                            'gender': _participantControllers[participantKey]!['genderError'] as bool,
-                          },
                           isExpanded: _expandedIndex == index,
                           onToggleExpand: () {
                             setState(() {
@@ -323,7 +260,8 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                               }
                             });
                           },
-                          isValid: _isParticipantValid(participantKey, ticket),
+                          onDataChanged: (data) => _onParticipantDataChanged(index, data),
+                          initialData: _participantsData[index],
                         );
                       },
                     ),

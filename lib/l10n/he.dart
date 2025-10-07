@@ -68,4 +68,8 @@ const Map<String, String> heTexts = {
   'ok': 'אישור',
   'coupon-applied-successfully': 'הקופון הוזן בהצלחה',
   'invalid-coupon': 'קופון לא חוקי',
+  'order-summary': 'סיכום הזמנה',
+  'subtotal': 'סכום ביניים',
+  'discount': 'הנחה',
+  'total': 'סה"כ',
 };

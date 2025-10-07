@@ -47,6 +47,7 @@ dependencies:
   geocoding: ^3.0.0
   image_picker: ^1.0.4
   permission_handler: ^11.0.1
+  pay: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -66,6 +67,7 @@ dev_dependencies:
 flutter:
   assets:
   - assets/images/
+  - assets/payment_configs/
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

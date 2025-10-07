@@ -1,12 +1,13 @@
+import 'package:day_night/controllers/checkout/participant/participant_info.dart';
+
 import '../ticket_item.dart';
 import 'personal_info.dart';
-import 'participant.dart';
 import 'ticket_info.dart';
 
 class PurchaseBasket {
   TicketInfo? _ticketInfo;
   PersonalInfo? _personalInfo;
-  final List<Participant> _participants = [];
+  late ParticipantInfo _participantsInfo;
 
   /// Adds tickets to the basket
   void addTickets(List<TicketItem> tickets) {
@@ -28,29 +29,8 @@ class PurchaseBasket {
     );
   }
 
-  /// Adds a participant to the basket
-  void addParticipant({
-    required String fullName,
-    String? idNumber,
-  }) {
-    _participants.add(
-      Participant(
-        fullName: fullName,
-        idNumber: idNumber,
-      ),
-    );
-  }
-
-  /// Removes a participant at the specified index
-  void removeParticipant(int index) {
-    if (index >= 0 && index < _participants.length) {
-      _participants.removeAt(index);
-    }
-  }
-
-  /// Clears all participants from the basket
-  void clearParticipants() {
-    _participants.clear();
+  void setParticipantsInfo(ParticipantInfo info) {
+    _participantsInfo = info;
   }
 
   /// Gets the current ticket information
@@ -59,9 +39,10 @@ class PurchaseBasket {
   /// Gets the purchaser's information
   PersonalInfo? get purchaserInfo => _personalInfo;
 
-  /// Gets the list of participants
-  List<Participant> get participants => List.unmodifiable(_participants);
+  ParticipantInfo get participantsInfo => _participantsInfo;
 
+  /// Gets the list of participants
+  /// 
   /// Gets the total price of the purchase
   double get totalPrice => _ticketInfo?.totalPrice ?? 0.0;
 
@@ -72,7 +53,7 @@ class PurchaseBasket {
   bool isValid() {
     if (_ticketInfo == null || _ticketInfo!.isEmpty) return false;
     if (_personalInfo == null) return false;
-    if (_participants.length != _ticketInfo!.totalQuantity - 1) return false;
+    if (participantsInfo.participants.length != _ticketInfo!.totalQuantity - 1) return false;
     return true;
   }
 
@@ -80,6 +61,6 @@ class PurchaseBasket {
   void clear() {
     _ticketInfo = null;
     _personalInfo = null;
-    _participants.clear();
+    _participantsInfo.participants.clear();
   }
 }

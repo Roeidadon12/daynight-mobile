@@ -1,6 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:day_night/constants.dart';
 import 'package:day_night/app_localizations.dart';
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
+    );
+  }
+}
 
 class PromoCodeField extends StatefulWidget {
   final Function(String promoCode)? onPromoCodeApplied;
@@ -97,10 +111,16 @@ class _PromoCodeFieldState extends State<PromoCodeField> {
                     controller: _controller,
                     focusNode: _focusNode,
                     enabled: !widget.isLoading,
+                    keyboardType: TextInputType.visiblePassword,
+                    textCapitalization: TextCapitalization.characters,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                     ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
+                      UpperCaseTextFormatter(),
+                    ],
                     decoration: InputDecoration(
                       hintText: AppLocalizations.of(context).get('promo-code'),
                       hintStyle: TextStyle(
