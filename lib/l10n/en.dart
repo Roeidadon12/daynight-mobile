@@ -76,4 +76,11 @@ const Map<String, String> enTexts = {
   'current-image': 'Current Image',
   'tap-to-view-full-image': 'Tap to view full image',
   'payment-with-credit': 'Payment with Credit Card',
+  'subscribe-newsletter-daynight': ' I agree to receive marketing materials from Day Night',
+  'subscribe-newsletter-organizer': 'I agree to receive marketing materials from ',
+  'agree-to-terms': 'I agree to the Terms and Conditions',
+  'by-clicking-payment-agree-to': 'By clicking payment, I agree to the',
+  'terms-and-conditions': 'Terms and Conditions',
+  'and': 'and',
+  'privacy-policy': 'Privacy Policy',
 };

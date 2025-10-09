@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 import 'package:pay/pay.dart';
 import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/shared/custom_app_bar.dart';
@@ -32,6 +33,10 @@ class _PaymentPageState extends State<PaymentPage> {
   late final Pay _payClient;
   bool _isPaymentLoading = false;
   bool _isCreditCardExpanded = false;
+  
+  // Checkbox states
+  bool _subscribeToNewsletterFromDayNight = false;
+  bool _subscribeToNewsletterFromOrganizer = false;
 
   double get totalProcessingFee {
     double totalFee = 0.0;
@@ -227,6 +232,28 @@ class _PaymentPageState extends State<PaymentPage> {
         content: Text(message),
         backgroundColor: Colors.red,
         duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _openTermsAndConditions() {
+    // TODO: Navigate to terms and conditions page or open web view
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Opening Terms and Conditions...'),
+        backgroundColor: Colors.blue,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _openPrivacyPolicy() {
+    // TODO: Navigate to privacy policy page or open web view
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Opening Privacy Policy...'),
+        backgroundColor: Colors.blue,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -760,6 +787,76 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
+  Widget _buildCheckboxFields() {
+    return Container(
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 2, bottom: 8),
+      child: Column(
+        children: [
+          // Terms and Conditions Checkbox
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Checkbox(
+                value: _subscribeToNewsletterFromDayNight,
+                onChanged: (bool? value) {
+                  setState(() {
+                    _subscribeToNewsletterFromDayNight = value ?? false;
+                  });
+                },
+                activeColor: kBrandPrimary,
+                side: BorderSide(color: Colors.grey[400]!),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(
+                    AppLocalizations.of(context).get('subscribe-newsletter-daynight'),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          // Newsletter Subscription Checkbox - Only show if organizer exists
+          if (widget.eventDetails.organizer != null) ...[
+            const SizedBox(height: 1),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Checkbox(
+                  value: _subscribeToNewsletterFromOrganizer,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _subscribeToNewsletterFromOrganizer = value ?? false;
+                    });
+                  },
+                  activeColor: kBrandPrimary,
+                  side: BorderSide(color: Colors.grey[400]!),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Text(
+                      '${AppLocalizations.of(context).get('subscribe-newsletter-organizer')}${widget.eventDetails.organizer!.displayName}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -793,6 +890,9 @@ class _PaymentPageState extends State<PaymentPage> {
                         const SizedBox(height: 24),
                         // Credit Card Payment Section
                         _buildCreditCardPayment(),
+                        const SizedBox(height: 24),
+                        // Checkbox Fields Section
+                        _buildCheckboxFields(),
                         const SizedBox(height: 16), // Bottom spacing
                       ],
                     ),
@@ -817,28 +917,73 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: SizedBox(
-                    height: 56,
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _processPayment,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kBrandPrimary,
-                        foregroundColor: Colors.white,
-                        side: BorderSide(
-                          color: kBrandPrimary,
-                          width: 2,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        height: 56,
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _processPayment,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kBrandPrimary,
+                            foregroundColor: Colors.white,
+                            side: BorderSide(
+                              color: kBrandPrimary,
+                              width: 2,
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            '${AppLocalizations.of(context).get('to-payment-of')} ${AppLocalizations.of(context).get('currency')}${finalAmount.toStringAsFixed(0)}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        elevation: 0,
                       ),
-                      child: Text(
-                        '${AppLocalizations.of(context).get('to-payment-of')} ${AppLocalizations.of(context).get('currency')}${finalAmount.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(height: 12),
+                      RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 12,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: AppLocalizations.of(context).get('by-clicking-payment-agree-to'),
+                            ),
+                            TextSpan(
+                              text: ' ${AppLocalizations.of(context).get('terms-and-conditions')}',
+                              style: TextStyle(
+                                color: kBrandPrimary,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  _openTermsAndConditions();
+                                },
+                            ),
+                            TextSpan(
+                              text: ' ${AppLocalizations.of(context).get('and')} ',
+                            ),
+                            TextSpan(
+                              text: AppLocalizations.of(context).get('privacy-policy'),
+                              style: TextStyle(
+                                color: kBrandPrimary,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  _openPrivacyPolicy();
+                                },
+                            ),
+                          ],
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),

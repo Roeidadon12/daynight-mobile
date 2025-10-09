@@ -76,4 +76,11 @@ const Map<String, String> heTexts = {
   'current-image': 'תמונה נוכחית',
   'tap-to-view-full-image': 'הקש כדי לצפות בתמונה מלאה',
   'payment-with-credit': 'תשלום בכרטיס אשראי',
+  'subscribe-newsletter-daynight': 'אני מאשר/ת קבלת חומר שיווקי מ-Day Night',
+  'subscribe-newsletter-organizer': 'אני מאשר/ת קבלת חומר שיווקי של',
+  'agree-to-terms': 'אני מסכים לתנאים ולהגבלות',
+  'by-clicking-payment-agree-to': 'על ידי לחיצה על תשלום, אני מסכים ל',
+  'terms-and-conditions': 'תנאים והגבלות',
+  'and': 'ו',
+  'privacy-policy': 'מדיניות פרטיות',
 };
