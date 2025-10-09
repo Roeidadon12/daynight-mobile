@@ -35,8 +35,8 @@ class _PaymentPageState extends State<PaymentPage> {
   bool _isCreditCardExpanded = false;
   
   // Checkbox states
-  bool _subscribeToNewsletterFromDayNight = false;
-  bool _subscribeToNewsletterFromOrganizer = false;
+  bool _subscribeToNewsletterFromDayNight = true;
+  bool _subscribeToNewsletterFromOrganizer = true;
 
   double get totalProcessingFee {
     double totalFee = 0.0;
