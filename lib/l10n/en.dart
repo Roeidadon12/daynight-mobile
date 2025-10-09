@@ -75,4 +75,5 @@ const Map<String, String> enTexts = {
   'image-selected': 'Image Selected',
   'current-image': 'Current Image',
   'tap-to-view-full-image': 'Tap to view full image',
+  'payment-with-credit': 'Payment with Credit Card',
 };

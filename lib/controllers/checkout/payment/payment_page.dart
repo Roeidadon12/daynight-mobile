@@ -31,6 +31,7 @@ class _PaymentPageState extends State<PaymentPage> {
   // Payment related variables
   late final Pay _payClient;
   bool _isPaymentLoading = false;
+  bool _isCreditCardExpanded = false;
 
   double get totalProcessingFee {
     double totalFee = 0.0;
@@ -607,6 +608,158 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
+  Widget _buildCreditCardPayment() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        color: Colors.black.withAlpha(77),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.grey[800]!,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          // Header - always visible
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                setState(() {
+                  _isCreditCardExpanded = !_isCreditCardExpanded;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.credit_card,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        AppLocalizations.of(context).get('payment-with-credit'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    AnimatedRotation(
+                      duration: const Duration(milliseconds: 300),
+                      turns: _isCreditCardExpanded ? 0.5 : 0.0,
+                      child: Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.grey[400],
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          
+          // Expandable content
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 300),
+            crossFadeState: _isCreditCardExpanded 
+                ? CrossFadeState.showSecond 
+                : CrossFadeState.showFirst,
+            firstChild: const SizedBox.shrink(),
+            secondChild: Container(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Column(
+                children: [
+                  const Divider(color: Colors.grey),
+                  const SizedBox(height: 16),
+                  
+                  // Secured payment content placeholder
+                  Container(
+                    width: double.infinity,
+                    height: 300,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[900],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.grey[700]!,
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.security,
+                          color: Colors.green,
+                          size: 48,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Secured Payment Form',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Credit card payment form will be loaded here',
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        
+                        // Placeholder payment button
+                        SizedBox(
+                          width: 200,
+                          height: 44,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Credit card payment would be processed here'),
+                                  backgroundColor: Colors.blue,
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.lock, size: 18),
+                                const SizedBox(width: 8),
+                                Text('Pay Securely'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -621,8 +774,8 @@ class _PaymentPageState extends State<PaymentPage> {
                   onBackPressed: () => Navigator.pop(context),
                 ),
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 88.0), // Extra bottom padding for the fixed button
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -637,9 +790,10 @@ class _PaymentPageState extends State<PaymentPage> {
                         const SizedBox(height: 24),
                         // Payment Summary Section
                         _buildPaymentSummary(),
-                        Expanded(
-                          child: Container(), // Spacer
-                        ),
+                        const SizedBox(height: 24),
+                        // Credit Card Payment Section
+                        _buildCreditCardPayment(),
+                        const SizedBox(height: 16), // Bottom spacing
                       ],
                     ),
                   ),

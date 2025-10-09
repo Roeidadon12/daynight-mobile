@@ -75,4 +75,5 @@ const Map<String, String> heTexts = {
   'image-selected': 'תמונה נבחרה',
   'current-image': 'תמונה נוכחית',
   'tap-to-view-full-image': 'הקש כדי לצפות בתמונה מלאה',
+  'payment-with-credit': 'תשלום בכרטיס אשראי',
 };
