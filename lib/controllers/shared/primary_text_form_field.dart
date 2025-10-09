@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../constants.dart';
 import '../../app_localizations.dart';
 
@@ -12,6 +13,7 @@ class PrimaryTextFormField extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? suffixIcon;
   final bool hasError;
+  final List<TextInputFormatter>? inputFormatters;
 
   const PrimaryTextFormField({
     super.key,
@@ -24,6 +26,7 @@ class PrimaryTextFormField extends StatelessWidget {
     this.onTap,
     this.suffixIcon,
     this.hasError = false,
+    this.inputFormatters,
   });
 
   @override
@@ -41,6 +44,7 @@ class PrimaryTextFormField extends StatelessWidget {
       keyboardType: keyboardType,
       readOnly: readOnly,
       onTap: onTap,
+      inputFormatters: inputFormatters,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: isRequired 

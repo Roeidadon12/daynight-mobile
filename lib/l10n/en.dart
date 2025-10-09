@@ -72,4 +72,7 @@ const Map<String, String> enTexts = {
   'subtotal': 'Subtotal',
   'discount': 'Discount',
   'total': 'Total',
+  'image-selected': 'Image Selected',
+  'current-image': 'Current Image',
+  'tap-to-view-full-image': 'Tap to view full image',
 };

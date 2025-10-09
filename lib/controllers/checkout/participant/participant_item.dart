@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:day_night/app_localizations.dart';
 import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/shared/primary_dropdown_field.dart';
@@ -8,6 +9,41 @@ import 'package:day_night/models/gender.dart' as gender_model;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+
+class _PhoneNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Remove all non-digit characters
+    String digitsOnly = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    
+    // Limit to 10 digits
+    if (digitsOnly.length > 10) {
+      digitsOnly = digitsOnly.substring(0, 10);
+    }
+    
+    String formatted = '';
+    
+    if (digitsOnly.isNotEmpty) {
+      // Add first 3 digits
+      if (digitsOnly.length >= 1) {
+        formatted += digitsOnly.substring(0, digitsOnly.length.clamp(0, 3));
+      }
+      
+      // Add hyphen and next 7 digits
+      if (digitsOnly.length > 3) {
+        formatted += '-${digitsOnly.substring(3)}';
+      }
+    }
+    
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
 
 class ParticipantItem extends StatefulWidget {
   final TicketItem ticket;
@@ -42,6 +78,39 @@ class _ParticipantItemState extends State<ParticipantItem> {
   final ImagePicker _picker = ImagePicker();
   XFile? _idCardImage;
   
+  String _getImageDisplayName() {
+    if (_idCardImage == null) return '';
+    
+    // Return localized text when image exists
+    return AppLocalizations.of(context).get('image-selected');
+  }
+
+  String _formatPhoneNumber(String phoneNumber) {
+    // Remove all non-digit characters
+    String digitsOnly = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+    
+    // Limit to 10 digits
+    if (digitsOnly.length > 10) {
+      digitsOnly = digitsOnly.substring(0, 10);
+    }
+    
+    String formatted = '';
+    
+    if (digitsOnly.isNotEmpty) {
+      // Add first 3 digits
+      if (digitsOnly.length >= 1) {
+        formatted += digitsOnly.substring(0, digitsOnly.length.clamp(0, 3));
+      }
+      
+      // Add hyphen and next 7 digits
+      if (digitsOnly.length > 3) {
+        formatted += '-${digitsOnly.substring(3)}';
+      }
+    }
+    
+    return formatted;
+  }
+  
   @override
   void initState() {
     super.initState();
@@ -52,7 +121,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
     // Initialize controllers with existing data
     _firstNameController = TextEditingController(text: _participantData.firstName);
     _lastNameController = TextEditingController(text: _participantData.lastName);
-    _phoneNumberController = TextEditingController(text: _participantData.phoneNumber);
+    _phoneNumberController = TextEditingController(text: _formatPhoneNumber(_participantData.phoneNumber));
     _idNumberController = TextEditingController(text: _participantData.idNumber);
     _dateOfBirthController = TextEditingController(text: _participantData.dateOfBirth);
     _genderNotifier = ValueNotifier<gender_model.Gender?>(_participantData.gender);
@@ -79,10 +148,22 @@ class _ParticipantItemState extends State<ParticipantItem> {
     _participantData.idNumber = _idNumberController.text;
     _participantData.dateOfBirth = _dateOfBirthController.text;
     
-    // Clear errors when user starts typing
+    // Clear errors when user starts typing and validation passes
     if (_firstNameController.text.isNotEmpty) _participantData.firstNameError = false;
     if (_lastNameController.text.isNotEmpty) _participantData.lastNameError = false;
-    if (_phoneNumberController.text.isNotEmpty) _participantData.phoneNumberError = false;
+    
+    // Phone number validation - clear error only if format is valid
+    if (_phoneNumberController.text.isNotEmpty) {
+      // Remove formatting (hyphen) for validation
+      String digitsOnly = _phoneNumberController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      
+      // Only clear error if phone number is valid (correct length and format)
+      if (digitsOnly.length == 10 && RegExp(kPhoneValidationRegex).hasMatch(digitsOnly)) {
+        _participantData.phoneNumberError = false;
+      }
+      // If invalid, don't change the error state (let validation method handle it)
+    }
+    
     if (_idNumberController.text.isNotEmpty) _participantData.idNumberError = false;
     if (_dateOfBirthController.text.isNotEmpty) _participantData.dateOfBirthError = false;
     
@@ -96,7 +177,11 @@ class _ParticipantItemState extends State<ParticipantItem> {
   void _onGenderChanged() {
     // Update participant data
     _participantData.gender = _genderNotifier.value;
-    if (_genderNotifier.value != null) _participantData.genderError = false;
+    
+    // Clear gender error if a value is selected
+    if (_genderNotifier.value != null) {
+      _participantData.genderError = false;
+    }
     
     // Notify parent about data changes
     widget.onDataChanged(_participantData);
@@ -146,10 +231,19 @@ class _ParticipantItemState extends State<ParticipantItem> {
       isValid = false;
     }
 
-    // Validate phone number (required)
+    // Validate phone number (required and format)
     if (_participantData.phoneNumber.isEmpty) {
       _participantData.phoneNumberError = true;
       isValid = false;
+    } else {
+      // Remove formatting (hyphen) for validation
+      String digitsOnly = _participantData.phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+      
+      // Validate against the regex pattern: must start with 05 followed by 8 digits
+      if (digitsOnly.length != 10 || !RegExp(kPhoneValidationRegex).hasMatch(digitsOnly)) {
+        _participantData.phoneNumberError = true;
+        isValid = false;
+      }
     }
 
     // Validate ID number if required
@@ -304,6 +398,56 @@ class _ParticipantItemState extends State<ParticipantItem> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Show current image if it exists
+              if (_idCardImage != null) ...[
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: Column(
+                    children: [
+                      Text(
+                        AppLocalizations.of(context).get('current-image'),
+                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () => _showFullScreenImage(),
+                        child: Container(
+                          height: 100,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white30),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              File(_idCardImage!.path),
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[800],
+                                  child: const Icon(
+                                    Icons.broken_image,
+                                    color: Colors.white54,
+                                    size: 40,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppLocalizations.of(context).get('tap-to-view-full-image'),
+                        style: const TextStyle(color: Colors.white54, fontSize: 10),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(color: Colors.white30, height: 1),
+                const SizedBox(height: 16),
+              ],
               ListTile(
                 leading: const Icon(Icons.camera_alt, color: Colors.white),
                 title: Text(
@@ -323,6 +467,94 @@ class _ParticipantItemState extends State<ParticipantItem> {
                 onTap: () {
                   Navigator.of(context).pop(ImageSource.gallery);
                 },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showFullScreenImage() {
+    if (_idCardImage == null) return;
+    
+    Navigator.of(context).pop(); // Close the source dialog first
+    
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Stack(
+            children: [
+              // Tap to dismiss
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  color: Colors.transparent,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              ),
+              // Image
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.5),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      File(_idCardImage!.path),
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          padding: const EdgeInsets.all(40),
+                          color: Colors.grey[800],
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.broken_image,
+                                color: Colors.white54,
+                                size: 60,
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Unable to load image',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              // Close button
+              Positioned(
+                top: 40,
+                right: 20,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
               ),
             ],
           ),
@@ -432,6 +664,9 @@ class _ParticipantItemState extends State<ParticipantItem> {
                   labelKey: 'phone-number',
                   keyboardType: TextInputType.phone,
                   hasError: _participantData.phoneNumberError,
+                  inputFormatters: [
+                    _PhoneNumberFormatter(),
+                  ],
                   validator: (value) {
                     // We handle validation manually, so always return null here
                     return null;
@@ -456,9 +691,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                         children: [
                           PrimaryTextFormField(
                             controller: TextEditingController(
-                              text: _idCardImage != null 
-                                  ? _idCardImage!.name 
-                                  : '',
+                              text: _getImageDisplayName(),
                             ),
                             labelKey: 'id-card-image',
                             readOnly: true,

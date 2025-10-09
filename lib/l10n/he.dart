@@ -72,4 +72,7 @@ const Map<String, String> heTexts = {
   'subtotal': 'סכום ביניים',
   'discount': 'הנחה',
   'total': 'סה"כ',
+  'image-selected': 'תמונה נבחרה',
+  'current-image': 'תמונה נוכחית',
+  'tap-to-view-full-image': 'הקש כדי לצפות בתמונה מלאה',
 };

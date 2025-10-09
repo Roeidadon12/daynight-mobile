@@ -19,3 +19,6 @@ Color get kBrandPrimaryInvert => config.brandPrimaryInvert;
 
 // Assets
 const kDefaultEventImage = 'assets/images/image_place_holder.png';
+
+// Validation Regex
+const kPhoneValidationRegex = r'^05[0-9][0-9]{7}$';

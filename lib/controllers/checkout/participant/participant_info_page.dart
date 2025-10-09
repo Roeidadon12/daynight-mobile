@@ -123,15 +123,27 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       isValid = false;
     }
 
-    // Validate phone number (required)
+    // Validate phone number (required and format)
     if (data.phoneNumber.isEmpty) {
       data.phoneNumberError = true;
       isValid = false;
+    } else {
+      // Remove formatting (hyphen) for validation
+      String digitsOnly = data.phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+      
+      // Validate against the regex pattern: must start with 05 followed by 8 digits
+      if (digitsOnly.length != 10 || !RegExp(kPhoneValidationRegex).hasMatch(digitsOnly)) {
+        data.phoneNumberError = true;
+        isValid = false;
+      }
     }
 
     // Validate ID number if required
     if (needsIdNumber(ticket)) {
       if (data.idNumber.isEmpty) {
+        data.idNumberError = true;
+        isValid = false;
+      } else if (!isValidIsraeliId(data.idNumber)) {
         data.idNumberError = true;
         isValid = false;
       }
@@ -156,6 +168,29 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
 
     return isValid;
   }
+
+  bool isValidIsraeliId(String id) {
+  // Trim spaces
+  id = id.trim();
+
+  // Basic format check: 5–9 digits only
+  final regex = RegExp(r'^\d{5,9}$');
+  if (!regex.hasMatch(id)) return false;
+
+  // Pad with leading zeros to ensure 9 digits
+  id = id.padLeft(9, '0');
+
+  int sum = 0;
+  for (int i = 0; i < 9; i++) {
+    int digit = int.parse(id[i]);
+    int multiplied = digit * ((i % 2) + 1);
+    if (multiplied > 9) multiplied -= 9;
+    sum += multiplied;
+  }
+
+  // Valid if sum is divisible by 10
+  return sum % 10 == 0;
+}
 
   @override
   void initState() {
