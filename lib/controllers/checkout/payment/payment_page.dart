@@ -340,7 +340,7 @@ class _PaymentPageState extends State<PaymentPage> {
       
       // Get participants by their indices from the flattened tickets
       for (int participantIndex in participantIndices) {
-        if (participantIndex < participantsInfo.participants.length) {
+        if (participantsInfo != null && participantIndex < participantsInfo.participants.length) {
           ticketParticipants.add(participantsInfo.participants[participantIndex]);
         } else {
           // Create a placeholder participant if not enough data

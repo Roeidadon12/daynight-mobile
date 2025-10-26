@@ -7,7 +7,7 @@ import 'ticket_info.dart';
 class PurchaseBasket {
   TicketInfo? _ticketInfo;
   PersonalInfo? _personalInfo;
-  late ParticipantInfo _participantsInfo;
+  ParticipantInfo? _participantsInfo;
 
   /// Adds tickets to the basket
   void addTickets(List<TicketItem> tickets) {
@@ -39,7 +39,7 @@ class PurchaseBasket {
   /// Gets the purchaser's information
   PersonalInfo? get purchaserInfo => _personalInfo;
 
-  ParticipantInfo get participantsInfo => _participantsInfo;
+  ParticipantInfo? get participantsInfo => _participantsInfo;
 
   /// Gets the list of participants
   /// 
@@ -53,7 +53,8 @@ class PurchaseBasket {
   bool isValid() {
     if (_ticketInfo == null || _ticketInfo!.isEmpty) return false;
     if (_personalInfo == null) return false;
-    if (participantsInfo.participants.length != _ticketInfo!.totalQuantity - 1) return false;
+    if (_participantsInfo == null) return false;
+    if (_participantsInfo!.participants.length != _ticketInfo!.totalQuantity - 1) return false;
     return true;
   }
 
@@ -61,6 +62,7 @@ class PurchaseBasket {
   void clear() {
     _ticketInfo = null;
     _personalInfo = null;
-    _participantsInfo.participants.clear();
+    _participantsInfo?.participants.clear();
+    _participantsInfo = null;
   }
 }

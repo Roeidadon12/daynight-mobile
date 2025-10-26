@@ -74,6 +74,8 @@ class _ParticipantItemState extends State<ParticipantItem> {
   late final TextEditingController _phoneNumberController;
   late final TextEditingController _idNumberController;
   late final TextEditingController _dateOfBirthController;
+  late final TextEditingController _facebookIdController;
+  late final TextEditingController _instagramIdController;
   late final ValueNotifier<gender_model.Gender?> _genderNotifier;
   final ImagePicker _picker = ImagePicker();
   XFile? _idCardImage;
@@ -125,6 +127,8 @@ class _ParticipantItemState extends State<ParticipantItem> {
     _idNumberController = TextEditingController(text: _participantData.idNumber);
     _dateOfBirthController = TextEditingController(text: _participantData.dateOfBirth);
     _genderNotifier = ValueNotifier<gender_model.Gender?>(_participantData.gender);
+    _facebookIdController = TextEditingController(text: _participantData.facebookId);
+    _instagramIdController = TextEditingController(text: _participantData.instagramId);
     
     // Set up image if exists
     if (_participantData.idCardImagePath != null && _participantData.idCardImagePath!.isNotEmpty) {
@@ -138,6 +142,8 @@ class _ParticipantItemState extends State<ParticipantItem> {
     _idNumberController.addListener(_onDataChanged);
     _dateOfBirthController.addListener(_onDataChanged);
     _genderNotifier.addListener(_onGenderChanged);
+    _facebookIdController.addListener(_onDataChanged);
+    _instagramIdController.addListener(_onDataChanged);
   }
 
   void _onDataChanged() {
@@ -147,7 +153,9 @@ class _ParticipantItemState extends State<ParticipantItem> {
     _participantData.phoneNumber = _phoneNumberController.text;
     _participantData.idNumber = _idNumberController.text;
     _participantData.dateOfBirth = _dateOfBirthController.text;
-    
+    _participantData.facebookId = _facebookIdController.text;
+    _participantData.instagramId = _instagramIdController.text;
+
     // Clear errors when user starts typing and validation passes
     if (_firstNameController.text.isNotEmpty) _participantData.firstNameError = false;
     if (_lastNameController.text.isNotEmpty) _participantData.lastNameError = false;
@@ -166,6 +174,8 @@ class _ParticipantItemState extends State<ParticipantItem> {
     
     if (_idNumberController.text.isNotEmpty) _participantData.idNumberError = false;
     if (_dateOfBirthController.text.isNotEmpty) _participantData.dateOfBirthError = false;
+    if (_facebookIdController.text.isNotEmpty) _participantData.facebookIdError = false;
+    if (_instagramIdController.text.isNotEmpty) _participantData.instagramIdError = false;
     
     // Notify parent about data changes
     widget.onDataChanged(_participantData);
@@ -199,14 +209,18 @@ class _ParticipantItemState extends State<ParticipantItem> {
     _idNumberController.removeListener(_onDataChanged);
     _dateOfBirthController.removeListener(_onDataChanged);
     _genderNotifier.removeListener(_onGenderChanged);
-    
+    _facebookIdController.removeListener(_onDataChanged);
+    _instagramIdController.removeListener(_onDataChanged);
+
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneNumberController.dispose();
     _idNumberController.dispose();
     _dateOfBirthController.dispose();
     _genderNotifier.dispose();
-    
+    _facebookIdController.dispose();
+    _instagramIdController.dispose();
+
     super.dispose();
   }
 

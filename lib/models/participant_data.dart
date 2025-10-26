@@ -11,6 +11,8 @@ class ParticipantData {
   String dateOfBirth;
   gender_model.Gender? gender;
   String? idCardImagePath;
+  String? facebookId;
+  String? instagramId;
 
   // Validation state
   bool firstNameError;
@@ -20,6 +22,8 @@ class ParticipantData {
   bool dateOfBirthError;
   bool genderError;
   bool idCardImageError;
+  bool facebookIdError;
+  bool instagramIdError;
 
   ParticipantData({
     required this.ticketId,
@@ -30,6 +34,8 @@ class ParticipantData {
     this.dateOfBirth = '',
     this.gender,
     this.idCardImagePath,
+    this.facebookId,
+    this.instagramId,
     this.firstNameError = false,
     this.lastNameError = false,
     this.phoneNumberError = false,
@@ -37,6 +43,8 @@ class ParticipantData {
     this.dateOfBirthError = false,
     this.genderError = false,
     this.idCardImageError = false,
+    this.facebookIdError = false,
+    this.instagramIdError = false,
   });
 
   /// Resets all error states
@@ -48,6 +56,8 @@ class ParticipantData {
     dateOfBirthError = false;
     genderError = false;
     idCardImageError = false;
+    facebookIdError = false;
+    instagramIdError = false;
   }
 
   /// Checks if the participant data is valid (has no errors)
@@ -58,7 +68,9 @@ class ParticipantData {
            !idNumberError &&
            !dateOfBirthError &&
            !genderError &&
-           !idCardImageError;
+           !idCardImageError &&
+           !facebookIdError &&
+           !instagramIdError;
   }
 
   /// Checks if the participant data is complete (has required information)
@@ -82,6 +94,8 @@ class ParticipantData {
       idNumber: idNumber,
       dateOfBirth: dateOfBirth,
       gender: gender,
+      facebookId: facebookId,
+      instagramId: instagramId,
       idCardImagePath: idCardImagePath,
       firstNameError: firstNameError,
       lastNameError: lastNameError,
@@ -90,6 +104,8 @@ class ParticipantData {
       dateOfBirthError: dateOfBirthError,
       genderError: genderError,
       idCardImageError: idCardImageError,
+      facebookIdError: facebookIdError,
+      instagramIdError: instagramIdError,
     );
   }
 

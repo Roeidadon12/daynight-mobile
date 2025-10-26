@@ -53,6 +53,8 @@ class ParticipantInfo {
     String? dateOfBirth,
     String? phoneNumber,
     gender_model.Gender? gender,
+    String facebookId = '',
+    String instagramId = '',
   }) {
     participants.add(
       Participant(
@@ -62,6 +64,8 @@ class ParticipantInfo {
         phoneNumber: phoneNumber,
         gender: gender,
         ticketId: ticketId,
+        facebookId: facebookId,
+        instagramId: instagramId,
       ),
     );
   }

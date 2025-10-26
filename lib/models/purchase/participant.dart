@@ -7,6 +7,8 @@ class Participant {
   final String? dateOfBirth;
   final String? phoneNumber;
   final gender_model.Gender? gender;
+  final String? facebookId;
+  final String? instagramId;
 
   const Participant({
     required this.fullName,
@@ -15,5 +17,7 @@ class Participant {
     this.dateOfBirth,
     this.phoneNumber,
     this.gender,
+    this.facebookId,
+    this.instagramId,
   });
 }

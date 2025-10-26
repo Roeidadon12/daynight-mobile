@@ -24,6 +24,13 @@ class CheckoutTickets {
 
   // Reset the basket
   void resetBasket() {
-    basket.clear();
+    try {
+      basket.setPurchaserInfo(fullName: '', email: '', phone: '');
+      currentBasket.clear();
+      basket.clear();
+    } catch (e) {
+      print('Error resetting basket: $e');
+      // Ignore if purchaser info was not set
+    }
   }
 }
