@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:day_night/app_localizations.dart';
 import 'package:day_night/constants.dart';
+import 'package:day_night/controllers/checkout/checkout_tickets.dart';
 import 'package:day_night/controllers/shared/primary_dropdown_field.dart';
 import 'package:day_night/controllers/shared/primary_text_form_field.dart';
 import 'package:day_night/models/ticket_item.dart';
@@ -52,6 +53,7 @@ class ParticipantItem extends StatefulWidget {
   final VoidCallback onToggleExpand;
   final Function(ParticipantData) onDataChanged;
   final ParticipantData? initialData;
+  final CheckoutTickets orderInfo;  
 
   const ParticipantItem({
     super.key,
@@ -60,6 +62,7 @@ class ParticipantItem extends StatefulWidget {
     required this.isExpanded,
     required this.onToggleExpand,
     required this.onDataChanged,
+    required this.orderInfo,
     this.initialData,
   });
 
@@ -177,6 +180,14 @@ class _ParticipantItemState extends State<ParticipantItem> {
     if (_facebookIdController.text.isNotEmpty) _participantData.facebookIdError = false;
     if (_instagramIdController.text.isNotEmpty) _participantData.instagramIdError = false;
     
+    // Special case: if either Facebook or Instagram is required (case 4) and user fills one, clear both errors
+    if (socialInfoType(widget.ticket) == 4) {
+      if (_facebookIdController.text.isNotEmpty || _instagramIdController.text.isNotEmpty) {
+        _participantData.facebookIdError = false;
+        _participantData.instagramIdError = false;
+      }
+    }
+    
     // Notify parent about data changes
     widget.onDataChanged(_participantData);
     
@@ -285,6 +296,45 @@ class _ParticipantItemState extends State<ParticipantItem> {
       isValid = false;
     }
 
+    // Validate social media fields based on requirements
+    int socialType = socialInfoType(widget.ticket);
+    switch (socialType) {
+      case 1: // Only Facebook required
+        if (_participantData.facebookId?.isEmpty ?? true) {
+          _participantData.facebookIdError = true;
+          isValid = false;
+        }
+        break;
+      case 2: // Only Instagram required
+        if (_participantData.instagramId?.isEmpty ?? true) {
+          _participantData.instagramIdError = true;
+          isValid = false;
+        }
+        break;
+      case 3: // Both required
+        if (_participantData.facebookId?.isEmpty ?? true) {
+          _participantData.facebookIdError = true;
+          isValid = false;
+        }
+        if (_participantData.instagramId?.isEmpty ?? true) {
+          _participantData.instagramIdError = true;
+          isValid = false;
+        }
+        break;
+      case 4: // Either one required (user choice)
+        if ((_participantData.facebookId?.isEmpty ?? true) && 
+            (_participantData.instagramId?.isEmpty ?? true)) {
+          _participantData.facebookIdError = true;
+          _participantData.instagramIdError = true;
+          isValid = false;
+        }
+        break;
+      case 0: // None required
+      default:
+        // No validation needed
+        break;
+    }
+
     // Notify parent about data changes and trigger rebuild
     widget.onDataChanged(_participantData);
     setState(() {});
@@ -302,6 +352,37 @@ class _ParticipantItemState extends State<ParticipantItem> {
 
   bool needsGender(TicketItem ticket) {
     return ticket.ticket.requiredGender == 1;
+  }
+
+  int socialInfoType(TicketItem ticket) {
+    bool isRequiredFacebook = widget.orderInfo.eventDetails.eventInformation.isRequiredFacebookUsername == 1;
+    bool isRequiredInstagram = widget.orderInfo.eventDetails.eventInformation.isRequiredInstagramUsername == 1;
+    bool isRequiredOne = widget.orderInfo.eventDetails.eventInformation.isRequiredFacebookOrInstagram == 1;
+
+    // Return based on requirements:
+    // 0 - no social media required
+    // 1 - only Facebook required
+    // 2 - only Instagram required  
+    // 3 - both Facebook and Instagram required
+    // 4 - either Facebook or Instagram required (user choice)
+    
+    // Use a more readable pattern matching approach
+    int socialType = -1;
+    switch ((isRequiredFacebook, isRequiredInstagram, isRequiredOne)) {
+      case (true, true, _): // Both Facebook and Instagram required
+        socialType = 3;
+      case (true, false, false): // Only Facebook required
+        socialType = 1;
+      case (false, true, false): // Only Instagram required
+        socialType = 2;
+      case (false, false, true): // Either one required (user choice)
+        socialType = 4;
+      case (false, false, false): // None required
+      default:
+        socialType = 0;
+    }
+
+    return socialType;
   }
 
   Future<void> _pickIdCardImage() async {
@@ -799,6 +880,73 @@ class _ParticipantItemState extends State<ParticipantItem> {
                     },
                   ),
                 ),
+              // Social media fields based on requirements
+              ...() {
+                final int socialType = socialInfoType(widget.ticket);
+                return [
+                  if (socialType == 1) // Only Facebook required
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: PrimaryTextFormField(
+                        controller: _facebookIdController,
+                        labelKey: 'facebook-id',
+                        keyboardType: TextInputType.text,
+                        hasError: _participantData.facebookIdError,
+                      ),
+                    ),
+                  if (socialType == 2) // Only Instagram required
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: PrimaryTextFormField(
+                        controller: _instagramIdController,
+                        labelKey: 'instagram-id',
+                        keyboardType: TextInputType.text,
+                        hasError: _participantData.instagramIdError,
+                      ),
+                    ),
+                  if (socialType == 3) ...[  // Both required
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: PrimaryTextFormField(
+                        controller: _facebookIdController,
+                        labelKey: 'facebook-id',
+                        keyboardType: TextInputType.text,
+                        hasError: _participantData.facebookIdError,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: PrimaryTextFormField(
+                        controller: _instagramIdController,
+                        labelKey: 'instagram-id',
+                        keyboardType: TextInputType.text,
+                        hasError: _participantData.instagramIdError,
+                      ),
+                    ),
+                  ],
+                  if (socialType == 4) ...[  // Either one required (user choice)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: PrimaryTextFormField(
+                        controller: _facebookIdController,
+                        labelKey: 'facebook-id',
+                        keyboardType: TextInputType.text,
+                        hasError: _participantData.facebookIdError,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: PrimaryTextFormField(
+                        controller: _instagramIdController,
+                        labelKey: 'instagram-id',
+                        keyboardType: TextInputType.text,
+                        hasError: _participantData.instagramIdError,
+                      ),
+                    ),
+                  ],
+                ];
+              }(),
+            
             ],
           ],
         ),

@@ -8,16 +8,13 @@ import 'package:day_night/controllers/checkout/payment/payment_page.dart';
 import 'package:day_night/models/participant_data.dart';
 import 'package:day_night/models/ticket_item.dart';
 import 'package:flutter/material.dart';
-import 'package:day_night/models/event_details.dart';
 
 class ParticipantInfoPage extends StatefulWidget {
   final CheckoutTickets orderInfo;
-  final EventDetails eventDetails;
 
   const ParticipantInfoPage({
     super.key,
     required this.orderInfo,
-    required this.eventDetails,
   });
 
   @override
@@ -27,12 +24,13 @@ class ParticipantInfoPage extends StatefulWidget {
 class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
   late final ParticipantInfo participantsInfo;
   final _formKey = GlobalKey<FormState>();
-  
+
   // Store participant data for each participant
   late final List<ParticipantData> _participantsData;
-  late final List<(TicketItem, int)> _flattenedTickets; // List of (ticket, participantIndex)
+  late final List<(TicketItem, int)>
+  _flattenedTickets; // List of (ticket, participantIndex)
   int _expandedIndex = 0; // Track which item is currently expanded
-  
+
   // Calculate total amount from all tickets
   double get totalAmount {
     return _flattenedTickets.fold(0.0, (sum, ticketItem) {
@@ -72,6 +70,34 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
     return ticket.ticket.requiredGender == 1;
   }
 
+  int socialInfoType(TicketItem ticket) {
+    bool isRequiredFacebook = widget.orderInfo.eventDetails.eventInformation.isRequiredFacebookUsername == 1;
+    bool isRequiredInstagram = widget.orderInfo.eventDetails.eventInformation.isRequiredInstagramUsername == 1;
+    bool isRequiredOne = widget.orderInfo.eventDetails.eventInformation.isRequiredFacebookOrInstagram == 1;
+
+    // Return based on requirements:
+    // 0 - no social media required
+    // 1 - only Facebook required
+    // 2 - only Instagram required  
+    // 3 - both Facebook and Instagram required
+    // 4 - either Facebook or Instagram required (user choice)
+    
+    // Use pattern matching approach
+    switch ((isRequiredFacebook, isRequiredInstagram, isRequiredOne)) {
+      case (true, true, _): // Both Facebook and Instagram required
+        return 3;
+      case (true, false, false): // Only Facebook required
+        return 1;
+      case (false, true, false): // Only Instagram required
+        return 2;
+      case (false, false, true): // Either one required (user choice)
+        return 4;
+      case (false, false, false): // None required
+      default:
+        return 0;
+    }
+  }
+
   /// Callback when participant data changes
   void _onParticipantDataChanged(int index, ParticipantData data) {
     _participantsData[index] = data;
@@ -81,14 +107,17 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
   bool _validateAllParticipants() {
     bool allValid = true;
     int firstInvalidIndex = -1;
-    
+
     for (int index = 0; index < _flattenedTickets.length; index++) {
       final (ticket, _) = _flattenedTickets[index];
       final participantData = _participantsData[index];
-      
+
       // Validate this participant's data
-      bool isParticipantValid = _validateSingleParticipant(participantData, ticket);
-      
+      bool isParticipantValid = _validateSingleParticipant(
+        participantData,
+        ticket,
+      );
+
       if (!isParticipantValid) {
         allValid = false;
         if (firstInvalidIndex == -1) {
@@ -96,13 +125,13 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
         }
       }
     }
-    
+
     if (!allValid) {
       setState(() {
         _expandedIndex = firstInvalidIndex;
       });
     }
-    
+
     return allValid;
   }
 
@@ -130,9 +159,10 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
     } else {
       // Remove formatting (hyphen) for validation
       String digitsOnly = data.phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
-      
+
       // Validate against the regex pattern: must start with 05 followed by 8 digits
-      if (digitsOnly.length != 10 || !RegExp(kPhoneValidationRegex).hasMatch(digitsOnly)) {
+      if (digitsOnly.length != 10 ||
+          !RegExp(kPhoneValidationRegex).hasMatch(digitsOnly)) {
         data.phoneNumberError = true;
         isValid = false;
       }
@@ -166,43 +196,127 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       isValid = false;
     }
 
+    // Validate social media fields based on requirements
+    int socialType = socialInfoType(ticket);
+    switch (socialType) {
+      case 1: // Only Facebook required
+        if (data.facebookId?.isEmpty ?? true) {
+          data.facebookIdError = true;
+          isValid = false;
+        } else if (!isValidFacebookId(data.facebookId!)) {
+          data.facebookIdError = true;
+          isValid = false;
+        }
+        break;
+      case 2: // Only Instagram required
+        if (data.instagramId?.isEmpty ?? true) {
+          data.instagramIdError = true;
+          isValid = false;
+        } else if (!isValidInstagramId(data.instagramId!)) {
+          data.instagramIdError = true;
+          isValid = false;
+        }
+        break;
+      case 3: // Both required
+        if (data.facebookId?.isEmpty ?? true) {
+          data.facebookIdError = true;
+          isValid = false;
+        } else if (!isValidFacebookId(data.facebookId!)) {
+          data.facebookIdError = true;
+          isValid = false;
+        }
+        if (data.instagramId?.isEmpty ?? true) {
+          data.instagramIdError = true;
+          isValid = false;
+        } else if (!isValidInstagramId(data.instagramId!)) {
+          data.instagramIdError = true;
+          isValid = false;
+        }
+        break;
+      case 4: // Either one required (user choice)
+        bool facebookEmpty = data.facebookId?.isEmpty ?? true;
+        bool instagramEmpty = data.instagramId?.isEmpty ?? true;
+        bool facebookValid = !facebookEmpty && isValidFacebookId(data.facebookId!);
+        bool instagramValid = !instagramEmpty && isValidInstagramId(data.instagramId!);
+        
+        if (facebookEmpty && instagramEmpty) {
+          // Neither provided
+          data.facebookIdError = true;
+          data.instagramIdError = true;
+          isValid = false;
+        } else {
+          // At least one provided, validate the provided ones
+          if (!facebookEmpty && !facebookValid) {
+            data.facebookIdError = true;
+            isValid = false;
+          }
+          if (!instagramEmpty && !instagramValid) {
+            data.instagramIdError = true;
+            isValid = false;
+          }
+        }
+        break;
+      case 0: // None required
+      default:
+        // No validation needed
+        break;
+    }
+
     return isValid;
   }
 
   bool isValidIsraeliId(String id) {
-  // Trim spaces
-  id = id.trim();
+    // Trim spaces
+    id = id.trim();
 
-  // Basic format check: 5–9 digits only
-  final regex = RegExp(r'^\d{5,9}$');
-  if (!regex.hasMatch(id)) return false;
+    // Basic format check: 5–9 digits only
+    final regex = RegExp(r'^\d{5,9}$');
+    if (!regex.hasMatch(id)) return false;
 
-  // Pad with leading zeros to ensure 9 digits
-  id = id.padLeft(9, '0');
+    // Pad with leading zeros to ensure 9 digits
+    id = id.padLeft(9, '0');
 
-  int sum = 0;
-  for (int i = 0; i < 9; i++) {
-    int digit = int.parse(id[i]);
-    int multiplied = digit * ((i % 2) + 1);
-    if (multiplied > 9) multiplied -= 9;
-    sum += multiplied;
+    int sum = 0;
+    for (int i = 0; i < 9; i++) {
+      int digit = int.parse(id[i]);
+      int multiplied = digit * ((i % 2) + 1);
+      if (multiplied > 9) multiplied -= 9;
+      sum += multiplied;
+    }
+
+    // Valid if sum is divisible by 10
+    return sum % 10 == 0;
   }
 
-  // Valid if sum is divisible by 10
-  return sum % 10 == 0;
-}
+  bool isValidFacebookId(String facebookId) {
+    // Basic format check: alphanumeric, 5-50 characters
+    final regex = RegExp(
+      r'^(?:https?:\/\/)?(?:www\.)?facebook\.com\/(?:profile\.php\?id=\d+|[A-Za-z0-9.\-]+)\/?$',
+      caseSensitive: false,
+    );
+    return regex.hasMatch(facebookId);
+  }
+
+  bool isValidInstagramId(String instagramId) {
+    // Basic format check: alphanumeric, underscores, dots, 1-30 characters
+    final regex = RegExp(
+      r'^(?:https?:\/\/)?(?:www\.)?instagram\.com\/[A-Za-z0-9._]+\/?$',
+      caseSensitive: false,
+    );
+    return regex.hasMatch(instagramId);
+  }
 
   @override
   void initState() {
     super.initState();
-    participantsInfo = ParticipantInfo(   
+    participantsInfo = ParticipantInfo(
       selectedTickets: widget.orderInfo.currentBasket.ticketInfo?.tickets ?? [],
       eventDetails: widget.orderInfo.eventDetails,
     );
-    
+
     // Create flattened list of tickets
     _flattenedTickets = _getFlattenedTickets(participantsInfo.selectedTickets);
-    
+
     // Initialize participant data for all participants
     _initializeParticipantsData();
   }
@@ -221,7 +335,11 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
     if (!allValid) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).get('please-fill-in-all-required-fields')),
+          content: Text(
+            AppLocalizations.of(
+              context,
+            ).get('please-fill-in-all-required-fields'),
+          ),
           backgroundColor: kBrandNegativePrimary,
           behavior: SnackBarBehavior.floating,
         ),
@@ -233,13 +351,19 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       // Save all participant information
       for (int i = 0; i < _participantsData.length; i++) {
         final participantData = _participantsData[i];
-        
+
         participantsInfo.addParticipant(
           ticketId: participantData.ticketId,
           fullName: participantData.fullName,
-          idNumber: participantData.idNumber.isNotEmpty ? participantData.idNumber : null,
-          dateOfBirth: participantData.dateOfBirth.isNotEmpty ? participantData.dateOfBirth : null,
-          phoneNumber: participantData.phoneNumber.isNotEmpty ? participantData.phoneNumber : null,
+          idNumber: participantData.idNumber.isNotEmpty
+              ? participantData.idNumber
+              : null,
+          dateOfBirth: participantData.dateOfBirth.isNotEmpty
+              ? participantData.dateOfBirth
+              : null,
+          phoneNumber: participantData.phoneNumber.isNotEmpty
+              ? participantData.phoneNumber
+              : null,
           gender: participantData.gender,
         );
       }
@@ -252,7 +376,6 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
         MaterialPageRoute(
           builder: (context) => PaymentPage(
             orderInfo: widget.orderInfo,
-            eventDetails: widget.eventDetails,
             flattenedTickets: _flattenedTickets,
           ),
         ),
@@ -277,7 +400,12 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                   child: Form(
                     key: _formKey,
                     child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 88), // Extra bottom padding for the button
+                      padding: const EdgeInsets.fromLTRB(
+                        16,
+                        16,
+                        16,
+                        88,
+                      ), // Extra bottom padding for the button
                       itemCount: _flattenedTickets.length,
                       itemBuilder: (context, index) {
                         final (ticket, _) = _flattenedTickets[index];
@@ -286,6 +414,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                           ticket: ticket,
                           participantIndex: index,
                           isExpanded: _expandedIndex == index,
+                          orderInfo: widget.orderInfo,
                           onToggleExpand: () {
                             setState(() {
                               if (_expandedIndex == index) {
@@ -295,7 +424,8 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                               }
                             });
                           },
-                          onDataChanged: (data) => _onParticipantDataChanged(index, data),
+                          onDataChanged: (data) =>
+                              _onParticipantDataChanged(index, data),
                           initialData: _participantsData[index],
                         );
                       },
@@ -330,10 +460,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kBrandPrimary,
                         foregroundColor: Colors.white,
-                        side: BorderSide(
-                          color: kBrandPrimary,
-                          width: 2,
-                        ),
+                        side: BorderSide(color: kBrandPrimary, width: 2),
                         elevation: 0,
                       ),
                       child: Text(

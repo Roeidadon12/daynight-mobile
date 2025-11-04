@@ -10,14 +10,12 @@ import 'package:day_night/controllers/checkout/payment/promo_code_controller.dar
 import 'package:day_night/models/ticket_item.dart';
 import 'package:day_night/models/ticket_payment.dart';
 import 'package:day_night/models/purchase/participant.dart';
-import 'package:day_night/models/event_details.dart';
   
 class PaymentPage extends StatefulWidget {
   final CheckoutTickets orderInfo;
-  final EventDetails eventDetails;
   final List<(TicketItem, int)> flattenedTickets;
 
-  const PaymentPage({super.key, required this.orderInfo, required this.eventDetails, required this.flattenedTickets});
+  const PaymentPage({super.key, required this.orderInfo, required this.flattenedTickets});
 
   @override
   State<PaymentPage> createState() => _PaymentPageState();
@@ -40,9 +38,9 @@ class _PaymentPageState extends State<PaymentPage> {
 
   double get totalProcessingFee {
     double totalFee = 0.0;
-    final processingFeeValue = widget.eventDetails.eventInformation.prcessingFee.toDouble();
-    final processingFeeType = widget.eventDetails.eventInformation.prcessingFeeType;
-    
+    final processingFeeValue = widget.orderInfo.eventDetails.eventInformation.prcessingFee.toDouble();
+    final processingFeeType = widget.orderInfo.eventDetails.eventInformation.prcessingFeeType;
+
     for (final ticketPayment in _ticketPayments) {
       if (processingFeeType == 'percentage') {
         // Apply percentage fee to the total ticket cost
@@ -822,7 +820,7 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
           
           // Newsletter Subscription Checkbox - Only show if organizer exists
-          if (widget.eventDetails.organizer != null) ...[
+          if (widget.orderInfo.eventDetails.organizer != null) ...[
             const SizedBox(height: 1),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -841,7 +839,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 12),
                     child: Text(
-                      '${AppLocalizations.of(context).get('subscribe-newsletter-organizer')}${widget.eventDetails.organizer!.displayName}',
+                      '${AppLocalizations.of(context).get('subscribe-newsletter-organizer')}${widget.orderInfo.eventDetails.organizer!.displayName}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
