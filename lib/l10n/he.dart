@@ -75,6 +75,7 @@ const Map<String, String> heTexts = {
   'image-selected': 'תמונה נבחרה',
   'current-image': 'תמונה נוכחית',
   'tap-to-view-full-image': 'הקש כדי לצפות בתמונה מלאה',
+  'minimum-age-required': 'גיל מינימלי נדרש: ',
   'payment-with-credit': 'תשלום בכרטיס אשראי',
   'subscribe-newsletter-daynight': 'אני מאשר/ת קבלת חומר שיווקי מ-Day Night',
   'subscribe-newsletter-organizer': 'אני מאשר/ת קבלת חומר שיווקי של',

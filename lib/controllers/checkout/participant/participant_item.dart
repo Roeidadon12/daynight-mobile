@@ -176,7 +176,17 @@ class _ParticipantItemState extends State<ParticipantItem> {
     }
     
     if (_idNumberController.text.isNotEmpty) _participantData.idNumberError = false;
-    if (_dateOfBirthController.text.isNotEmpty) _participantData.dateOfBirthError = false;
+    
+    // Date of birth validation - clear error only if valid age
+    if (_dateOfBirthController.text.isNotEmpty && needsDateOfBirth(widget.ticket)) {
+      if (_validateAge(_dateOfBirthController.text)) {
+        _participantData.dateOfBirthError = false;
+      }
+    } else if (_dateOfBirthController.text.isNotEmpty) {
+      // If date of birth is not required, just clear error when not empty
+      _participantData.dateOfBirthError = false;
+    }
+    
     if (_facebookIdController.text.isNotEmpty) _participantData.facebookIdError = false;
     if (_instagramIdController.text.isNotEmpty) _participantData.instagramIdError = false;
     
@@ -285,9 +295,17 @@ class _ParticipantItemState extends State<ParticipantItem> {
     }
 
     // Validate date of birth if required
-    if (needsDateOfBirth(widget.ticket) && _participantData.dateOfBirth.isEmpty) {
-      _participantData.dateOfBirthError = true;
-      isValid = false;
+    if (needsDateOfBirth(widget.ticket)) {
+      if (_participantData.dateOfBirth.isEmpty) {
+        _participantData.dateOfBirthError = true;
+        isValid = false;
+      } else {
+        // Validate minimum age requirement
+        if (!_validateAge(_participantData.dateOfBirth)) {
+          _participantData.dateOfBirthError = true;
+          isValid = false;
+        }
+      }
     }
 
     // Validate gender if required
@@ -352,6 +370,45 @@ class _ParticipantItemState extends State<ParticipantItem> {
 
   bool needsGender(TicketItem ticket) {
     return ticket.ticket.requiredGender == 1;
+  }
+
+  /// Validates if the participant's age meets the minimum age requirement
+  /// 
+  /// [dateOfBirthString] should be in format "dd/mm/yyyy"
+  /// Returns true if age is valid (>= minAge), false otherwise
+  bool _validateAge(String dateOfBirthString) {
+    try {
+      // Parse date from "dd/mm/yyyy" format
+      final parts = dateOfBirthString.split('/');
+      if (parts.length != 3) return false;
+      
+      final day = int.tryParse(parts[0]);
+      final month = int.tryParse(parts[1]);
+      final year = int.tryParse(parts[2]);
+      
+      if (day == null || month == null || year == null) return false;
+      if (day < 1 || day > 31 || month < 1 || month > 12) return false;
+      
+      final birthDate = DateTime(year, month, day);
+      final now = DateTime.now();
+      
+      // Calculate age in years
+      int age = now.year - birthDate.year;
+      
+      // Adjust age if birthday hasn't occurred this year yet
+      if (now.month < birthDate.month || 
+          (now.month == birthDate.month && now.day < birthDate.day)) {
+        age--;
+      }
+      
+      // Get minimum age requirement from event information
+      final minAge = widget.orderInfo.eventDetails.eventInformation.minAge;
+      
+      return age >= minAge;
+    } catch (e) {
+      // If there's any error parsing the date, consider it invalid
+      return false;
+    }
   }
 
   int socialInfoType(TicketItem ticket) {
@@ -827,11 +884,14 @@ class _ParticipantItemState extends State<ParticipantItem> {
                       return null;
                     },
                     onTap: () async {
+                      final minAge = widget.orderInfo.eventDetails.eventInformation.minAge;
+                      final maxValidDate = DateTime.now().subtract(Duration(days: minAge * 365));
+                      
                       final date = await showDatePicker(
                         context: context,
-                        initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+                        initialDate: maxValidDate.subtract(const Duration(days: 365 * 5)), // Start 5 years older than minimum age
                         firstDate: DateTime(1900),
-                        lastDate: DateTime.now(),
+                        lastDate: maxValidDate, // Only allow dates that meet minimum age requirement
                         builder: (context, child) {
                           return Theme(
                             data: Theme.of(context).copyWith(
@@ -853,7 +913,29 @@ class _ParticipantItemState extends State<ParticipantItem> {
                       if (date != null && context.mounted) {
                         _dateOfBirthController.text = '${date.day}/${date.month}/${date.year}';
                         _participantData.dateOfBirth = _dateOfBirthController.text;
-                        _participantData.dateOfBirthError = false;
+                        
+                        // Validate age and clear error only if valid
+                        if (needsDateOfBirth(widget.ticket)) {
+                          if (_validateAge(_participantData.dateOfBirth)) {
+                            _participantData.dateOfBirthError = false;
+                          } else {
+                            _participantData.dateOfBirthError = true;
+                            // Show user-friendly error message
+                            final minAge = widget.orderInfo.eventDetails.eventInformation.minAge;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '${AppLocalizations.of(context).get('minimum-age-required')}$minAge',
+                                ),
+                                backgroundColor: kBrandNegativePrimary,
+                                duration: const Duration(seconds: 3),
+                              ),
+                            );
+                          }
+                        } else {
+                          _participantData.dateOfBirthError = false;
+                        }
+                        
                         widget.onDataChanged(_participantData);
                         setState(() {});
                       }

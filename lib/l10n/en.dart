@@ -75,6 +75,7 @@ const Map<String, String> enTexts = {
   'image-selected': 'Image Selected',
   'current-image': 'Current Image',
   'tap-to-view-full-image': 'Tap to view full image',
+  'minimum-age-required': 'Minimum age required: ',
   'payment-with-credit': 'Payment with Credit Card',
   'subscribe-newsletter-daynight': ' I agree to receive marketing materials from Day Night',
   'subscribe-newsletter-organizer': 'I agree to receive marketing materials from ',
