@@ -25,7 +25,7 @@ class PrimaryButton extends StatelessWidget {
     Widget button = SizedBox(
       height: height,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: disabled ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: disabled ? Colors.grey : kBrandPrimary,
           foregroundColor: Colors.white,

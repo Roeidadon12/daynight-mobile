@@ -21,31 +21,25 @@ class ListTickets extends StatefulWidget {
 }
 
 class ListTicketsState extends State<ListTickets> {
-  Ticket? selectedTicket;
+  // Track selected tickets with their amounts
+  final Map<String, int> _ticketAmounts = {};
 
   void _selectTicket(Ticket ticket) {
     setState(() {
-      // If the same ticket is tapped again, deselect it
-      selectedTicket = selectedTicket == ticket ? null : ticket;
-      widget.onTicketSelected(selectedTicket, selectedTicket != null ? 1 : 0);
+      final currentAmount = _ticketAmounts[ticket.id.toString()] ?? 0;
+      final newAmount = currentAmount > 0 ? 0 : 1;
+      _ticketAmounts[ticket.id.toString()] = newAmount;
+      widget.onTicketSelected(newAmount > 0 ? ticket : null, newAmount);
     });
   }
 
   void _handleAmountChange(Ticket ticket, int newAmount) {
     setState(() {
-      if (newAmount > 0 && selectedTicket != ticket) {
-        // If amount is being increased and this ticket wasn't selected, select it
-        selectedTicket = ticket;
-        widget.onTicketSelected(ticket, newAmount);
-      } else if (newAmount == 0 && selectedTicket == ticket) {
-        // If amount is reduced to 0 and this was the selected ticket, deselect it
-        selectedTicket = null;
-        widget.onTicketSelected(null, 0);
-      } else if (selectedTicket == ticket) {
-        // Update amount for currently selected ticket
-        widget.onTicketSelected(ticket, newAmount);
-      }
+      _ticketAmounts[ticket.id.toString()] = newAmount;
     });
+    
+    // Always notify parent about amount changes
+    widget.onTicketSelected(ticket, newAmount);
   }
 
   @override
@@ -64,8 +58,8 @@ class ListTicketsState extends State<ListTickets> {
               child: TicketItem(
                 eventDetails: widget.eventDetails,
                 ticket: ticket,
-                initialAmount: 0,
-                isSelected: selectedTicket == ticket,
+                initialAmount: _ticketAmounts[ticket.id.toString()] ?? 0,
+                isSelected: (_ticketAmounts[ticket.id.toString()] ?? 0) > 0,
                 onAmountChanged: (newAmount) => _handleAmountChange(ticket, newAmount),
               ),
             ),
