@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:day_night/app_localizations.dart';
 import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets.dart';
-import 'package:day_night/controllers/shared/primary_dropdown_field.dart';
+import 'package:day_night/controllers/shared/gender_expandable_field.dart';
 import 'package:day_night/controllers/shared/primary_text_form_field.dart';
 import 'package:day_night/models/ticket_item.dart';
 import 'package:day_night/models/participant_data.dart';
@@ -854,7 +854,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                             },
                             suffixIcon: Icon(
                               _idCardImage != null ? Icons.check_circle : Icons.upload_file,
-                              color: _idCardImage != null ? Colors.green : Colors.grey,
+                              color: _idCardImage != null ? Colors.green : kBrandPrimary,
                             ),
                           ),
                           Positioned.fill(
@@ -940,7 +940,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                         setState(() {});
                       }
                     },
-                    suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
+                    suffixIcon: Icon(Icons.calendar_today, color: kBrandPrimary),
                   ),
                 ),
               if (needsGender(widget.ticket))
@@ -949,11 +949,10 @@ class _ParticipantItemState extends State<ParticipantItem> {
                   child: ValueListenableBuilder<gender_model.Gender?>(
                     valueListenable: _genderNotifier,
                     builder: (context, selectedGender, child) {
-                      return PrimaryDropdownField<gender_model.Gender>(
-                        value: selectedGender,
+                      return GenderExpandableField(
                         labelKey: 'gender',
-                        items: gender_model.Gender.values,
-                        getLabel: (gender, context) => gender.getLabel(context),
+                        selected: selectedGender,
+                        options: gender_model.Gender.values,
                         hasError: _participantData.genderError,
                         onChanged: (value) {
                           _genderNotifier.value = value;

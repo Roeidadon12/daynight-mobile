@@ -123,12 +123,17 @@ class _TicketItemState extends State<TicketItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeInOut,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      color: Colors.black.withAlpha(77), // Semi-transparent black background
-      shape: RoundedRectangleBorder(
+      decoration: BoxDecoration(
+        color: kBrandTextPrimary.withValues(alpha: 0.2), // Semi-transparent black background
         borderRadius: BorderRadius.circular(8),
-        side: widget.isSelected ? BorderSide(color: kBrandPrimary, width: 4.0) : BorderSide.none,
+        border: Border.all(
+          color: widget.isSelected ? kBrandPrimary : Colors.transparent,
+          width: widget.isSelected ? 4.0 : 0.0,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -138,13 +143,13 @@ class _TicketItemState extends State<TicketItem> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    widget.ticket.title,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleMedium?.copyWith(
-                      color: widget.isSelected ? kBrandPrimary : Colors.white.withAlpha(77),
-                    ),
+                  AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeInOut,
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: widget.isSelected ? kBrandPrimary : Colors.white.withAlpha(77),
+                        ),
+                    child: Text(widget.ticket.title),
                   ),
                   widget.ticket.pricingType == 'rounds'
                       ? RoundPrice(eventDetails: widget.eventDetails, soldOut: _isSoldOut, ticket: widget.ticket, isSelected: widget.isSelected)
@@ -177,11 +182,14 @@ class _TicketItemState extends State<TicketItem> {
                                     color: widget.isSelected ? Colors.white :Colors.white.withAlpha(77),
                                   ),
                             ),
-                      Text(
-                        widget.eventDetails.eventInformation.prcessingFee
-                            .toString(),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: widget.isSelected ? Colors.white : Colors.white.withAlpha(77),
+                      AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeInOut,
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: widget.isSelected ? Colors.white : Colors.white.withAlpha(77),
+                            ),
+                        child: Text(
+                          widget.eventDetails.eventInformation.prcessingFee.toString(),
                         ),
                       ),
                     ],

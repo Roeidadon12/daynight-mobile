@@ -16,6 +16,7 @@ Color get kMainBackgroundColor => config.mainBackgroundColor;
 Color get kBrandPrimary => config.brandPrimary;
 Color get kBrandNegativePrimary => config.brandNegativePrimary;
 Color get kBrandPrimaryInvert => config.brandPrimaryInvert;
+Color get kBrandTextPrimary => config.brandTextPrimary;
 
 // Assets
 const kDefaultEventImage = 'assets/images/image_place_holder.png';

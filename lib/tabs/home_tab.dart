@@ -283,7 +283,7 @@ class _HomeTabState extends State<HomeTab> {
                         ).get('upcoming-events-label'),
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
-                              color: Colors.white,
+                              color: kBrandTextPrimary,
                               fontWeight: FontWeight.bold,
                             ),
                       ),
@@ -292,15 +292,21 @@ class _HomeTabState extends State<HomeTab> {
                           // Add your button action here
                         },
                         style: TextButton.styleFrom(
-                          foregroundColor: kBrandPrimary,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          // Lighter version of primary as background
+                          backgroundColor: kBrandTextPrimary.withValues(alpha: 0.2),
+                          foregroundColor: kBrandTextPrimary,
+                          // Make button a bit bigger than the text
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          // Full semi-circle (pill) shape
+                          shape: const StadiumBorder(),
+                          // Ensure enough height for nice curvature
+                          minimumSize: const Size(0, 40),
                         ),
                         child: Text(
                           AppLocalizations.of(context).get('view-all'),
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
-                                color: kBrandPrimary,
-                                fontWeight: FontWeight.bold,
+                                color: kBrandTextPrimary,
                               ),
                         ),
                       ),

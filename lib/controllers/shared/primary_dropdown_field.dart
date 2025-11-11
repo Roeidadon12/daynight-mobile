@@ -37,18 +37,66 @@ class PrimaryDropdownField<T> extends StatelessWidget {
 
     return DropdownButtonFormField<T>(
       value: value,
+      // Opened-list design: rounded items, clearer selection, better spacing
       items: items.map((item) {
+        final bool isSelected = value == item;
         return DropdownMenuItem<T>(
           value: item,
-          child: Text(
-            getLabel(item, context),
-            style: const TextStyle(color: Colors.white),
+          child: Container(
+            // Do not force width; let dropdown constraints size it
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: isSelected
+                  ? kBrandPrimary.withValues(alpha: 0.15)
+                  : Colors.transparent,
+              border: isSelected
+                  ? Border.all(
+                      color: kBrandPrimary.withValues(alpha: 0.30),
+                      width: 1,
+                    )
+                  : null,
+            ),
+            child: Row(
+              // Avoid flex-based expansion inside dropdown items (unbounded width)
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: Text(
+                    getLabel(item, context),
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: isSelected ? kBrandPrimary : Colors.white,
+                      fontSize: 16,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+                if (isSelected) ...[
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.check_circle_rounded,
+                    size: 18,
+                    color: kBrandPrimary,
+                  ),
+                ],
+              ],
+            ),
           ),
         );
       }).toList(),
       onChanged: onChanged,
       style: const TextStyle(color: Colors.white),
-      dropdownColor: Colors.black.withAlpha(240),
+      // Use app constants; avoid deprecated withOpacity
+      dropdownColor: kMainBackgroundColor,
+      borderRadius: BorderRadius.circular(16),
+      elevation: 12,
+      menuMaxHeight: 280,
       decoration: InputDecoration(
         labelText: isRequired 
           ? '${AppLocalizations.of(context).get(labelKey)} *'

@@ -15,6 +15,7 @@ abstract class AppConfig {
   Color get brandNegativePrimary;
   Color get brandPrimary;
   Color get brandPrimaryInvert;
+  Color get brandTextPrimary;
   
   // Feature Flags
   bool get enableAnalytics;

@@ -22,7 +22,7 @@ class DevConfig implements AppConfig {
   int get defaultLanguageId => 22;
   
   @override
-  Color get mainBackgroundColor => Colors.blueAccent; // Color(0x0C0E12FF);
+  Color get mainBackgroundColor => const Color(0xFF0C0E12);
 
   @override
   Color get brandNegativePrimary => const Color(0xFFF97066);
@@ -32,6 +32,9 @@ class DevConfig implements AppConfig {
   
   @override
   Color get brandPrimaryInvert => const Color(0x22262F40);
+
+  @override
+  Color get brandTextPrimary => const Color(0xFFFFFFFF);
   
   @override
   bool get enableAnalytics => false;
