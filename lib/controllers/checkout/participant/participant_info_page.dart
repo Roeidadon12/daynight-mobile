@@ -7,6 +7,7 @@ import 'package:day_night/controllers/checkout/checkout_tickets.dart';
 import 'package:day_night/controllers/checkout/payment/payment_page.dart';
 import 'package:day_night/models/participant_data.dart';
 import 'package:day_night/models/ticket_item.dart';
+import 'package:day_night/models/purchase/payment_service_request.dart';
 import 'package:flutter/material.dart';
 
 class ParticipantInfoPage extends StatefulWidget {
@@ -370,16 +371,187 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
 
       widget.orderInfo.currentBasket.setParticipantsInfo(participantsInfo);
 
-      // Navigate to payment page
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PaymentPage(
-            orderInfo: widget.orderInfo,
-            flattenedTickets: _flattenedTickets,
+      // Navigate to payment page with loading
+      _navigateToPayment();
+    }
+  }
+
+  /// Creates a PaymentServiceRequest from current participant data
+  PaymentServiceRequest _createPaymentServiceRequest() {
+    final basket = widget.orderInfo.currentBasket;
+    final tickets = basket.ticketInfo?.tickets ?? [];
+    final purchaserInfo = basket.purchaserInfo;
+    
+    // Convert participant data to ParticipantPaymentInfo
+    // Skip the first participant since that represents the purchaser's ticket
+    final participants = <ParticipantPaymentInfo>[];
+    for (int i = 1; i < _participantsData.length; i++) {
+      final participantData = _participantsData[i];
+      participants.add(ParticipantPaymentInfo(
+        firstName: participantData.firstName,
+        lastName: participantData.lastName,
+        email: '', // Note: ParticipantData doesn't seem to have email, using empty string
+        phone: participantData.phoneNumber,
+        countryCode: '+1', // Note: Default country code, should be configurable
+        gender: participantData.gender?.name ?? '',
+        dateOfBirth: participantData.dateOfBirth,
+        idNumber: participantData.idNumber.isNotEmpty ? participantData.idNumber : null,
+        instagramUsername: participantData.instagramId,
+        facebookUsername: participantData.facebookId,
+      ));
+    }
+
+    // Use the first participant's data as the purchaser info
+    final purchaserData = _participantsData.isNotEmpty ? _participantsData[0] : null;
+    
+    // Debug: Print the raw participant data
+    if (purchaserData != null) {
+      print('Raw purchaserData.firstName: "${purchaserData.firstName}"');
+      print('Raw purchaserData.lastName: "${purchaserData.lastName}"');
+    }
+    
+    // Clean up the purchaser name by removing any leading numbers or indices
+    String cleanPurchaserName = 'Unknown User';
+    String? cleanFirstName;
+    String? cleanLastName;
+    
+    if (purchaserData != null) {
+      final firstName = purchaserData.firstName.trim();
+      final lastName = purchaserData.lastName.trim();
+      
+      // Based on your description:
+      // Current: firstName="1", lastName="1 Yahalom 1"  
+      // Expected: firstName="Oren 1", lastName="Yahalom 1"
+      
+      // Construct the full name from both fields and parse it correctly
+      final fullRawName = '$firstName $lastName'.trim();
+      print('Full raw name: "$fullRawName"');
+      
+      // Remove leading numbers and split properly
+      final cleanedFullName = fullRawName.replaceFirst(RegExp(r'^\d+\s*'), '');
+      print('Cleaned full name: "$cleanedFullName"');
+      
+      // Split the cleaned name: expecting something like "Oren 1 Yahalom 1"
+      final nameParts = cleanedFullName.split(' ');
+      
+      if (nameParts.length >= 4) {
+        // Format: "Oren 1 Yahalom 1" -> firstName="Oren 1", lastName="Yahalom 1"
+        cleanFirstName = '${nameParts[0]} ${nameParts[1]}'; // "Oren 1"
+        cleanLastName = '${nameParts[2]} ${nameParts[3]}';  // "Yahalom 1"
+      } else if (nameParts.length == 3) {
+        // Format: "Oren Yahalom 1" -> firstName="Oren", lastName="Yahalom 1"  
+        cleanFirstName = nameParts[0];
+        cleanLastName = '${nameParts[1]} ${nameParts[2]}';
+      } else if (nameParts.length == 2) {
+        // Format: "Oren Yahalom" -> firstName="Oren", lastName="Yahalom"
+        cleanFirstName = nameParts[0];
+        cleanLastName = nameParts[1];
+      } else {
+        // Fallback
+        cleanFirstName = cleanedFullName;
+        cleanLastName = '';
+      }
+      
+      cleanPurchaserName = '$cleanFirstName $cleanLastName'.trim();
+      print('Cleaned firstName: "$cleanFirstName"');
+      print('Cleaned lastName: "$cleanLastName"');
+      print('Constructed cleanPurchaserName: "$cleanPurchaserName"');
+    } else if (purchaserInfo?.fullName != null) {
+      cleanPurchaserName = purchaserInfo!.fullName;
+    }
+    
+    return PaymentServiceRequest.fromAppModels(
+      eventId: widget.orderInfo.eventDetails.eventInformation.id,
+      tickets: tickets,
+      purchaserFullName: cleanPurchaserName,
+      purchaserFirstName: cleanFirstName,
+      purchaserLastName: cleanLastName,
+      purchaserEmail: purchaserInfo?.email ?? 'unknown@example.com', // Email still comes from purchaser info
+      purchaserPhone: purchaserData?.phoneNumber ?? (purchaserInfo?.phone ?? ''),
+      purchaserCountryCode: '+1', // Default country code
+      participants: participants,
+      purchaserIdNumber: purchaserData?.idNumber ?? purchaserInfo?.idNumber,
+      purchaserGender: purchaserData?.gender?.name,
+      purchaserDateOfBirth: purchaserData?.dateOfBirth,
+      purchaserInstagram: purchaserData?.instagramId,
+      purchaserFacebook: purchaserData?.facebookId,
+      // Optional fields - these would typically come from your checkout flow
+      processingFee: null,
+      processingFeeType: null,
+      processingFeePercentage: null,
+      discount: null,
+      couponId: null,
+    );
+  }
+
+  Future<void> _navigateToPayment() async {
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.grey[900],
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                Text(
+                  AppLocalizations.of(context).get('processing'),
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
           ),
-        ),
-      );
+        );
+      },
+    );
+
+    try {
+      // Create payment service request with all participant data
+      final paymentRequest = _createPaymentServiceRequest();
+      
+      // TODO: Call your payment service here
+      // await yourPaymentService.processPayment(paymentRequest);
+      
+      // For debugging, you can print the payment request form data:
+      print('Payment request: ${paymentRequest.toFormData()}');
+      
+      // Simulate service call for now
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Dismiss loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+        
+        // Navigate to payment page
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentPage(
+              orderInfo: widget.orderInfo,
+              flattenedTickets: _flattenedTickets,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Dismiss loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+        
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: kBrandNegativePrimary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
