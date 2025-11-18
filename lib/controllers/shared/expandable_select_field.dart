@@ -53,8 +53,8 @@ class _ExpandableSelectState<T> extends State<ExpandableSelect<T>> {
       _hideOverlay();
       setState(() => _expanded = false);
     } else {
-      _showOverlay();
       setState(() => _expanded = true);
+      _showOverlay();
     }
   }
 
@@ -78,11 +78,19 @@ class _ExpandableSelectState<T> extends State<ExpandableSelect<T>> {
     _measureField();
     final overlay = Overlay.of(context);
 
+    // Calculate the current border color (same logic as in build method)
+    final borderColor = widget.hasError 
+        ? kBrandNegativePrimary 
+        : _expanded 
+            ? kBrandPrimary 
+            : Colors.grey[800]!;
+
     final list = _OptionsList<T>(
       options: widget.options,
       selected: widget.selected,
       getLabel: widget.getLabel,
       hasError: widget.hasError,
+      borderColor: borderColor,
       onSelect: _select,
       verticalSpacing: widget.verticalSpacing,
       maxHeight: widget.maxHeight,
@@ -141,11 +149,19 @@ class _ExpandableSelectState<T> extends State<ExpandableSelect<T>> {
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.circular(32);
+    
+    // Determine border color based on state
+    final borderColor = widget.hasError 
+        ? kBrandNegativePrimary 
+        : _expanded 
+            ? kBrandPrimary 
+            : Colors.grey[800]!;
+    
     final outlineBorder = OutlineInputBorder(
       borderRadius: borderRadius,
       borderSide: BorderSide(
-        color: widget.hasError ? kBrandNegativePrimary : Colors.grey[800]!,
-        width: 1,
+        color: borderColor,
+        width: _expanded ? 2 : 1,
       ),
     );
 
@@ -159,61 +175,59 @@ class _ExpandableSelectState<T> extends State<ExpandableSelect<T>> {
 
     return CompositedTransformTarget(
       link: _layerLink,
-      child: GestureDetector(
-        onTap: _toggle,
-        child: InputDecorator(
-          key: _fieldKey,
-          isEmpty: widget.selected == null,
-          decoration: InputDecoration(
-            labelText: labelText,
-            labelStyle: TextStyle(
-              color: widget.hasError ? kBrandNegativePrimary : Colors.grey[400],
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.black.withAlpha(77),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            border: outlineBorder,
-            enabledBorder: outlineBorder,
-            focusedBorder: OutlineInputBorder(
-              borderRadius: borderRadius,
-              borderSide: BorderSide(
-                color: kBrandPrimary,
-                width: 2,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        child: GestureDetector(
+          onTap: _toggle,
+          child: InputDecorator(
+            key: _fieldKey,
+            isEmpty: widget.selected == null,
+            decoration: InputDecoration(
+              labelText: labelText,
+              labelStyle: TextStyle(
+                color: widget.hasError ? kBrandNegativePrimary : Colors.grey[400],
+                fontSize: 16,
+              ),
+              filled: true,
+              fillColor: Colors.black.withAlpha(77),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              border: outlineBorder,
+              enabledBorder: outlineBorder,
+              focusedBorder: outlineBorder,
+              errorBorder: OutlineInputBorder(
+                borderRadius: borderRadius,
+                borderSide: BorderSide(
+                  color: kBrandNegativePrimary,
+                  width: 1,
+                ),
               ),
             ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: borderRadius,
-              borderSide: BorderSide(
-                color: kBrandNegativePrimary,
-                width: 1,
-              ),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  selectedLabel,
-                  style: TextStyle(
-                    color: widget.selected != null ? Colors.white : Colors.grey[500],
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    selectedLabel,
+                    style: TextStyle(
+                      color: widget.selected != null ? Colors.white : Colors.grey[500],
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              AnimatedRotation(
-                turns: _expanded ? 0.5 : 0.0,
-                duration: const Duration(milliseconds: 200),
-                child: Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: Colors.grey[400],
-                  size: 24,
+                AnimatedRotation(
+                  turns: _expanded ? 0.5 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: Colors.grey[400],
+                    size: 24,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -226,6 +240,7 @@ class _OptionsList<T> extends StatelessWidget {
   final T? selected;
   final String Function(T, BuildContext) getLabel;
   final bool hasError;
+  final Color borderColor;
   final ValueChanged<T> onSelect;
   final double verticalSpacing;
   final double? maxHeight;
@@ -237,6 +252,7 @@ class _OptionsList<T> extends StatelessWidget {
     required this.selected,
     required this.getLabel,
     required this.hasError,
+    required this.borderColor,
     required this.onSelect,
     required this.verticalSpacing,
     required this.maxHeight,
@@ -299,8 +315,8 @@ class _OptionsList<T> extends StatelessWidget {
         color: kMainBackgroundColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: hasError ? kBrandNegativePrimary : Colors.grey[800]!,
-          width: 1,
+          color: borderColor,
+          width: 2,
         ),
         boxShadow: [
           BoxShadow(
