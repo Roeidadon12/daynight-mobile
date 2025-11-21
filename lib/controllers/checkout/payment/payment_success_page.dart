@@ -31,15 +31,21 @@ class PaymentSuccessPage extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 50),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height - 
+                              MediaQuery.of(context).padding.top - 
+                              kToolbarHeight - 
+                              140, // Subtract button area height
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                     // Enjoy Image with Text Overlay
                     Builder(
                       builder: (context) {
-                        const double imageWidth = 200;
-                        const double imageHeight = 140;
+                        const double imageWidth = 300;
+                        const double imageHeight = 210;
                         
                         return SizedBox(
                           width: imageWidth,
@@ -74,30 +80,28 @@ class PaymentSuccessPage extends StatelessWidget {
                                   );
                                 },
                               ),
-                              // Overlay localized text with rotation - responsive positioning
-                              Positioned(
-                                top: imageHeight * 0.455, // 45.5% of container height
-                                left: imageWidth * 0.38, // 38% of container width
-                            child: Transform.rotate(
-                              angle: -0.56, // Rotation to match ticket angle
-                              child: Text(
-                                AppLocalizations.of(context).get('enjoy'),
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 17, // Fixed size that works well
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.2,
-                                  shadows: [
-                                    Shadow(
-                                      offset: Offset(1.0, 1.0),
-                                      blurRadius: 3.0,
-                                      color: Colors.black26,
+                              // Overlay localized text with rotation - centered positioning
+                              Center(
+                                child: Transform.rotate(
+                                  angle: -0.56, // Rotation to match ticket angle
+                                  child: Text(
+                                    AppLocalizations.of(context).get('enjoy'),
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.2,
+                                      shadows: [
+                                        Shadow(
+                                          offset: Offset(1.0, 1.0),
+                                          blurRadius: 3.0,
+                                          color: Colors.black26,
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
                         ],
                       ),
                     );
@@ -132,6 +136,7 @@ class PaymentSuccessPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                   ],
+                  ),
                 ),
               ),
             ),
