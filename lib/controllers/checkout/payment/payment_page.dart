@@ -7,6 +7,7 @@ import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/app_localizations.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets.dart';
 import 'package:day_night/controllers/checkout/payment/promo_code_controller.dart';
+import 'package:day_night/controllers/shared/loading_overlay_controller.dart';
 import 'package:day_night/models/ticket_item.dart';
 import 'package:day_night/models/ticket_payment.dart';
 import 'package:day_night/models/purchase/participant.dart';
@@ -370,20 +371,75 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   /// Process payment using the TicketPayment objects
-  void _processPayment() {
-    print('Processing payment for ${_ticketPayments.length} ticket types:');
+  Future<void> _processPayment() async {
+    if (_isPaymentLoading) return;
     
-    for (final ticketPayment in _ticketPayments) {
-      print('- Ticket ID: ${ticketPayment.ticketId}');
-      print('  Price per ticket: \$${ticketPayment.ticketPrice}');
-      print('  Participants: ${ticketPayment.participantCount}');
-      print('  Total for this ticket: \$${ticketPayment.totalAmount}');
-      print('  Participants: ${ticketPayment.participants.map((p) => p.fullName).join(', ')}');
+    setState(() {
+      _isPaymentLoading = true;
+    });
+
+    try {
+      print('Processing payment for ${_ticketPayments.length} ticket types:');
+      
+      for (final ticketPayment in _ticketPayments) {
+        print('- Ticket ID: ${ticketPayment.ticketId}');
+        print('  Price per ticket: \$${ticketPayment.ticketPrice}');
+        print('  Participants: ${ticketPayment.participantCount}');
+        print('  Total for this ticket: \$${ticketPayment.totalAmount}');
+        print('  Participants: ${ticketPayment.participants.map((p) => p.fullName).join(', ')}');
+      }
+      
+      print('Grand total: \$$finalAmount');
+
+      // Create payment request with all ticket and participant information
+      final paymentRequest = {
+        'ticketPayments': _ticketPayments.map((tp) => {
+          'ticketId': tp.ticketId,
+          'ticketPrice': tp.ticketPrice,
+          'participantCount': tp.participantCount,
+          'totalAmount': tp.totalAmount,
+          'participants': tp.participants.map((p) => {
+            'fullName': p.fullName,
+            'idNumber': p.idNumber,
+            'dateOfBirth': p.dateOfBirth,
+            'phoneNumber': p.phoneNumber,
+            'gender': p.gender?.name,
+            'facebookId': p.facebookId,
+            'instagramId': p.instagramId,
+          }).toList(),
+        }).toList(),
+        'orderInfo': {
+          'eventId': widget.orderInfo.eventDetails.eventInformation.id,
+          'eventTitle': widget.orderInfo.eventDetails.eventInformation.title,
+        },
+        'totals': {
+          'ticketsSubtotal': ticketSubtotal,
+          'processingFee': totalProcessingFee,
+          'discount': _promoCodeSuccess != null ? ticketSubtotal * 0.1 : 0.0,
+          'finalAmount': finalAmount,
+        },
+        'preferences': {
+          'subscribeToNewsletterFromDayNight': _subscribeToNewsletterFromDayNight,
+          'subscribeToNewsletterFromOrganizer': _subscribeToNewsletterFromOrganizer,
+        },
+        'promoCode': _promoCodeSuccess != null ? 'DN10OFF' : null, // Store applied promo code
+      };
+
+      // Send payment request to backend
+      await _sendPaymentToBackend(paymentRequest);
+      
+      // Show success message and navigate away
+      _showPaymentSuccess();
+      
+    } catch (e) {
+      _showPaymentError('Payment processing failed: ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPaymentLoading = false;
+        });
+      }
     }
-    
-    print('Grand total: \$$finalAmount');
-    
-    // TODO: Implement actual payment processing
   }
 
   void _handlePromoCodeApplied(String promoCode) async {
@@ -855,13 +911,21 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kMainBackgroundColor,
-      body: SafeArea(
-        child: Stack(
-          children: [
+      body: _isPaymentLoading 
+          ? LoadingOverlayController(
+              title: AppLocalizations.of(context).get('processing-payment'),
+              label: AppLocalizations.of(context).get('please-wait'),
+              disableBackButton: true,
+            )
+          : SafeArea(
+              child: Stack(
+                children: [
             Column(
               children: [
                 CustomAppBar(
@@ -922,7 +986,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         height: 56,
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _processPayment,
+                          onPressed: _isPaymentLoading ? null : _processPayment,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kBrandPrimary,
                             foregroundColor: Colors.white,
@@ -932,13 +996,22 @@ class _PaymentPageState extends State<PaymentPage> {
                             ),
                             elevation: 0,
                           ),
-                          child: Text(
-                            '${AppLocalizations.of(context).get('to-payment-of')} ${AppLocalizations.of(context).get('currency')}${finalAmount.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          child: _isPaymentLoading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : Text(
+                                  '${AppLocalizations.of(context).get('to-payment-of')} ${AppLocalizations.of(context).get('currency')}${finalAmount.toStringAsFixed(0)}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -981,14 +1054,14 @@ class _PaymentPageState extends State<PaymentPage> {
                           ],
                         ),
                       ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
     );
   }
 }
