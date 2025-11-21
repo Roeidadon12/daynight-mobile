@@ -122,7 +122,7 @@ class EventService {
   Future<List<Event>> getEventsByPriceRange(
     double rangeFromPrice,
     double rangeToPrice,
-    int language_id,
+    int languageId,
   ) async {
     if (rangeFromPrice < 0 ||
         rangeToPrice < 0 ||
@@ -137,7 +137,7 @@ class EventService {
       queryParams: {
         'start_price': rangeFromPrice.toString(),
         'end_price': rangeToPrice.toString(),
-        'language_id': language_id.toString(),
+        'language_id': languageId.toString(),
       },
     );
 
@@ -146,7 +146,7 @@ class EventService {
   }
 
   Future<List<Event>> getEventsByDateRange(
-    int language_id,
+    int languageId,
     DateTime startDate,
     DateTime endDate,
   ) async {
@@ -166,7 +166,7 @@ class EventService {
       queryParams: {
         'start_date': startDateStr,
         'end_date': endDateStr,
-        'language_id': language_id.toString(),
+        'language_id': languageId.toString(),
       },
     );
 
@@ -174,13 +174,13 @@ class EventService {
     return events;
   }
 
-  Future<List<Event>> getEventsByCategory(int language_id, int categoryId) async {
+  Future<List<Event>> getEventsByCategory(int languageId, int categoryId) async {
     final response = await api.request(
       endpoint: ApiCommands.getEvents.value,
       method: 'GET',
       queryParams: {
         'category_id': categoryId.toString(),
-        'language_id': language_id.toString(),
+        'language_id': languageId.toString(),
       },
     );
 
@@ -189,12 +189,12 @@ class EventService {
   }
 
   Future<List<Event>> getEventsByCriteria(
-    int language_id,
+    int languageId,
     Map<String, dynamic> criteria,
   ) async {
     final cleanedCriteria = Map<String, dynamic>.from(criteria)
       ..removeWhere((key, value) => value == null || value.toString().isEmpty)
-      ..addAll({'language_id': language_id.toString()});
+      ..addAll({'language_id': languageId.toString()});
 
     final response = await api.request(
       endpoint: ApiCommands.getEvents.value,
@@ -206,12 +206,12 @@ class EventService {
     return events;
   }
 
-  Future<EventDetails?> getEventById(int language_id, int eventId) async {
+  Future<EventDetails?> getEventById(int languageId, int eventId) async {
     final response = await api.request(
       endpoint: ApiCommands.getEventDetails.value,
       method: 'GET',
       queryParams: {
-        'language_id': language_id.toString(),
+        'language_id': languageId.toString(),
         'event_id': eventId.toString(),
       },
     );

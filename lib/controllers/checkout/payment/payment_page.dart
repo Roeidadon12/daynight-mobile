@@ -205,7 +205,7 @@ class _PaymentPageState extends State<PaymentPage> {
     print('Sending payment to backend...');
     print('Payment Token: $paymentToken');
     print('Tickets: ${_ticketPayments.map((t) => t.toString()).join(', ')}');
-    print('Total Amount: \$${finalAmount}');
+    print('Total Amount: \$$finalAmount');
     
     // Simulate API call
     await Future.delayed(const Duration(seconds: 1));
@@ -381,7 +381,7 @@ class _PaymentPageState extends State<PaymentPage> {
       print('  Participants: ${ticketPayment.participants.map((p) => p.fullName).join(', ')}');
     }
     
-    print('Grand total: \$${finalAmount}');
+    print('Grand total: \$$finalAmount');
     
     // TODO: Implement actual payment processing
   }

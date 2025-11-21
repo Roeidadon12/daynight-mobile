@@ -92,7 +92,7 @@ class _PrimaryDropdownFieldState<T> extends State<PrimaryDropdownField<T>>
         );
 
         return DropdownButtonFormField<T>(
-          value: widget.value,
+          initialValue: widget.value,
           focusNode: _focusNode,
           // Opened-list design: rounded items, clearer selection, better spacing
           items: widget.items.map((item) {

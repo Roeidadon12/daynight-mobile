@@ -29,7 +29,7 @@ class _PhoneNumberFormatter extends TextInputFormatter {
     
     if (digitsOnly.isNotEmpty) {
       // Add first 3 digits
-      if (digitsOnly.length >= 1) {
+      if (digitsOnly.isNotEmpty) {
         formatted += digitsOnly.substring(0, digitsOnly.length.clamp(0, 3));
       }
       
@@ -103,7 +103,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
     
     if (digitsOnly.isNotEmpty) {
       // Add first 3 digits
-      if (digitsOnly.length >= 1) {
+      if (digitsOnly.isNotEmpty) {
         formatted += digitsOnly.substring(0, digitsOnly.length.clamp(0, 3));
       }
       
