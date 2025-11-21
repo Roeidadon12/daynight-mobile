@@ -572,12 +572,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
                   child: Form(
                     key: _formKey,
                     child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(
-                        16,
-                        16,
-                        16,
-                        88,
-                      ), // Extra bottom padding for the button
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 88), // Bottom padding for the button
                       itemCount: _flattenedTickets.length,
                       itemBuilder: (context, index) {
                         final (ticket, _) = _flattenedTickets[index];

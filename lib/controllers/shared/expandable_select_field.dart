@@ -19,7 +19,7 @@ class ExpandableSelect<T> extends StatefulWidget {
   final double? maxHeight; // max overlay height (scrolls if exceeded)
   final EdgeInsets optionPadding; // padding per option row
   final BorderRadius optionBorderRadius; // border radius for option highlight
-  final bool barrierDismissible; // whether outside tap closes overlay
+  final ValueChanged<bool>? onExpansionChanged; // callback when dropdown opens/closes
 
   const ExpandableSelect({
     super.key,
@@ -34,115 +34,54 @@ class ExpandableSelect<T> extends StatefulWidget {
     this.maxHeight,
     this.optionPadding = const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
     this.optionBorderRadius = const BorderRadius.all(Radius.circular(14)),
-    this.barrierDismissible = true,
+    this.onExpansionChanged,
   });
 
   @override
   State<ExpandableSelect<T>> createState() => _ExpandableSelectState<T>();
 }
 
-class _ExpandableSelectState<T> extends State<ExpandableSelect<T>> {
+class _ExpandableSelectState<T> extends State<ExpandableSelect<T>>
+    with SingleTickerProviderStateMixin {
   bool _expanded = false;
-  final LayerLink _layerLink = LayerLink();
-  final GlobalKey _fieldKey = GlobalKey();
-  OverlayEntry? _overlayEntry;
-  Size? _fieldSize;
+  late AnimationController _animationController;
+  late Animation<double> _expandAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+  }
 
   void _toggle() {
+    setState(() => _expanded = !_expanded);
+    
     if (_expanded) {
-      _hideOverlay();
-      setState(() => _expanded = false);
+      _animationController.forward();
     } else {
-      setState(() => _expanded = true);
-      _showOverlay();
+      _animationController.reverse();
     }
+    
+    widget.onExpansionChanged?.call(_expanded);
   }
 
   void _select(T value) {
     widget.onChanged(value);
-    _hideOverlay();
     setState(() => _expanded = false);
-  }
-
-  void _measureField() {
-    final ctx = _fieldKey.currentContext;
-    if (ctx != null) {
-      final box = ctx.findRenderObject() as RenderBox?;
-      if (box != null) {
-        _fieldSize = box.size;
-      }
-    }
-  }
-
-  void _showOverlay() {
-    _measureField();
-    final overlay = Overlay.of(context);
-
-    // Calculate the current border color (same logic as in build method)
-    final borderColor = widget.hasError 
-        ? kBrandNegativePrimary 
-        : _expanded 
-            ? kBrandPrimary 
-            : Colors.grey[800]!;
-
-    final list = _OptionsList<T>(
-      options: widget.options,
-      selected: widget.selected,
-      getLabel: widget.getLabel,
-      hasError: widget.hasError,
-      borderColor: borderColor,
-      onSelect: _select,
-      verticalSpacing: widget.verticalSpacing,
-      maxHeight: widget.maxHeight,
-      optionPadding: widget.optionPadding,
-      optionBorderRadius: widget.optionBorderRadius,
-    );
-
-    _overlayEntry = OverlayEntry(
-      builder: (context) {
-        return Stack(
-          children: [
-            if (widget.barrierDismissible)
-              Positioned.fill(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    _hideOverlay();
-                    if (mounted) setState(() => _expanded = false);
-                  },
-                ),
-              ),
-            CompositedTransformFollower(
-              link: _layerLink,
-              showWhenUnlinked: false,
-              offset: Offset(0, (_fieldSize?.height ?? 56) + 8),
-              child: Material(
-                color: Colors.transparent,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minWidth: _fieldSize?.width ?? 240,
-                    maxWidth: _fieldSize?.width ?? 480,
-                  ),
-                  child: list,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-
-    overlay.insert(_overlayEntry!);
-  }
-
-  void _hideOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
+    _animationController.reverse();
+    widget.onExpansionChanged?.call(false);
   }
 
   @override
   void dispose() {
-    _hideOverlay();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -173,64 +112,86 @@ class _ExpandableSelectState<T> extends State<ExpandableSelect<T>> {
         ? widget.getLabel(widget.selected as T, context)
         : '';
 
-    return CompositedTransformTarget(
-      link: _layerLink,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        child: GestureDetector(
-          onTap: _toggle,
-          child: InputDecorator(
-            key: _fieldKey,
-            isEmpty: widget.selected == null,
-            decoration: InputDecoration(
-              labelText: labelText,
-              labelStyle: TextStyle(
-                color: widget.hasError ? kBrandNegativePrimary : Colors.grey[400],
-                fontSize: 16,
-              ),
-              filled: true,
-              fillColor: Colors.black.withAlpha(77),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              border: outlineBorder,
-              enabledBorder: outlineBorder,
-              focusedBorder: outlineBorder,
-              errorBorder: OutlineInputBorder(
-                borderRadius: borderRadius,
-                borderSide: BorderSide(
-                  color: kBrandNegativePrimary,
-                  width: 1,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // The field itself
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: GestureDetector(
+            onTap: _toggle,
+            child: InputDecorator(
+              isEmpty: widget.selected == null,
+              decoration: InputDecoration(
+                labelText: labelText,
+                labelStyle: TextStyle(
+                  color: widget.hasError ? kBrandNegativePrimary : Colors.grey[400],
+                  fontSize: 16,
+                ),
+                filled: true,
+                fillColor: Colors.black.withAlpha(77),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                border: outlineBorder,
+                enabledBorder: outlineBorder,
+                focusedBorder: outlineBorder,
+                errorBorder: OutlineInputBorder(
+                  borderRadius: borderRadius,
+                  borderSide: BorderSide(
+                    color: kBrandNegativePrimary,
+                    width: 1,
+                  ),
                 ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    selectedLabel,
-                    style: TextStyle(
-                      color: widget.selected != null ? Colors.white : Colors.grey[500],
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      selectedLabel,
+                      style: TextStyle(
+                        color: widget.selected != null ? Colors.white : Colors.grey[500],
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                AnimatedRotation(
-                  turns: _expanded ? 0.5 : 0.0,
-                  duration: const Duration(milliseconds: 200),
-                  child: Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: Colors.grey[400],
-                    size: 24,
+                  AnimatedRotation(
+                    turns: _expanded ? 0.5 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: Colors.grey[400],
+                      size: 24,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
+        
+        // The expandable options list
+        SizeTransition(
+          sizeFactor: _expandAnimation,
+          child: Container(
+            margin: const EdgeInsets.only(top: 8),
+            child: _OptionsList<T>(
+              options: widget.options,
+              selected: widget.selected,
+              getLabel: widget.getLabel,
+              hasError: widget.hasError,
+              borderColor: borderColor,
+              onSelect: _select,
+              verticalSpacing: widget.verticalSpacing,
+              maxHeight: widget.maxHeight,
+              optionPadding: widget.optionPadding,
+              optionBorderRadius: widget.optionBorderRadius,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
