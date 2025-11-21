@@ -84,4 +84,9 @@ const Map<String, String> heTexts = {
   'terms-and-conditions': 'תנאים והגבלות',
   'and': 'ו',
   'privacy-policy': 'מדיניות פרטיות',
+  'payment-success': 'תשלום בוצע בהצלחה',
+  'enjoy': 'תהנו',
+  'purchase-completed-successfully': 'הרכישה הושלמה בהצלחה!',
+  'tickets-sent-to-email': 'הכרטיסים נשלחו לכתובת האימייל שלך.',
+  'to-my-tickets': 'לכרטיסים שלי',
 };

@@ -84,4 +84,9 @@ const Map<String, String> enTexts = {
   'terms-and-conditions': 'Terms and Conditions',
   'and': 'and',
   'privacy-policy': 'Privacy Policy',
+  'payment-success': 'Payment Success',
+  'enjoy': 'ENJOY',
+  'purchase-completed-successfully': 'Your purchase has been completed successfully!',
+  'tickets-sent-to-email': 'Your tickets have been sent to your email address.',
+  'to-my-tickets': 'To My Tickets',
 };

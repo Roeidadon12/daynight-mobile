@@ -7,6 +7,7 @@ import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/app_localizations.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets.dart';
 import 'package:day_night/controllers/checkout/payment/promo_code_controller.dart';
+import 'package:day_night/controllers/checkout/payment/payment_success_page.dart';
 import 'package:day_night/controllers/shared/loading_overlay_controller.dart';
 import 'package:day_night/models/ticket_item.dart';
 import 'package:day_night/models/ticket_payment.dart';
@@ -183,7 +184,7 @@ class _PaymentPageState extends State<PaymentPage> {
       
       if (token != null) {
         // TODO: Send payment data to your backend API
-        await _sendPaymentToBackend(token);
+        // await _sendPaymentToBackend(token);
         
         // Show success message
         _showPaymentSuccess();
@@ -213,16 +214,21 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   void _showPaymentSuccess() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Payment successful! Total: \$${finalAmount.toStringAsFixed(2)}'),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
+    // Calculate total ticket count
+    final totalTicketCount = _ticketPayments.fold(0, (sum, ticketPayment) => sum + ticketPayment.participantCount);
+    
+    // Navigate to payment success page
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PaymentSuccessPage(
+          totalAmount: finalAmount,
+          eventTitle: widget.orderInfo.eventDetails.eventInformation.title,
+          ticketCount: totalTicketCount,
+          transactionId: DateTime.now().millisecondsSinceEpoch.toString(), // Generate a simple transaction ID
+        ),
       ),
     );
-    
-    // TODO: Navigate to success page or back to home
-    Navigator.pop(context);
   }
 
   void _showPaymentError(String message) {
