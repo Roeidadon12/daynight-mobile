@@ -21,80 +21,28 @@ class ListTickets extends StatefulWidget {
 }
 
 class ListTicketsState extends State<ListTickets> {
-  // Track selected tickets with their amounts
+  // Track selected tickets with their amounts - support multiple selections
   final Map<String, int> _ticketAmounts = {};
-  String? _selectedTicketId; // allow only one selected row at a time
 
   void _selectTicket(Ticket ticket) {
     final String id = ticket.id.toString();
 
-    // Prepare previous ticket (if any) to notify about deselection
-    Ticket? prevTicket;
-    if (_selectedTicketId != null && _selectedTicketId != id) {
-      try {
-        prevTicket = widget.tickets.firstWhere((t) => t.id.toString() == _selectedTicketId);
-      } catch (_) {
-        prevTicket = null;
-      }
-    }
-
     setState(() {
-      if (_selectedTicketId == id) {
-        // Toggle selection: if already selected, unselect and set amount to 0
-        final newAmount = (_ticketAmounts[id] ?? 0) > 0 ? 0 : 1;
-        _ticketAmounts[id] = newAmount;
-        _selectedTicketId = newAmount > 0 ? id : null;
-        widget.onTicketSelected(newAmount > 0 ? ticket : null, newAmount);
-      } else {
-        // Select this ticket and clear others
-        _selectedTicketId = id;
-        // Zero out all other amounts
-        _ticketAmounts.updateAll((key, value) => 0);
-        // Ensure at least 1 by default when selecting
-        final newAmount = (_ticketAmounts[id] ?? 0) > 0 ? _ticketAmounts[id]! : 1;
-        _ticketAmounts[id] = newAmount;
-
-        // Notify parent about previous deselection and the new selection
-        if (prevTicket != null) {
-          widget.onTicketSelected(prevTicket, 0);
-        }
-        widget.onTicketSelected(ticket, newAmount);
-      }
+      // Toggle selection: if already selected with amount > 0, set to 0, otherwise set to 1
+      final currentAmount = _ticketAmounts[id] ?? 0;
+      final newAmount = currentAmount > 0 ? 0 : 1;
+      _ticketAmounts[id] = newAmount;
+      widget.onTicketSelected(ticket, newAmount);
     });
   }
 
   void _handleAmountChange(Ticket ticket, int newAmount) {
     final String id = ticket.id.toString();
 
-    // Determine if we need to deselect a previously selected ticket
-    Ticket? prevTicket;
-    if (newAmount > 0 && _selectedTicketId != null && _selectedTicketId != id) {
-      try {
-        prevTicket = widget.tickets.firstWhere((t) => t.id.toString() == _selectedTicketId);
-      } catch (_) {
-        prevTicket = null;
-      }
-    }
-
     setState(() {
-      if (newAmount > 0) {
-        // Selecting/adjusting this ticket => make it the only selected one
-        _selectedTicketId = id;
-        _ticketAmounts.updateAll((key, value) => 0);
-      } else {
-        // Amount became 0 -> if it was the selected one, clear selection
-        if (_selectedTicketId == id) {
-          _selectedTicketId = null;
-        }
-      }
-
       _ticketAmounts[id] = newAmount;
     });
 
-    // Notify parent: first clear previous selection (if any), then update this one
-    if (prevTicket != null) {
-      widget.onTicketSelected(prevTicket, 0);
-    }
     widget.onTicketSelected(ticket, newAmount);
   }
 
@@ -102,6 +50,9 @@ class ListTicketsState extends State<ListTickets> {
   Widget build(BuildContext context) {
     return Column(
       children: widget.tickets.map((ticket) {
+        final ticketId = ticket.id.toString();
+        final isSelected = (_ticketAmounts[ticketId] ?? 0) > 0;
+        
         return Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
           child: GestureDetector(
@@ -114,8 +65,8 @@ class ListTicketsState extends State<ListTickets> {
               child: TicketItem(
                 eventDetails: widget.eventDetails,
                 ticket: ticket,
-                initialAmount: _ticketAmounts[ticket.id.toString()] ?? 0,
-                isSelected: _selectedTicketId == ticket.id.toString(),
+                initialAmount: _ticketAmounts[ticketId] ?? 0,
+                isSelected: isSelected,
                 onAmountChanged: (newAmount) => _handleAmountChange(ticket, newAmount),
               ),
             ),

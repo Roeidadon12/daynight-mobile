@@ -11,7 +11,9 @@ class PurchaseBasket {
 
   /// Adds tickets to the basket
   void addTickets(List<TicketItem> tickets) {
-    _ticketInfo = TicketInfo(tickets: tickets);
+    // Filter out tickets with quantity 0 or less as a safety measure
+    final validTickets = tickets.where((ticket) => ticket.quantity > 0).toList();
+    _ticketInfo = TicketInfo(tickets: validTickets);
   }
 
   /// Updates the purchaser's information

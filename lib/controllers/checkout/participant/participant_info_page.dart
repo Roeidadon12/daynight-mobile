@@ -44,8 +44,11 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
   List<(TicketItem, int)> _getFlattenedTickets(List<TicketItem> tickets) {
     final flattened = <(TicketItem, int)>[];
     for (final ticket in tickets) {
-      for (int i = 0; i < ticket.quantity; i++) {
-        flattened.add((ticket, i));
+      // Only process tickets that have quantity > 0
+      if (ticket.quantity > 0) {
+        for (int i = 0; i < ticket.quantity; i++) {
+          flattened.add((ticket, i));
+        }
       }
     }
     return flattened;
@@ -310,8 +313,14 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
   @override
   void initState() {
     super.initState();
+    
+    // Filter out tickets with quantity 0 as a safety measure
+    final validTickets = (widget.orderInfo.currentBasket.ticketInfo?.tickets ?? [])
+        .where((ticket) => ticket.quantity > 0)
+        .toList();
+    
     participantsInfo = ParticipantInfo(
-      selectedTickets: widget.orderInfo.currentBasket.ticketInfo?.tickets ?? [],
+      selectedTickets: validTickets,
       eventDetails: widget.orderInfo.eventDetails,
     );
 
