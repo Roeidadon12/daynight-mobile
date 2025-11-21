@@ -89,4 +89,9 @@ const Map<String, String> enTexts = {
   'purchase-completed-successfully': 'Your purchase has been completed successfully!',
   'tickets-sent-to-email': 'Your tickets have been sent to your email address.',
   'to-my-tickets': 'To My Tickets',
+  'my-tickets': 'My Tickets',
+  'upcoming-events': 'Upcoming Events',
+  'closed-events': 'Closed Events',
+  'favorite-events': 'Favorite Events',
+  
 };

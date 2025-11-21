@@ -4,6 +4,12 @@ enum HomeTabButtonType {
   week,
 }
 
+enum FilterTicketsButtonType {
+  upcoming,
+  closed,
+  favorite,
+}
+
 enum SearchCriteriaType {
   dateCrieteria,
   priceCriteria,

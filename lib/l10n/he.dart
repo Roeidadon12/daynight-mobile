@@ -89,4 +89,8 @@ const Map<String, String> heTexts = {
   'purchase-completed-successfully': 'הרכישה הושלמה בהצלחה!',
   'tickets-sent-to-email': 'הכרטיסים נשלחו לכתובת האימייל שלך.',
   'to-my-tickets': 'לכרטיסים שלי',
+  'my-tickets': 'הכרטיסים שלי',
+  'upcoming-events': 'אירועים קרובים',
+  'closed-events': 'אירועים סגורים',
+  'favorite-events': 'אירועים מועדפים',
 };

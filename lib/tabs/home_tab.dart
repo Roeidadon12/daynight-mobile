@@ -176,6 +176,20 @@ class _HomeTabState extends State<HomeTab> {
   HomeTabView _currentView = HomeTabView.today;
   Category? _currentCategory;
 
+  int _getSelectedIndex(List<String> labels) {
+    switch (_currentView) {
+      case HomeTabView.today:
+        return labels.indexOf(AppLocalizations.of(context).get('today-events'));
+      case HomeTabView.week:
+        return labels.indexOf(AppLocalizations.of(context).get('week-events'));
+      case HomeTabView.category:
+        if (_currentCategory != null) {
+          return labels.indexOf(_currentCategory!.name);
+        }
+        return -1;
+    }
+  }
+
   String _getEmptyStateMessage(BuildContext context, [String? displayMessage]) {
     if (displayMessage != null) {
       return AppLocalizations.of(context).get(displayMessage);
@@ -234,6 +248,7 @@ class _HomeTabState extends State<HomeTab> {
                 else
                   HorizontalButtonsController(
                     labels: labels,
+                    selectedIndex: _getSelectedIndex(labels),
                     delegates: {
                       // Only include delegates for event types that have events
                       if (todayEvents.isNotEmpty)
