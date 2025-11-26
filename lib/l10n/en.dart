@@ -93,5 +93,12 @@ const Map<String, String> enTexts = {
   'upcoming-events': 'Upcoming Events',
   'closed-events': 'Closed Events',
   'favorite-events': 'Favorite Events',
+  'my-events': 'My Events',
+  'my-editing': 'My Events',
+  'drafts': 'Drafts',
+  'published': 'Published',
+  'create-first-event': 'Create your first event to get started',
+  'create-new-event': 'Create New Event',
+  'create-event': 'Create event',
   
 };

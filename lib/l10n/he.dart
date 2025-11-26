@@ -93,4 +93,11 @@ const Map<String, String> heTexts = {
   'upcoming-events': 'אירועים קרובים',
   'closed-events': 'אירועים סגורים',
   'favorite-events': 'אירועים מועדפים',
+  'my-events': 'האירועים שלי',
+  'my-editing': 'האירועים שלי',
+  'drafts': 'טיוטות',
+  'published': 'פורסם',
+  'create-first-event': 'צרו את האירוע הראשון שלכם כדי להתחיל',
+  'create-new-event': 'צור אירוע חדש',
+  'create-event': 'צור אירוע',
 };

@@ -10,6 +10,12 @@ enum FilterTicketsButtonType {
   favorite,
 }
 
+enum FilterEditingButtonType {
+  myEvents,
+  drafts,
+  published,
+}
+
 enum SearchCriteriaType {
   dateCrieteria,
   priceCriteria,
