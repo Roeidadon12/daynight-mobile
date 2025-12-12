@@ -128,6 +128,14 @@ const Map<String, String> enTexts = {
   'enter-event-location': 'Enter event location',
   'event-name-required': 'Event name is required',
   'location-required': 'Location is required',
-  'continue': 'Continue',
-
+  'create-event-continue-to-description': 'Continue to Event Description',
+  'event-timezone': 'Timezone',
+  'event-currency': 'Currency',
+  'event-language': 'Language',
+  'date-format': 'dd/MM/yyyy',
+  'time-format': 'HH:mm',
+  'datetime-format': 'dd/MM/yyyy HH:mm',
+  'create-event-main-image': 'Event Main Image (You can change it at any time)',
+  'create-event-description': 'Event Description',
+  'create-event-description-instructions': 'Write a description that will make them want to come and what will be at the event',
 };

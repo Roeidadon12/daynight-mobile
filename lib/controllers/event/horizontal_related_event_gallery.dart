@@ -186,28 +186,33 @@ class _HorizontalEventGalleryWithDotsState extends State<_HorizontalEventGallery
               width: size,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   // Additional content can be added here
-                  Text(
-                    event.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (event.country != '') ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      event.country,
-                      style: const TextStyle(color: Colors.white70, fontSize: 10),
+                  Flexible(
+                    child: Text(
+                      event.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (event.country != '') ...[
+                    const SizedBox(height: 2),
+                    Flexible(
+                      child: Text(
+                        event.country,
+                        style: const TextStyle(color: Colors.white70, fontSize: 10),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ],

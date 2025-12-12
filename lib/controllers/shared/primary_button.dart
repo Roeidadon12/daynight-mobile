@@ -26,14 +26,32 @@ class PrimaryButton extends StatelessWidget {
       height: height,
       child: ElevatedButton(
         onPressed: disabled ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: disabled ? Colors.grey : kBrandPrimary,
-          foregroundColor: Colors.white,
-          side: BorderSide(
-            color: disabled ? Colors.grey : kBrandPrimary,
-            width: 2,
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith<Color>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.disabled)) {
+                return Colors.grey[400]!;
+              }
+              return kBrandPrimary;
+            },
           ),
-          elevation: 0,
+          foregroundColor: WidgetStateProperty.resolveWith<Color>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.disabled)) {
+                return Colors.black87;
+              }
+              return Colors.white;
+            },
+          ),
+          side: WidgetStateProperty.resolveWith<BorderSide>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.disabled)) {
+                return BorderSide(color: Colors.grey[400]!, width: 2);
+              }
+              return BorderSide(color: kBrandPrimary, width: 2);
+            },
+          ),
+          elevation: WidgetStateProperty.all<double>(0),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

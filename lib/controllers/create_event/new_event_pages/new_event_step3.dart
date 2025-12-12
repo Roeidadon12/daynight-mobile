@@ -405,6 +405,7 @@ class _NewEventStep3State extends State<NewEventStep3> {
                     textKey: 'create-event',
                     disabled: !_isFormValid(),
                     trailingIcon: Icons.check,
+                    flexible: false,
                   ),
                 ),
               ],

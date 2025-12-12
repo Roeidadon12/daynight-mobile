@@ -32,8 +32,53 @@ class _NewEventStep1State extends State<NewEventStep1> {
   DateTime? _startTime;
   DateTime? _endTime;
   bool _categoryExpanded = false;
+  String _selectedTimezone = 'GMT+2 (Israel)';
+  bool _timezoneExpanded = false;
+  String _selectedCurrency = 'ILS (Israeli Shekel)';
+  bool _currencyExpanded = false;
+  String _selectedLanguage = 'Hebrew';
+  bool _languageExpanded = false;
 
   List<Category> _categories = [];
+  
+  List<String> get _timezones => [
+    'GMT+2 (Israel)',
+    'GMT-5 (EST)',
+    'GMT-8 (PST)',
+    'GMT+0 (UTC)',
+    'GMT+1 (CET)',
+    'GMT+3 (MSK)',
+    'GMT+9 (JST)',
+    'GMT+8 (CST)',
+    'GMT-3 (BRT)',
+    'GMT+5:30 (IST)',
+  ];
+  
+  List<String> get _currencies => [
+    'ILS (Israeli Shekel)',
+    'USD (US Dollar)',
+    'EUR (Euro)',
+    'GBP (British Pound)',
+    'JPY (Japanese Yen)',
+    'CAD (Canadian Dollar)',
+    'AUD (Australian Dollar)',
+    'CHF (Swiss Franc)',
+    'CNY (Chinese Yuan)',
+    'INR (Indian Rupee)',
+  ];
+  
+  List<String> get _languages => [
+    'Hebrew',
+    'English',
+    'Arabic',
+    'Spanish',
+    'French',
+    'German',
+    'Italian',
+    'Portuguese',
+    'Russian',
+    'Chinese',
+  ];
 
   @override
   void initState() {
@@ -72,6 +117,9 @@ class _NewEventStep1State extends State<NewEventStep1> {
     
     _startTime = widget.eventData['startTime'];
     _endTime = widget.eventData['endTime'];
+    _selectedTimezone = widget.eventData['timezone'] ?? 'GMT+2 (Israel)';
+    _selectedCurrency = widget.eventData['currency'] ?? 'ILS (Israeli Shekel)';
+    _selectedLanguage = widget.eventData['language'] ?? 'Hebrew';
   }
 
   @override
@@ -99,6 +147,9 @@ class _NewEventStep1State extends State<NewEventStep1> {
       widget.onDataChanged('minimalAge', _minimalAgeController.text.isNotEmpty ? int.tryParse(_minimalAgeController.text) : null);
       widget.onDataChanged('startTime', _startTime);
       widget.onDataChanged('endTime', _endTime);
+      widget.onDataChanged('timezone', _selectedTimezone);
+      widget.onDataChanged('currency', _selectedCurrency);
+      widget.onDataChanged('language', _selectedLanguage);
       
       widget.onNext();
     }
@@ -226,6 +277,21 @@ class _NewEventStep1State extends State<NewEventStep1> {
         });
       }
     }
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    // Get the datetime format from localization
+    final format = AppLocalizations.of(context).get('datetime-format');
+    
+    // Simple format replacement for dd/MM/yyyy HH:mm
+    String formatted = format
+        .replaceAll('dd', dateTime.day.toString().padLeft(2, '0'))
+        .replaceAll('MM', dateTime.month.toString().padLeft(2, '0'))
+        .replaceAll('yyyy', dateTime.year.toString())
+        .replaceAll('HH', dateTime.hour.toString().padLeft(2, '0'))
+        .replaceAll('mm', dateTime.minute.toString().padLeft(2, '0'));
+    
+    return formatted;
   }
 
   @override
@@ -488,12 +554,14 @@ class _NewEventStep1State extends State<NewEventStep1> {
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.event, color: Colors.white54),
-                                      const SizedBox(width: 8),
+                                      if (_startTime == null) ...[
+                                        Icon(Icons.event, color: Colors.white54),
+                                        const SizedBox(width: 8),
+                                      ],
                                       Expanded(
                                         child: Text(
                                           _startTime != null
-                                              ? '${_startTime!.day}/${_startTime!.month}/${_startTime!.year} ${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}'
+                                              ? _formatDateTime(_startTime!)
                                               : AppLocalizations.of(context).get('select-start-time'),
                                           style: TextStyle(
                                             color: _startTime != null ? Colors.white : Colors.grey[400],
@@ -540,12 +608,14 @@ class _NewEventStep1State extends State<NewEventStep1> {
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.event, color: Colors.white54),
-                                      const SizedBox(width: 8),
+                                      if (_endTime == null) ...[
+                                        Icon(Icons.event, color: Colors.white54),
+                                        const SizedBox(width: 8),
+                                      ],
                                       Expanded(
                                         child: Text(
                                           _endTime != null
-                                              ? '${_endTime!.day}/${_endTime!.month}/${_endTime!.year} ${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}'
+                                              ? _formatDateTime(_endTime!)
                                               : AppLocalizations.of(context).get('select-end-time'),
                                           style: TextStyle(
                                             color: _endTime != null ? Colors.white : Colors.grey[400],
@@ -562,6 +632,452 @@ class _NewEventStep1State extends State<NewEventStep1> {
                         ),
                       ],
                     ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Timezone Selection
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context).get('event-timezone'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _timezoneExpanded = !_timezoneExpanded;
+                            });
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withAlpha(77),
+                              borderRadius: BorderRadius.circular(32),
+                              border: Border.all(
+                                color: _timezoneExpanded ? kBrandPrimary : Colors.grey[800]!,
+                                width: _timezoneExpanded ? 2 : 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.access_time, color: Colors.white54, size: 20),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          _selectedTimezone,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                AnimatedRotation(
+                                  turns: _timezoneExpanded ? 0.5 : 0.0,
+                                  duration: const Duration(milliseconds: 200),
+                                  child: Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: Colors.grey[400],
+                                    size: 24,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        
+                        // Timezone Dropdown
+                        if (_timezoneExpanded) ...[
+                          const SizedBox(height: 8),
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              color: kMainBackgroundColor,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: kBrandPrimary,
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.45),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: _timezones.map((timezone) {
+                                final isSelected = timezone == _selectedTimezone;
+                                return InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedTimezone = timezone;
+                                      _timezoneExpanded = false;
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(14),
+                                      color: isSelected ? kBrandPrimary.withValues(alpha: 0.15) : Colors.transparent,
+                                      border: isSelected
+                                          ? Border.all(
+                                              color: kBrandPrimary.withValues(alpha: 0.30),
+                                              width: 1,
+                                            )
+                                          : null,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            timezone,
+                                            style: TextStyle(
+                                              color: isSelected ? kBrandPrimary : Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        if (isSelected)
+                                          Icon(
+                                            Icons.check_circle_rounded,
+                                            size: 18,
+                                            color: kBrandPrimary,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Currency and Language Row
+                    Row(
+                      children: [
+                        // Currency
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context).get('event-currency'),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _currencyExpanded = !_currencyExpanded;
+                                    _languageExpanded = false; // Close language dropdown
+                                  });
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withAlpha(77),
+                                    borderRadius: BorderRadius.circular(32),
+                                    border: Border.all(
+                                      color: _currencyExpanded ? kBrandPrimary : Colors.grey[800]!,
+                                      width: _currencyExpanded ? 2 : 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.attach_money, color: Colors.white54, size: 20),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                _selectedCurrency.split(' ')[0], // Show only currency code
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      AnimatedRotation(
+                                        turns: _currencyExpanded ? 0.5 : 0.0,
+                                        duration: const Duration(milliseconds: 200),
+                                        child: Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: Colors.grey[400],
+                                          size: 24,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        const SizedBox(width: 16),
+                        
+                        // Language
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context).get('event-language'),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _languageExpanded = !_languageExpanded;
+                                    _currencyExpanded = false; // Close currency dropdown
+                                  });
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withAlpha(77),
+                                    borderRadius: BorderRadius.circular(32),
+                                    border: Border.all(
+                                      color: _languageExpanded ? kBrandPrimary : Colors.grey[800]!,
+                                      width: _languageExpanded ? 2 : 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.language, color: Colors.white54, size: 20),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                _selectedLanguage,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      AnimatedRotation(
+                                        turns: _languageExpanded ? 0.5 : 0.0,
+                                        duration: const Duration(milliseconds: 200),
+                                        child: Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: Colors.grey[400],
+                                          size: 24,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    // Currency Dropdown (full width below the row)
+                    if (_currencyExpanded) ...[
+                      const SizedBox(height: 8),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: kMainBackgroundColor,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: kBrandPrimary,
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.45),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: _currencies.map((currency) {
+                            final isSelected = currency == _selectedCurrency;
+                            return InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _selectedCurrency = currency;
+                                  _currencyExpanded = false;
+                                });
+                              },
+                              borderRadius: BorderRadius.circular(14),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  color: isSelected ? kBrandPrimary.withValues(alpha: 0.15) : Colors.transparent,
+                                  border: isSelected
+                                      ? Border.all(
+                                          color: kBrandPrimary.withValues(alpha: 0.30),
+                                          width: 1,
+                                        )
+                                      : null,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        currency,
+                                        style: TextStyle(
+                                          color: isSelected ? kBrandPrimary : Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      Icon(
+                                        Icons.check_circle_rounded,
+                                        size: 18,
+                                        color: kBrandPrimary,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                    
+                    // Language Dropdown (full width below the row)
+                    if (_languageExpanded) ...[
+                      const SizedBox(height: 8),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: kMainBackgroundColor,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: kBrandPrimary,
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.45),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: _languages.map((language) {
+                            final isSelected = language == _selectedLanguage;
+                            return InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _selectedLanguage = language;
+                                  _languageExpanded = false;
+                                });
+                              },
+                              borderRadius: BorderRadius.circular(14),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  color: isSelected ? kBrandPrimary.withValues(alpha: 0.15) : Colors.transparent,
+                                  border: isSelected
+                                      ? Border.all(
+                                          color: kBrandPrimary.withValues(alpha: 0.30),
+                                          width: 1,
+                                        )
+                                      : null,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        language,
+                                        style: TextStyle(
+                                          color: isSelected ? kBrandPrimary : Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      Icon(
+                                        Icons.check_circle_rounded,
+                                        size: 18,
+                                        color: kBrandPrimary,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -573,9 +1089,10 @@ class _NewEventStep1State extends State<NewEventStep1> {
             padding: const EdgeInsets.all(16),
             child: PrimaryButton(
               onPressed: _saveAndNext,
-              textKey: 'continue',
+              textKey: 'create-event-continue-to-description',
               disabled: !_isFormValid(),
               trailingIcon: Icons.arrow_forward,
+              flexible: false,
             ),
           ),
         ],

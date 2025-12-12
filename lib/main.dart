@@ -1,6 +1,7 @@
 import 'package:day_night/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'utils/logger.dart';
 import 'splash_screen.dart';
 import 'app_localizations.dart';
@@ -66,6 +67,7 @@ class MyApp extends StatelessWidget {
       ),
       localizationsDelegates: [
         const AppLocalizationsDelegate(),
+        FlutterQuillLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
