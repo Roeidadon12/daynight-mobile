@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../app_localizations.dart';
 import '../../../constants.dart';
 import '../../shared/primary_button.dart';
+import '../../../models/category.dart';
+import '../../../utils/category_utils.dart';
 
 class NewEventStep1 extends StatefulWidget {
   final Map<String, dynamic> eventData;
@@ -25,29 +27,47 @@ class _NewEventStep1State extends State<NewEventStep1> {
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
   
-  String? _selectedCategory;
+  Category? _selectedCategory;
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
 
-  final List<String> _categories = [
-    'music',
-    'sports',
-    'technology',
-    'food',
-    'art',
-    'business',
-    'education',
-    'entertainment',
-  ];
+  List<Category> _categories = [];
 
   @override
   void initState() {
     super.initState();
+    // Load categories
+    _categories = getCategoriesByLanguage();
+    
     // Initialize with existing data if any
     _eventNameController.text = widget.eventData['eventName'] ?? '';
     _descriptionController.text = widget.eventData['description'] ?? '';
     _locationController.text = widget.eventData['location'] ?? '';
-    _selectedCategory = widget.eventData['category'];
+    
+    // Handle existing category data - find category by ID or slug if it exists
+    final existingCategory = widget.eventData['category'];
+    if (existingCategory != null && _categories.isNotEmpty) {
+      if (existingCategory is Category) {
+        _selectedCategory = existingCategory;
+      } else if (existingCategory is int) {
+        try {
+          _selectedCategory = _categories.firstWhere(
+            (cat) => cat.id == existingCategory,
+          );
+        } catch (e) {
+          _selectedCategory = _categories.first;
+        }
+      } else if (existingCategory is String) {
+        try {
+          _selectedCategory = _categories.firstWhere(
+            (cat) => cat.slug == existingCategory || cat.name == existingCategory,
+          );
+        } catch (e) {
+          _selectedCategory = _categories.first;
+        }
+      }
+    }
+    
     _selectedDate = widget.eventData['date'];
     _selectedTime = widget.eventData['time'];
   }
@@ -234,7 +254,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
+                        child: DropdownButton<Category>(
                           value: _selectedCategory,
                           hint: Text(
                             AppLocalizations.of(context).get('select-category'),
@@ -242,13 +262,13 @@ class _NewEventStep1State extends State<NewEventStep1> {
                           ),
                           style: const TextStyle(color: Colors.white),
                           dropdownColor: Colors.grey[800],
-                          items: _categories.map((String category) {
-                            return DropdownMenuItem<String>(
+                          items: _categories.map((Category category) {
+                            return DropdownMenuItem<Category>(
                               value: category,
-                              child: Text(AppLocalizations.of(context).get(category)),
+                              child: Text(category.name),
                             );
                           }).toList(),
-                          onChanged: (String? newValue) {
+                          onChanged: (Category? newValue) {
                             setState(() {
                               _selectedCategory = newValue;
                             });

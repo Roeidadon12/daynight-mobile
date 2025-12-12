@@ -35,6 +35,8 @@ const Map<String, String> heTexts = {
   'no-week-events': 'אין אירועים השבוע',
   'no-category-events': 'אין אירועים בקטגוריה זו',
   'no-upcoming-events': 'אין אירועים קרובים',
+  'week-events': 'אירועי השבוע',
+  'today-events': 'אירועי היום',
   'sold-out': 'אזל מהמלאי',
   'proceed-to-payment': 'המשך לתשלום',
   'processing-fee': 'דמי טיפול',
@@ -100,4 +102,13 @@ const Map<String, String> heTexts = {
   'create-first-event': 'צרו את האירוע הראשון שלכם כדי להתחיל',
   'create-new-event': 'צור אירוע חדש',
   'create-event': 'צור אירוע',
+
+  'create-event-basic-info': 'תיאור האירוע',
+  'create-event-basic-info-description': 'בוא נעצב את האווירה שמדברת אל הקהל שלך, הרושם כן קובע!',
+  'create-event-details': 'הגדרות מתקדמות',
+  'create-event-details-description': 'קח את האירוע שלך קדימה עם הגדרות מתקדמות שיעזרו לך להצליח כמו הגדולים!',
+  'create-event-tickets-pricing': 'פרטי חשבון',
+  'create-event-tickets-pricing-description': 'לאן תרצה לקבל את הכסף?',
+  'create-event-confirmation': '',
+  'create-event-confirmation-description': '',
 };

@@ -33,6 +33,8 @@ const Map<String, String> enTexts = {
   'no-week-events': 'No events scheduled for this week',
   'no-category-events': 'No events found in this category',
   'no-upcoming-events': 'No upcoming events available',
+  'week-events': 'Week\'s Events',
+  'today-events': 'Today\'s Events',
   'GBP': 'British Pound (£)', // British Pound
   'buy-tickets': 'Buy Tickets',
   'sold-out': 'Sold Out',
@@ -101,4 +103,12 @@ const Map<String, String> enTexts = {
   'create-new-event': 'Create New Event',
   'create-event': 'Create event',
   
+  'create-event-basic-info': 'Event Description',
+  'create-event-basic-info-description': 'Set the mood that speaks to your audience, first impressions matter!',
+  'create-event-details': 'Advanced Settings',
+  'create-event-details-description': 'Take your event to the next level with advanced settings that help you succeed like the pros!',
+  'create-event-tickets-pricing': 'Account Details',
+  'create-event-tickets-pricing-description': 'Where would you like to receive the money?',
+  'create-event-confirmation': '',
+  'create-event-confirmation-description': '',
 };

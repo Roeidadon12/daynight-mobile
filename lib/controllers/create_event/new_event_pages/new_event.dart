@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../app_localizations.dart';
 import '../../../constants.dart';
 import '../../shared/custom_app_bar.dart';
+import '../event_components/create_step_title.dart';
 import 'new_event_step1.dart';
 import 'new_event_step2.dart';
 import 'new_event_step3.dart';
@@ -19,11 +20,23 @@ class _NewEventPageState extends State<NewEventPage> {
   // Controllers for each step - to be reused in editing phase
   final Map<String, dynamic> _eventData = {};
   
-  final List<String> _stepTitles = [
-    'event-basic-info',
-    'event-details',
-    'event-tickets-pricing',
-    'event-confirmation'
+  List<CreateStepTitle> get _stepTitles => [
+    CreateStepTitle(
+      title: AppLocalizations.of(context).get('create-event-basic-info'),
+      description: AppLocalizations.of(context).get('create-event-basic-info-description'),
+    ),
+    CreateStepTitle(
+      title: AppLocalizations.of(context).get('create-event-details'),
+      description: AppLocalizations.of(context).get('create-event-details-description'),
+    ),
+    CreateStepTitle(
+      title: AppLocalizations.of(context).get('create-event-tickets-pricing'),
+      description: AppLocalizations.of(context).get('create-event-tickets-pricing-description'),
+    ),
+    CreateStepTitle(
+      title: AppLocalizations.of(context).get('create-event-confirmation'),
+      description: AppLocalizations.of(context).get('create-event-confirmation-description'),
+    ),
   ];
 
   void _nextStep() {
@@ -124,17 +137,8 @@ class _NewEventPageState extends State<NewEventPage> {
   Widget _buildStepTitle() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: kMainBackgroundColor,
-      child: Text(
-        AppLocalizations.of(context).get(_stepTitles[_currentStep]),
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.center,
-      ),
+      child: _stepTitles[_currentStep],
     );
   }
 
