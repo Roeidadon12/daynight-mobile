@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:day_night/app_localizations.dart';
 import 'package:day_night/constants.dart';
+import 'package:day_night/controllers/create_event/new_event_pages/new_event.dart';
 
 class EmptyMyEvents extends StatelessWidget {
   const EmptyMyEvents({super.key});
@@ -71,7 +72,12 @@ class EmptyMyEvents extends StatelessWidget {
               height: 56,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: Navigate to create event page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NewEventPage(),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kBrandPrimary,
