@@ -4,6 +4,9 @@ import '../../../constants.dart';
 import '../../shared/primary_button.dart';
 import '../../../models/category.dart';
 import '../../../utils/category_utils.dart';
+import '../../shared/category_expandable_field.dart';
+import '../../shared/labeled_text_form_field.dart';
+import '../../shared/expandable_select_field.dart';
 
 class NewEventStep1 extends StatefulWidget {
   final Map<String, dynamic> eventData;
@@ -24,12 +27,12 @@ class NewEventStep1 extends StatefulWidget {
 class _NewEventStep1State extends State<NewEventStep1> {
   final _formKey = GlobalKey<FormState>();
   final _eventNameController = TextEditingController();
-  final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
+  final _minimalAgeController = TextEditingController();
   
   Category? _selectedCategory;
-  DateTime? _selectedDate;
-  TimeOfDay? _selectedTime;
+  DateTime? _startTime;
+  DateTime? _endTime;
 
   List<Category> _categories = [];
 
@@ -41,8 +44,8 @@ class _NewEventStep1State extends State<NewEventStep1> {
     
     // Initialize with existing data if any
     _eventNameController.text = widget.eventData['eventName'] ?? '';
-    _descriptionController.text = widget.eventData['description'] ?? '';
     _locationController.text = widget.eventData['location'] ?? '';
+    _minimalAgeController.text = widget.eventData['minimalAge']?.toString() ?? '';
     
     // Handle existing category data - find category by ID or slug if it exists
     final existingCategory = widget.eventData['category'];
@@ -68,47 +71,49 @@ class _NewEventStep1State extends State<NewEventStep1> {
       }
     }
     
-    _selectedDate = widget.eventData['date'];
-    _selectedTime = widget.eventData['time'];
+    _startTime = widget.eventData['startTime'];
+    _endTime = widget.eventData['endTime'];
   }
 
   @override
   void dispose() {
     _eventNameController.dispose();
-    _descriptionController.dispose();
     _locationController.dispose();
+    _minimalAgeController.dispose();
     super.dispose();
   }
 
   bool _isFormValid() {
     return _eventNameController.text.isNotEmpty &&
-           _descriptionController.text.isNotEmpty &&
            _locationController.text.isNotEmpty &&
            _selectedCategory != null &&
-           _selectedDate != null &&
-           _selectedTime != null;
+           _startTime != null &&
+           _endTime != null;
   }
 
   void _saveAndNext() {
     if (_formKey.currentState!.validate() && _isFormValid()) {
       // Save all form data
       widget.onDataChanged('eventName', _eventNameController.text);
-      widget.onDataChanged('description', _descriptionController.text);
       widget.onDataChanged('location', _locationController.text);
       widget.onDataChanged('category', _selectedCategory);
-      widget.onDataChanged('date', _selectedDate);
-      widget.onDataChanged('time', _selectedTime);
+      widget.onDataChanged('minimalAge', _minimalAgeController.text.isNotEmpty ? int.tryParse(_minimalAgeController.text) : null);
+      widget.onDataChanged('startTime', _startTime);
+      widget.onDataChanged('endTime', _endTime);
       
       widget.onNext();
     }
   }
 
-  Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
+  Future<void> _selectStartTime() async {
+    final DateTime now = DateTime.now();
+    final DateTime initialDateTime = _startTime ?? now.add(const Duration(days: 1));
+    
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now().add(const Duration(days: 1)),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      initialDate: initialDateTime,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -122,17 +127,50 @@ class _NewEventStep1State extends State<NewEventStep1> {
       },
     );
     
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
+    if (pickedDate != null) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(initialDateTime),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: Theme.of(context).colorScheme.copyWith(
+                primary: kBrandPrimary,
+                surface: Colors.grey[900]!,
+              ),
+            ),
+            child: child!,
+          );
+        },
+      );
+      
+      if (pickedTime != null) {
+        setState(() {
+          _startTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+          // If end time is not set or is before start time, set it to start time + 2 hours
+          if (_endTime == null || _endTime!.isBefore(_startTime!)) {
+            _endTime = _startTime!.add(const Duration(hours: 2));
+          }
+        });
+      }
     }
   }
 
-  Future<void> _selectTime() async {
-    final TimeOfDay? picked = await showTimePicker(
+  Future<void> _selectEndTime() async {
+    final DateTime now = DateTime.now();
+    final DateTime initialDateTime = _endTime ?? (_startTime?.add(const Duration(hours: 2)) ?? now.add(const Duration(days: 1, hours: 2)));
+    
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialTime: _selectedTime ?? const TimeOfDay(hour: 20, minute: 0),
+      initialDate: initialDateTime,
+      firstDate: _startTime ?? now,
+      lastDate: now.add(const Duration(days: 365)),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -146,10 +184,48 @@ class _NewEventStep1State extends State<NewEventStep1> {
       },
     );
     
-    if (picked != null && picked != _selectedTime) {
-      setState(() {
-        _selectedTime = picked;
-      });
+    if (pickedDate != null) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(initialDateTime),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: Theme.of(context).colorScheme.copyWith(
+                primary: kBrandPrimary,
+                surface: Colors.grey[900]!,
+              ),
+            ),
+            child: child!,
+          );
+        },
+      );
+      
+      if (pickedTime != null) {
+        final DateTime newEndTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+        
+        // Ensure end time is after start time
+        if (_startTime != null && newEndTime.isBefore(_startTime!)) {
+          // Show error or adjust automatically
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context).get('end-time-must-be-after-start-time')),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+        
+        setState(() {
+          _endTime = newEndTime;
+        });
+      }
     }
   }
 
@@ -168,162 +244,116 @@ class _NewEventStep1State extends State<NewEventStep1> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Event Name
-                    Text(
-                      AppLocalizations.of(context).get('event-name'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
+                    LabeledTextFormField(
                       controller: _eventNameController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context).get('enter-event-name'),
-                        hintStyle: TextStyle(color: Colors.grey[400]),
-                        filled: true,
-                        fillColor: Colors.grey[800],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return AppLocalizations.of(context).get('event-name-required');
-                        }
-                        return null;
-                      },
+                      titleKey: 'event-name',
+                      hintTextKey: 'enter-event-name',
+                      errorTextKey: 'event-name-required',
+                      isRequired: true,
                       onChanged: (value) => setState(() {}),
                     ),
                     
                     const SizedBox(height: 24),
                     
-                    // Description
-                    Text(
-                      AppLocalizations.of(context).get('description'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _descriptionController,
-                      style: const TextStyle(color: Colors.white),
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context).get('enter-event-description'),
-                        hintStyle: TextStyle(color: Colors.grey[400]),
-                        filled: true,
-                        fillColor: Colors.grey[800],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return AppLocalizations.of(context).get('description-required');
-                        }
-                        return null;
-                      },
-                      onChanged: (value) => setState(() {}),
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Category
-                    Text(
-                      AppLocalizations.of(context).get('category'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[800],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<Category>(
-                          value: _selectedCategory,
-                          hint: Text(
-                            AppLocalizations.of(context).get('select-category'),
-                            style: TextStyle(color: Colors.grey[400]),
+                    // Category and Minimal Age Row
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Category
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Title with required asterisk
+                              RichText(
+                                text: TextSpan(
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text: AppLocalizations.of(context).get('category'),
+                                    ),
+                                    const TextSpan(
+                                      text: ' *',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              // Category field without label
+                              ExpandableSelect<Category>(
+                                labelKey: 'category',
+                                selected: _selectedCategory,
+                                options: _categories,
+                                getLabel: (category, ctx) => category.name,
+                                onChanged: (Category? newValue) {
+                                  setState(() {
+                                    _selectedCategory = newValue;
+                                  });
+                                },
+                                isRequired: false, // We handle the required indicator manually above
+                              ),
+                            ],
                           ),
-                          style: const TextStyle(color: Colors.white),
-                          dropdownColor: Colors.grey[800],
-                          items: _categories.map((Category category) {
-                            return DropdownMenuItem<Category>(
-                              value: category,
-                              child: Text(category.name),
-                            );
-                          }).toList(),
-                          onChanged: (Category? newValue) {
-                            setState(() {
-                              _selectedCategory = newValue;
-                            });
-                          },
                         ),
-                      ),
+                        
+                        const SizedBox(width: 16),
+                        
+                        // Minimal Age
+                        Expanded(
+                          flex: 1,
+                          child: LabeledTextFormField(
+                            controller: _minimalAgeController,
+                            titleKey: 'minimal-age',
+                            hintTextKey: 'enter-minimal-age',
+                            keyboardType: TextInputType.number,
+                            customValidator: (value) {
+                              if (value != null && value.isNotEmpty) {
+                                final age = int.tryParse(value);
+                                if (age == null || age < 0 || age > 120) {
+                                  return AppLocalizations.of(context).get('invalid-age');
+                                }
+                              }
+                              return null;
+                            },
+                            onChanged: (value) => setState(() {}),
+                          ),
+                        ),
+                      ],
                     ),
                     
                     const SizedBox(height: 24),
                     
                     // Location
-                    Text(
-                      AppLocalizations.of(context).get('location'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
+                    LabeledTextFormField(
                       controller: _locationController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context).get('enter-event-location'),
-                        hintStyle: TextStyle(color: Colors.grey[400]),
-                        filled: true,
-                        fillColor: Colors.grey[800],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                        suffixIcon: const Icon(Icons.location_on, color: Colors.white54),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return AppLocalizations.of(context).get('location-required');
-                        }
-                        return null;
-                      },
+                      titleKey: 'location',
+                      hintTextKey: 'enter-event-location',
+                      errorTextKey: 'location-required',
+                      isRequired: true,
+                      suffixIcon: const Icon(Icons.location_on, color: Colors.white54),
                       onChanged: (value) => setState(() {}),
                     ),
                     
                     const SizedBox(height: 24),
                     
-                    // Date & Time Row
+                    // Start Time & End Time Row
                     Row(
                       children: [
-                        // Date
+                        // Start Time
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                AppLocalizations.of(context).get('date'),
+                                AppLocalizations.of(context).get('start-time'),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -332,7 +362,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
                               ),
                               const SizedBox(height: 8),
                               InkWell(
-                                onTap: _selectDate,
+                                onTap: _selectStartTime,
                                 child: Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.all(12),
@@ -342,14 +372,17 @@ class _NewEventStep1State extends State<NewEventStep1> {
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.calendar_today, color: Colors.white54),
+                                      Icon(Icons.event, color: Colors.white54),
                                       const SizedBox(width: 8),
-                                      Text(
-                                        _selectedDate != null
-                                            ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-                                            : AppLocalizations.of(context).get('select-date'),
-                                        style: TextStyle(
-                                          color: _selectedDate != null ? Colors.white : Colors.grey[400],
+                                      Expanded(
+                                        child: Text(
+                                          _startTime != null
+                                              ? '${_startTime!.day}/${_startTime!.month}/${_startTime!.year} ${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}'
+                                              : AppLocalizations.of(context).get('select-start-time'),
+                                          style: TextStyle(
+                                            color: _startTime != null ? Colors.white : Colors.grey[400],
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
                                     ],
@@ -362,13 +395,13 @@ class _NewEventStep1State extends State<NewEventStep1> {
                         
                         const SizedBox(width: 16),
                         
-                        // Time
+                        // End Time
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                AppLocalizations.of(context).get('time'),
+                                AppLocalizations.of(context).get('end-time'),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -377,7 +410,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
                               ),
                               const SizedBox(height: 8),
                               InkWell(
-                                onTap: _selectTime,
+                                onTap: _selectEndTime,
                                 child: Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.all(12),
@@ -387,14 +420,17 @@ class _NewEventStep1State extends State<NewEventStep1> {
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.access_time, color: Colors.white54),
+                                      Icon(Icons.event, color: Colors.white54),
                                       const SizedBox(width: 8),
-                                      Text(
-                                        _selectedTime != null
-                                            ? '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}'
-                                            : AppLocalizations.of(context).get('select-time'),
-                                        style: TextStyle(
-                                          color: _selectedTime != null ? Colors.white : Colors.grey[400],
+                                      Expanded(
+                                        child: Text(
+                                          _endTime != null
+                                              ? '${_endTime!.day}/${_endTime!.month}/${_endTime!.year} ${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}'
+                                              : AppLocalizations.of(context).get('select-end-time'),
+                                          style: TextStyle(
+                                            color: _endTime != null ? Colors.white : Colors.grey[400],
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
                                     ],

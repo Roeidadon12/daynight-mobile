@@ -26,16 +26,16 @@ class _NewEventPageState extends State<NewEventPage> {
       description: AppLocalizations.of(context).get('create-event-basic-info-description'),
     ),
     CreateStepTitle(
+      title: AppLocalizations.of(context).get('create-event-design'),
+      description: AppLocalizations.of(context).get('create-event-design-description'),
+    ),
+    CreateStepTitle(
       title: AppLocalizations.of(context).get('create-event-details'),
       description: AppLocalizations.of(context).get('create-event-details-description'),
     ),
     CreateStepTitle(
       title: AppLocalizations.of(context).get('create-event-tickets-pricing'),
       description: AppLocalizations.of(context).get('create-event-tickets-pricing-description'),
-    ),
-    CreateStepTitle(
-      title: AppLocalizations.of(context).get('create-event-confirmation'),
-      description: AppLocalizations.of(context).get('create-event-confirmation-description'),
     ),
   ];
 
