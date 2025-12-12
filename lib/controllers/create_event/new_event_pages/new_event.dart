@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../app_localizations.dart';
 import '../../../constants.dart';
+import '../../../models/create_event_data.dart';
 import '../../shared/custom_app_bar.dart';
 import '../event_components/create_step_title.dart';
 import 'new_event_step1.dart';
@@ -17,8 +18,8 @@ class NewEventPage extends StatefulWidget {
 class _NewEventPageState extends State<NewEventPage> {
   int _currentStep = 0;
   
-  // Controllers for each step - to be reused in editing phase
-  final Map<String, dynamic> _eventData = {};
+  // Structured event data model
+  final CreateEventData _eventData = CreateEventData();
   
   List<CreateStepTitle> get _stepTitles => [
     CreateStepTitle(
@@ -57,48 +58,48 @@ class _NewEventPageState extends State<NewEventPage> {
 
   void _onStepDataChanged(String key, dynamic value) {
     setState(() {
-      _eventData[key] = value;
+      _eventData.updateField(key, value);
     });
   }
 
   void _onStepCompleted() {
     // Handle final step completion
     // This could navigate to a success page or back to events list
-    Navigator.pop(context, _eventData);
+    Navigator.pop(context, _eventData.toMap());
   }
 
   Widget _buildCurrentStep() {
     switch (_currentStep) {
       case 0:
         return NewEventStep1(
-          eventData: _eventData,
+          eventData: _eventData.toMap(),
           onDataChanged: _onStepDataChanged,
           onNext: _nextStep,
         );
       case 1:
         return NewEventStep2(
-          eventData: _eventData,
+          eventData: _eventData.toMap(),
           onDataChanged: _onStepDataChanged,
           onNext: _nextStep,
           onPrevious: _previousStep,
         );
       case 2:
         return NewEventStep3(
-          eventData: _eventData,
+          eventData: _eventData.toMap(),
           onDataChanged: _onStepDataChanged,
           onComplete: _nextStep, // This will go to step 4
           onPrevious: _previousStep,
         );
       case 3:
         return NewEventStep3( // Placeholder - you'll need to create NewEventStep4
-          eventData: _eventData,
+          eventData: _eventData.toMap(),
           onDataChanged: _onStepDataChanged,
           onComplete: _onStepCompleted, // Final completion
           onPrevious: _previousStep,
         );
       default:
         return NewEventStep1(
-          eventData: _eventData,
+          eventData: _eventData.toMap(),
           onDataChanged: _onStepDataChanged,
           onNext: _nextStep,
         );

@@ -121,7 +121,7 @@ const Map<String, String> enTexts = {
   'select-end-time': 'Select End Time',
   'end-time-must-be-after-start-time': 'End time must be after start time',
   'minimal-age': 'Minimal Age',
-  'enter-minimal-age': 'Enter minimal age',
+  'enter-minimal-age': '',
   'invalid-age': 'Please enter a valid age (0-120)',
   'category': 'Category',
   'location': 'Location',

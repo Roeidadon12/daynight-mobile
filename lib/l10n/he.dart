@@ -120,7 +120,7 @@ const Map<String, String> heTexts = {
   'select-end-time': 'בחר שעת סיום',
   'end-time-must-be-after-start-time': 'שעת הסיום חייבת להיות אחרי שעת ההתחלה',
   'minimal-age': 'גיל מינימלי',
-  'enter-minimal-age': 'הזן גיל מינימלי',
+  'enter-minimal-age': '',
   'invalid-age': 'אנא הזן גיל חוקי (0-120)',
   'category': 'קטגוריה',
   'location': 'מיקום',

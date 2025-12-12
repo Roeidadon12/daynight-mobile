@@ -70,10 +70,28 @@ class LabeledTextFormField extends StatelessWidget {
             hintText: AppLocalizations.of(context).get(hintTextKey),
             hintStyle: TextStyle(color: Colors.grey[400]),
             filled: true,
-            fillColor: Colors.grey[800],
+            fillColor: Colors.black.withAlpha(77),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(32),
+              borderSide: BorderSide(
+                color: Colors.grey[800]!,
+                width: 1,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(32),
+              borderSide: BorderSide(
+                color: Colors.grey[800]!,
+                width: 1,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(32),
+              borderSide: const BorderSide(
+                color: Color(0xFF8B5CF6),
+                width: 2,
+              ),
             ),
             suffixIcon: suffixIcon,
           ),

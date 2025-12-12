@@ -1,21 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../app_localizations.dart';
 import '../../../constants.dart';
+import '../../../models/create_event_data.dart';
 import '../../shared/primary_button.dart';
-
-class TicketTypeModel {
-  String name;
-  double price;
-  int quantity;
-  String description;
-
-  TicketTypeModel({
-    required this.name,
-    required this.price,
-    required this.quantity,
-    required this.description,
-  });
-}
 
 class NewEventStep3 extends StatefulWidget {
   final Map<String, dynamic> eventData;
@@ -37,7 +24,7 @@ class NewEventStep3 extends StatefulWidget {
 
 class _NewEventStep3State extends State<NewEventStep3> {
   final _formKey = GlobalKey<FormState>();
-  List<TicketTypeModel> _ticketTypes = [];
+  List<CreateEventTicketType> _ticketTypes = [];
   bool _isFreeEvent = false;
   
   @override
@@ -47,7 +34,7 @@ class _NewEventStep3State extends State<NewEventStep3> {
     _isFreeEvent = widget.eventData['isFreeEvent'] ?? false;
     
     // Initialize ticket types from saved data or create default one
-    final savedTickets = widget.eventData['ticketTypes'] as List<TicketTypeModel>?;
+    final savedTickets = widget.eventData['ticketTypes'] as List<CreateEventTicketType>?;
     if (savedTickets != null && savedTickets.isNotEmpty) {
       _ticketTypes = savedTickets;
     } else if (!_isFreeEvent) {
@@ -66,7 +53,7 @@ class _NewEventStep3State extends State<NewEventStep3> {
 
   void _addTicketType() {
     setState(() {
-      _ticketTypes.add(TicketTypeModel(
+      _ticketTypes.add(CreateEventTicketType(
         name: '',
         price: 0.0,
         quantity: 1,
