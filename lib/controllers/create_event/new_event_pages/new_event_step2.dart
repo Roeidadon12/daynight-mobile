@@ -167,35 +167,12 @@ class _NewEventStep2State extends State<NewEventStep2> {
           // Navigation Buttons
           Container(
             padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                // Back Button
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: widget.onPrevious,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: BorderSide(color: Colors.grey[600]!),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: Text(AppLocalizations.of(context).get('back')),
-                  ),
-                ),
-                
-                const SizedBox(width: 16),
-                
-                // Continue Button
-                Expanded(
-                  flex: 2,
-                  child: PrimaryButton(
-                    onPressed: _saveAndNext,
-                    textKey: 'continue',
-                    disabled: !_isFormValid(),
-                    trailingIcon: Icons.arrow_forward,
-                    flexible: false,
-                  ),
-                ),
-              ],
+            child: PrimaryButton(
+              onPressed: _saveAndNext,
+              textKey: 'create-event-continue-to-advanced-settings',
+              disabled: !_isFormValid(),
+              trailingIcon: Icons.arrow_forward,
+              flexible: false,
             ),
           ),
         ],

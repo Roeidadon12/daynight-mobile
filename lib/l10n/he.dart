@@ -137,4 +137,5 @@ const Map<String, String> heTexts = {
   'create-event-main-image': 'תמונת ראשית של האירוע (ניתן לשנות בכל עת)',
   'create-event-description': 'תיאור האירוע',
   'create-event-description-instructions': 'כתוב תיאור שיגרום להם לרצות להגיע ומה יהיה באירוע',
+  'create-event-continue-to-advanced-settings': 'המשך להגדרות מתקדמות',
 };

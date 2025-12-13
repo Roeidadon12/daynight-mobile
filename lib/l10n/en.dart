@@ -138,4 +138,5 @@ const Map<String, String> enTexts = {
   'create-event-main-image': 'Event Main Image (You can change it at any time)',
   'create-event-description': 'Event Description',
   'create-event-description-instructions': 'Write a description that will make them want to come and what will be at the event',
+  'create-event-continue-to-advanced-settings': 'Continue to Advanced Settings',
 };
