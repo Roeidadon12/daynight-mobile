@@ -63,12 +63,6 @@ class _NewEventPageState extends State<NewEventPage> {
     });
   }
 
-  void _onStepCompleted() {
-    // Handle final step completion
-    // This could navigate to a success page or back to events list
-    Navigator.pop(context, _eventData.toMap());
-  }
-
   Widget _buildCurrentStep() {
     switch (_currentStep) {
       case 0:
@@ -90,11 +84,6 @@ class _NewEventPageState extends State<NewEventPage> {
           onDataChanged: _onStepDataChanged,
           onComplete: _nextStep, // This will go to step 4
           onPrevious: _previousStep,
-        );
-      case 3:
-        return NewEventStep4(
-          eventData: _eventData.toMap(),
-          onComplete: _onStepCompleted, // Final completion
         );
       default:
         return NewEventStep1(
@@ -144,6 +133,16 @@ class _NewEventPageState extends State<NewEventPage> {
 
   @override
   Widget build(BuildContext context) {
+    // If we're on the final step (step 4), show it as a full-screen success page
+    if (_currentStep == 3) {
+      return NewEventStep4(
+        eventData: _eventData.toMap(),
+        onComplete: () {
+          Navigator.popUntil(context, (route) => route.isFirst);
+        },
+      );
+    }
+    
     return Scaffold(
       backgroundColor: kMainBackgroundColor,
       body: SafeArea(

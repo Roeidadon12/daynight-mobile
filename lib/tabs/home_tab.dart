@@ -5,9 +5,8 @@ import 'package:day_night/utils/slide_page_route.dart';
 import 'package:flutter/material.dart';
 import '../app_localizations.dart';
 import '../controllers/user/user_controller.dart';
-import '../controllers/user/user_header.dart';
+import '../controllers/user/user_profile_section.dart';
 import '../controllers/shared/horizontal_buttons_controller.dart';
-import '../screens/auth/login_screen.dart';
 import 'package:provider/provider.dart';
 import '../models/enums.dart';
 import '../models/category.dart';
@@ -229,17 +228,18 @@ class _HomeTabState extends State<HomeTab> {
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 children: [
+                // User Profile Section
                 Consumer<UserController>(
                   builder: (context, userController, _) {
                     if (userController.isLoggedIn) {
-                      return const UserHeader();
+                      return UserProfileSection(user: userController.user!);
                     } else if (userController.isGuest) {
-                      return const GuestHeader();
+                      return const GuestProfileSection();
                     } else {
                       // Unknown status - show loading or nothing
                       return userController.isLoading 
                           ? const Center(child: CircularProgressIndicator())
-                          : const SizedBox.shrink();
+                          : const GuestProfileSection();
                     }
                   },
                 ),
@@ -362,80 +362,3 @@ class _HomeTabState extends State<HomeTab> {
   }
 }
 
-/// Widget displayed for guest users, prompting them to login for a better experience
-class GuestHeader extends StatelessWidget {
-  const GuestHeader({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade900,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kBrandPrimary.withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.person_outline,
-                color: kBrandPrimary,
-                size: 24,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                AppLocalizations.of(context).get('guest-mode'),
-                style: TextStyle(
-                  color: kBrandPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            AppLocalizations.of(context).get('guest-mode-description'),
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: kBrandPrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context).get('login'),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}

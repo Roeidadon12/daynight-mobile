@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../app_localizations.dart';
 import '../../../constants.dart';
+import '../../../main.dart';
 
 class NewEventStep4 extends StatelessWidget {
   final Map<String, dynamic> eventData;
@@ -110,13 +111,22 @@ class NewEventStep4 extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                     ),
+                    Text(
+                      AppLocalizations.of(context).get('event-is-now-live'),
+                        style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                     const SizedBox(height: 8),
                     
                     // Success Message
                     Column(
                       children: [
                         Text(
-                          AppLocalizations.of(context).get('event-is-now-live'),
+                          AppLocalizations.of(context).get('event-is-live-our-turn'),
                           style: TextStyle(
                             color: Colors.grey[300],
                             fontSize: 14,
@@ -143,7 +153,15 @@ class NewEventStep4 extends StatelessWidget {
                     height: 56,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.popUntil(context, (route) => route.isFirst);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyHomePage(
+                              title: AppLocalizations.of(context).get('day_night_home'),
+                            ),
+                          ),
+                          (route) => false, // Remove all previous routes
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kBrandPrimary,
@@ -158,7 +176,7 @@ class NewEventStep4 extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        AppLocalizations.of(context).get('back-to-events'),
+                        AppLocalizations.of(context).get('to-main-screen'),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

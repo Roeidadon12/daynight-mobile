@@ -188,13 +188,15 @@ const Map<String, String> enTexts = {
   'event-created': 'Event Created',
   'event-ready-to-share': 'Your event is ready to share with the world!',
   'congratulations': 'Congratulations',
-  'event-created-successfully': 'Your event has been created successfully!',
-  'event-is-now-live': 'Your event is now live and ready for attendees.',
+  'event-created-successfully': 'Wow, you\'ve successfully finished!',
+  'event-is-now-live': 'Your event is about to go live',
+  'event-is-live-our-turn': 'Now it\'s our turn to review the details and you will receive an update from us via SMS and email',
   'share-event-url': 'Share your event using the URL below:',
   'url-copied': 'URL copied to clipboard',
   'copy-url': 'Copy URL',
   'manage-my-event': 'Manage My Event',
   'back-to-events': 'Back to Events',
+  'to-main-screen': 'To Main Screen',
   
   // Authentication and User Status
   'login': 'Login',

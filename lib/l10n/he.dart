@@ -187,13 +187,15 @@ const Map<String, String> heTexts = {
   'event-created': 'האירוע נוצר',
   'event-ready-to-share': 'האירוע שלכם מוכן לשיתוף עם העולם!',
   'congratulations': 'ברכותינו',
-  'event-created-successfully': 'האירוע שלכם נוצר בהצלחה!',
-  'event-is-now-live': 'האירוע שלכם כעת פעיל ומוכן למשתתפים.',
+  'event-created-successfully': 'וואו, סיימתם בהצלחה!',
+  'event-is-now-live': 'האירוע שלכם אוטוטו באוויר',
+  'event-is-live-our-turn': 'עכשיו תורנו לעבור על הפרטים ותקבלו עדכון מאיתנו ב-SMS ובמייל',
   'share-event-url': 'שתפו את האירוע שלכם באמצעות הקישור למטה:',
   'url-copied': 'הקישור הועתק ללוח',
   'copy-url': 'העתק קישור',
   'manage-my-event': 'נהל את האירוע שלי',
   'back-to-events': 'חזרה לאירועים',
+  'to-main-screen': 'למסך הראשי',
 
   // Authentication and User Status
   'login': 'התחברות',

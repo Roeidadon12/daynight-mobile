@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../app_localizations.dart';
 import '../../../constants.dart';
+import '../../../controllers/user/user_controller.dart';
+import '../../../screens/auth/login_screen.dart';
 import '../../shared/primary_button.dart';
 import '../../shared/labeled_text_form_field.dart';
 
@@ -68,26 +71,51 @@ class _NewEventStep3State extends State<NewEventStep3> {
 
   void _saveAndComplete() {
     if (_formKey.currentState!.validate() && _isFormValid()) {
-      // Create final URL by combining domain with suffix
-      String finalUrl = 'Daynight.co.il/Event/';
-      if (_urlSuffixController.text.isNotEmpty) {
-        finalUrl += _urlSuffixController.text;
+      // Check if user is authenticated
+      final userController = Provider.of<UserController>(context, listen: false);
+      
+      if (!userController.isLoggedIn) {
+        // User is not authenticated, navigate to login screen
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+        ).then((result) {
+          // After returning from login screen, check again if user is logged in
+          if (userController.isLoggedIn) {
+            _proceedWithEventCreation();
+          }
+          // If user didn't log in (closed login screen or continued as guest),
+          // stay on Step3 - don't proceed
+        });
+        return;
       }
       
-      // Save form data
-      widget.onDataChanged('organizerName', _organizerNameController.text);
-      widget.onDataChanged('urlSuffix', _urlSuffixController.text);
-      widget.onDataChanged('finalUrl', finalUrl);
-      widget.onDataChanged('isPrivateEvent', _isPrivateEvent);
-      widget.onDataChanged('termsAccepted', _termsAccepted);
-      widget.onDataChanged('trackingField1', _trackingField1Controller.text);
-      widget.onDataChanged('trackingField2', _trackingField2Controller.text);
-      widget.onDataChanged('trackingField3', _trackingField3Controller.text);
-      widget.onDataChanged('trackingField4', _trackingField4Controller.text);
-      widget.onDataChanged('isUserTrackingExpanded', _isUserTrackingExpanded);
-      
-      widget.onComplete();
+      // User is authenticated, proceed with event creation
+      _proceedWithEventCreation();
     }
+  }
+  
+  void _proceedWithEventCreation() {
+    // Create final URL by combining domain with suffix
+    String finalUrl = 'Daynight.co.il/Event/';
+    if (_urlSuffixController.text.isNotEmpty) {
+      finalUrl += _urlSuffixController.text;
+    }
+    
+    // Save form data
+    widget.onDataChanged('organizerName', _organizerNameController.text);
+    widget.onDataChanged('urlSuffix', _urlSuffixController.text);
+    widget.onDataChanged('finalUrl', finalUrl);
+    widget.onDataChanged('isPrivateEvent', _isPrivateEvent);
+    widget.onDataChanged('termsAccepted', _termsAccepted);
+    widget.onDataChanged('trackingField1', _trackingField1Controller.text);
+    widget.onDataChanged('trackingField2', _trackingField2Controller.text);
+    widget.onDataChanged('trackingField3', _trackingField3Controller.text);
+    widget.onDataChanged('trackingField4', _trackingField4Controller.text);
+    widget.onDataChanged('isUserTrackingExpanded', _isUserTrackingExpanded);
+    
+    widget.onComplete();
   }
 
   @override
