@@ -358,7 +358,7 @@ class _NewEventStep3State extends State<NewEventStep3> {
           
           // Navigation Buttons
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16), 
             child: SizedBox(
               width: double.infinity,
               child: PrimaryButton(

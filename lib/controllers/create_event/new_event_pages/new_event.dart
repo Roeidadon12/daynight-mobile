@@ -7,6 +7,7 @@ import '../event_components/create_step_title.dart';
 import 'new_event_step1.dart';
 import 'new_event_step2.dart';
 import 'new_event_step3.dart';
+import 'new_event_step4.dart';
 
 class NewEventPage extends StatefulWidget {
   const NewEventPage({super.key});
@@ -35,8 +36,8 @@ class _NewEventPageState extends State<NewEventPage> {
       description: AppLocalizations.of(context).get('create-event-details-description'),
     ),
     CreateStepTitle(
-      title: AppLocalizations.of(context).get('create-event-tickets-pricing'),
-      description: AppLocalizations.of(context).get('create-event-tickets-pricing-description'),
+      title: AppLocalizations.of(context).get('event-created'),
+      description: '',
     ),
   ];
 
@@ -91,11 +92,9 @@ class _NewEventPageState extends State<NewEventPage> {
           onPrevious: _previousStep,
         );
       case 3:
-        return NewEventStep3( // Placeholder - you'll need to create NewEventStep4
+        return NewEventStep4(
           eventData: _eventData.toMap(),
-          onDataChanged: _onStepDataChanged,
           onComplete: _onStepCompleted, // Final completion
-          onPrevious: _previousStep,
         );
       default:
         return NewEventStep1(
