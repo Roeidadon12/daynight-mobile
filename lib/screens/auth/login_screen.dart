@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/user/user_controller.dart';
+import '../../controllers/shared/labeled_text_form_field.dart';
 import '../../constants.dart';
 import '../../app_localizations.dart';
 import 'registration_screen.dart';
@@ -15,14 +16,74 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _smsCodeController = TextEditingController();
   bool _isLoading = false;
   bool _isAwaitingSMS = false; // SMS verification mode
   String? _errorMessage;
+  String _selectedCountryCode = '+972'; // Default to Israel
+
+  // Country codes list with flags
+  final List<Map<String, String>> _countryCodes = [
+    {'code': '+972', 'name': 'Israel', 'flag': '🇮🇱'},
+    {'code': '+1', 'name': 'USA/Canada', 'flag': '🇺🇸'},
+    {'code': '+44', 'name': 'UK', 'flag': '🇬🇧'},
+    {'code': '+33', 'name': 'France', 'flag': '🇫🇷'},
+    {'code': '+49', 'name': 'Germany', 'flag': '🇩🇪'},
+    {'code': '+39', 'name': 'Italy', 'flag': '🇮🇹'},
+    {'code': '+34', 'name': 'Spain', 'flag': '🇪🇸'},
+    {'code': '+31', 'name': 'Netherlands', 'flag': '🇳🇱'},
+    {'code': '+41', 'name': 'Switzerland', 'flag': '🇨🇭'},
+    {'code': '+43', 'name': 'Austria', 'flag': '🇦🇹'},
+    {'code': '+32', 'name': 'Belgium', 'flag': '🇧🇪'},
+    {'code': '+46', 'name': 'Sweden', 'flag': '🇸🇪'},
+    {'code': '+47', 'name': 'Norway', 'flag': '🇳🇴'},
+    {'code': '+45', 'name': 'Denmark', 'flag': '🇩🇰'},
+    {'code': '+358', 'name': 'Finland', 'flag': '🇫🇮'},
+    {'code': '+351', 'name': 'Portugal', 'flag': '🇵🇹'},
+    {'code': '+30', 'name': 'Greece', 'flag': '🇬🇷'},
+    {'code': '+90', 'name': 'Turkey', 'flag': '🇹🇷'},
+    {'code': '+91', 'name': 'India', 'flag': '🇮🇳'},
+    {'code': '+86', 'name': 'China', 'flag': '🇨🇳'},
+    {'code': '+81', 'name': 'Japan', 'flag': '🇯🇵'},
+    {'code': '+82', 'name': 'South Korea', 'flag': '🇰🇷'},
+    {'code': '+61', 'name': 'Australia', 'flag': '🇦🇺'},
+    {'code': '+64', 'name': 'New Zealand', 'flag': '🇳🇿'},
+    {'code': '+27', 'name': 'South Africa', 'flag': '🇿🇦'},
+    {'code': '+55', 'name': 'Brazil', 'flag': '🇧🇷'},
+    {'code': '+52', 'name': 'Mexico', 'flag': '🇲🇽'},
+    {'code': '+54', 'name': 'Argentina', 'flag': '🇦🇷'},
+    {'code': '+56', 'name': 'Chile', 'flag': '🇨🇱'},
+    {'code': '+57', 'name': 'Colombia', 'flag': '🇨🇴'},
+    {'code': '+7', 'name': 'Russia', 'flag': '🇷🇺'},
+    {'code': '+380', 'name': 'Ukraine', 'flag': '🇺🇦'},
+    {'code': '+48', 'name': 'Poland', 'flag': '🇵🇱'},
+    {'code': '+420', 'name': 'Czech Republic', 'flag': '🇨🇿'},
+    {'code': '+36', 'name': 'Hungary', 'flag': '🇭🇺'},
+    {'code': '+40', 'name': 'Romania', 'flag': '🇷🇴'},
+    {'code': '+359', 'name': 'Bulgaria', 'flag': '🇧🇬'},
+    {'code': '+385', 'name': 'Croatia', 'flag': '🇭🇷'},
+    {'code': '+381', 'name': 'Serbia', 'flag': '🇷🇸'},
+    {'code': '+62', 'name': 'Indonesia', 'flag': '🇮🇩'},
+    {'code': '+60', 'name': 'Malaysia', 'flag': '🇲🇾'},
+    {'code': '+65', 'name': 'Singapore', 'flag': '🇸🇬'},
+    {'code': '+66', 'name': 'Thailand', 'flag': '🇹🇭'},
+    {'code': '+84', 'name': 'Vietnam', 'flag': '🇻🇳'},
+    {'code': '+63', 'name': 'Philippines', 'flag': '🇵🇭'},
+    {'code': '+20', 'name': 'Egypt', 'flag': '🇪🇬'},
+    {'code': '+971', 'name': 'UAE', 'flag': '🇦🇪'},
+    {'code': '+966', 'name': 'Saudi Arabia', 'flag': '🇸🇦'},
+    {'code': '+962', 'name': 'Jordan', 'flag': '🇯🇴'},
+    {'code': '+961', 'name': 'Lebanon', 'flag': '🇱🇧'},
+    {'code': '+212', 'name': 'Morocco', 'flag': '🇲🇦'},
+    {'code': '+216', 'name': 'Tunisia', 'flag': '🇹🇳'},
+    {'code': '+213', 'name': 'Algeria', 'flag': '🇩🇿'},
+  ];
 
   @override
   void dispose() {
+    _emailController.dispose();
     _phoneController.dispose();
     _smsCodeController.dispose();
     super.dispose();
@@ -108,15 +169,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _handleGuestLogin() async {
-    final userController = Provider.of<UserController>(context, listen: false);
-    await userController.continueAsGuest();
-    
-    if (mounted) {
-      Navigator.of(context).pop(); // Return to previous screen
-    }
-  }
-
   void _navigateToRegistration() {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -168,13 +220,38 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return AppLocalizations.of(context).get('email-required');
+    }
+    
+    // Comprehensive email validation using regex
+    // This pattern validates most common email formats including:
+    // - Letters, numbers, dots, hyphens, underscores in local part
+    // - Multiple domain levels
+    // - International domain extensions
+    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
+      return AppLocalizations.of(context).get('email-invalid');
+    }
+    
+    return null;
+  }
+
   String? _validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
       return AppLocalizations.of(context).get('phone-required');
     }
     
-    // Basic phone number validation
-    if (value.length < 9) {
+    // Remove any spaces, dashes, or other formatting
+    String cleanedNumber = value.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+    
+    // Basic phone number validation - should be digits only and reasonable length
+    if (!RegExp(r'^[0-9]+$').hasMatch(cleanedNumber)) {
+      return AppLocalizations.of(context).get('phone-invalid');
+    }
+    
+    // Check minimum length (without country code)
+    if (cleanedNumber.length < 7) {
       return AppLocalizations.of(context).get('phone-min-length');
     }
     
@@ -399,22 +476,186 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   
                   if (Platform.isIOS) const SizedBox(height: 20),
+                  
+                  // OR Divider
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 20),
+                    child: Row(
+                      children: [
+                        const Expanded(child: Divider(color: Colors.white30, thickness: 1)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            AppLocalizations.of(context).get('or'),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const Expanded(child: Divider(color: Colors.white30, thickness: 1)),
+                      ],
+                    ),
+                  ),
+                  
+                  // Email field
+                  LabeledTextFormField(
+                    controller: _emailController,
+                    titleKey: 'email',
+                    hintTextKey: 'email',
+                    keyboardType: TextInputType.emailAddress,
+                    customValidator: _validateEmail,
+                  ),
+                  
+                  const SizedBox(height: 20),
                 ],
                 
-                // Phone number field
-                TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).get('phone-number'),
-                    prefixIcon: const Icon(Icons.phone_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 8),
+
+                // Phone number field with country code (dark themed)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title with asterisk
+                    RichText(
+                      text: TextSpan(
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: AppLocalizations.of(context).get('phone-number'),
+                          ),
+                          const TextSpan(
+                            text: ' *',
+                            style: TextStyle(
+                              color: Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  validator: _validatePhoneNumber,
+                    const SizedBox(height: 8),
+                    
+                    // Phone input row
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withAlpha(77),
+                          borderRadius: BorderRadius.circular(32),
+                          border: Border.all(
+                            color: Colors.grey[800]!,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            // Country code dropdown
+                            Container(
+                              padding: const EdgeInsets.only(left: 16),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: _selectedCountryCode,
+                                  items: _countryCodes.map((country) {
+                                    return DropdownMenuItem<String>(
+                                      value: country['code'],
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            country['code']!,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.white,
+                                            ),
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            country['flag']!,
+                                            style: const TextStyle(fontSize: 18),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      _selectedCountryCode = newValue!;
+                                    });
+                                  },
+                                  icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+                                  iconSize: 20,
+                                  dropdownColor: Colors.grey[900],
+                                  style: const TextStyle(color: Colors.white),
+                                  isDense: true,
+                                  alignment: AlignmentDirectional.centerStart,
+                                  selectedItemBuilder: (BuildContext context) {
+                                    return _countryCodes.map<Widget>((country) {
+                                      return Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            country['flag']!,
+                                            style: const TextStyle(fontSize: 18),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            country['code']!,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.white,
+                                            ),
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                        ],
+                                      );
+                                    }).toList();
+                                  },
+                                ),
+                              ),
+                            ),
+                            
+                            // Separator
+                            Container(
+                              height: 24,
+                              width: 1,
+                              color: Colors.grey[600],
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            
+                            // Phone number input
+                            Expanded(
+                              child: TextFormField(
+                                controller: _phoneController,
+                                keyboardType: TextInputType.phone,
+                                textDirection: TextDirection.ltr,
+                                style: const TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                  hintText: AppLocalizations.of(context).get('phone-number'),
+                                  hintStyle: TextStyle(color: Colors.grey[400]),
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+                                ),
+                                validator: _validatePhoneNumber,
+                              ),
+                            ),
+                            
+                            const SizedBox(width: 16),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 
                 const SizedBox(height: 16),
@@ -438,11 +679,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             onTap: () => _openTermsAndConditions(),
                             child: Text(
                               AppLocalizations.of(context).get('terms-and-conditions-link'),
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: kBrandPrimary,
                                 fontSize: 12,
                                 decoration: TextDecoration.underline,
-                                decorationColor: Colors.white,
+                                decorationColor: kBrandPrimary,
                               ),
                             ),
                           ),
@@ -519,47 +760,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 
-                const SizedBox(height: 16),
-                
-                // Guest login button
-                SizedBox(
-                  height: 50,
-                  child: OutlinedButton(
-                    onPressed: _isLoading ? null : _handleGuestLogin,
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.white70),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context).get('continue-as-guest'),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ),
-                ),
-                
                 const SizedBox(height: 24),
                 
-                // Divider
-                Row(
-                  children: [
-                    const Expanded(child: Divider(color: Colors.white30)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        AppLocalizations.of(context).get('or'),
-                        style: const TextStyle(color: Colors.white70),
-                      ),
-                    ),
-                    const Expanded(child: Divider(color: Colors.white30)),
-                  ],
-                ),
-                
-                const SizedBox(height: 24),
                 
                 // Registration prompt
                 Row(

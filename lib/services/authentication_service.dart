@@ -6,7 +6,7 @@ import '../models/user.dart';
 import '../models/user_status.dart';
 import '../utils/logger.dart';
 
-/// Service responsible for managing user authentication, including login, 
+/// Service responsible for managing user authentication, including login,
 /// registration, logout, and token management with persistent storage.
 class AuthenticationService {
   final ApiService _api;
@@ -14,37 +14,37 @@ class AuthenticationService {
   static const String _userKey = 'user_data';
   static const String _statusKey = 'user_status';
 
-  AuthenticationService() : _api = ApiService(
-    baseUrl: kApiBaseUrl,
-    timeout: const Duration(seconds: 30)
-  );
+  AuthenticationService()
+    : _api = ApiService(
+        baseUrl: kApiBaseUrl,
+        timeout: const Duration(seconds: 30),
+      );
 
   /// Authenticates a user with email and password
   /// Returns the authenticated user on success, null on failure
   Future<User?> login(String email, String password) async {
     try {
       Logger.info('Attempting login for email: $email', 'AuthService');
-      
+
       final response = await _api.request(
         endpoint: '/auth/login',
         method: 'POST',
-        body: {
-          'email': email,
-          'password': password,
-        },
+        body: {'email': email, 'password': password},
       );
 
-      if (response['status'] == 'success' && response['token'] != null && response['user'] != null) {
+      if (response['status'] == 'success' &&
+          response['token'] != null &&
+          response['user'] != null) {
         final token = response['token'] as String;
         final userData = response['user'] as Map<String, dynamic>;
-        
+
         // Store authentication data
         await _storeToken(token);
         await _storeUserStatus(UserStatus.connected);
-        
+
         final user = User.fromJson(userData);
         await _storeUser(user);
-        
+
         Logger.info('Login successful for user: ${user.email}', 'AuthService');
         return user;
       } else {
@@ -62,46 +62,59 @@ class AuthenticationService {
   Future<User?> register({
     required String fullName,
     required String email,
-    required String password,
+    String? password,
     required String phoneNumber,
     required String sex,
-    required DateTime dob,
-    required String idNumber,
+    DateTime? dob,
+    String? idNumber,
     String? address,
+    String? smsCode,
   }) async {
     try {
       Logger.info('Attempting registration for email: $email', 'AuthService');
-      
+
+      final requestBody = {
+        'full_name': fullName,
+        'email': email,
+        'phone_number': phoneNumber,
+        'sex': sex,
+      };
+
+      if (password != null) requestBody['password'] = password;
+      if (dob != null) requestBody['date_of_birth'] = dob.toIso8601String();
+      if (idNumber != null) requestBody['id_number'] = idNumber;
+      if (address != null) requestBody['address'] = address;
+      if (smsCode != null) requestBody['sms_code'] = smsCode;
+
       final response = await _api.request(
         endpoint: '/auth/register',
         method: 'POST',
-        body: {
-          'full_name': fullName,
-          'email': email,
-          'password': password,
-          'phone_number': phoneNumber,
-          'sex': sex,
-          'date_of_birth': dob.toIso8601String(),
-          'id_number': idNumber,
-          if (address != null) 'address': address,
-        },
+        body: requestBody,
       );
 
-      if (response['status'] == 'success' && response['token'] != null && response['user'] != null) {
+      if (response['status'] == 'success' &&
+          response['token'] != null &&
+          response['user'] != null) {
         final token = response['token'] as String;
         final userData = response['user'] as Map<String, dynamic>;
-        
+
         // Store authentication data
         await _storeToken(token);
         await _storeUserStatus(UserStatus.connected);
-        
+
         final user = User.fromJson(userData);
         await _storeUser(user);
-        
-        Logger.info('Registration successful for user: ${user.email}', 'AuthService');
+
+        Logger.info(
+          'Registration successful for user: ${user.email}',
+          'AuthService',
+        );
         return user;
       } else {
-        Logger.warning('Registration failed: Invalid response format', 'AuthService');
+        Logger.warning(
+          'Registration failed: Invalid response format',
+          'AuthService',
+        );
         return null;
       }
     } catch (e) {
@@ -121,7 +134,7 @@ class AuthenticationService {
   }) async {
     try {
       Logger.info('Attempting Google login for email: $email', 'AuthService');
-      
+
       final response = await _api.request(
         endpoint: '/auth/google',
         method: 'POST',
@@ -134,21 +147,29 @@ class AuthenticationService {
         },
       );
 
-      if (response['status'] == 'success' && response['token'] != null && response['user'] != null) {
+      if (response['status'] == 'success' &&
+          response['token'] != null &&
+          response['user'] != null) {
         final token = response['token'] as String;
         final userData = response['user'] as Map<String, dynamic>;
-        
+
         // Store authentication data
         await _storeToken(token);
         await _storeUserStatus(UserStatus.connected);
-        
+
         final user = User.fromJson(userData);
         await _storeUser(user);
-        
-        Logger.info('Google login successful for user: ${user.email}', 'AuthService');
+
+        Logger.info(
+          'Google login successful for user: ${user.email}',
+          'AuthService',
+        );
         return user;
       } else {
-        Logger.warning('Google login failed: Invalid response format', 'AuthService');
+        Logger.warning(
+          'Google login failed: Invalid response format',
+          'AuthService',
+        );
         return null;
       }
     } catch (e) {
@@ -168,7 +189,7 @@ class AuthenticationService {
   }) async {
     try {
       Logger.info('Attempting Apple login for email: $email', 'AuthService');
-      
+
       final response = await _api.request(
         endpoint: '/auth/apple',
         method: 'POST',
@@ -181,21 +202,29 @@ class AuthenticationService {
         },
       );
 
-      if (response['status'] == 'success' && response['token'] != null && response['user'] != null) {
+      if (response['status'] == 'success' &&
+          response['token'] != null &&
+          response['user'] != null) {
         final token = response['token'] as String;
         final userData = response['user'] as Map<String, dynamic>;
-        
+
         // Store authentication data
         await _storeToken(token);
         await _storeUserStatus(UserStatus.connected);
-        
+
         final user = User.fromJson(userData);
         await _storeUser(user);
-        
-        Logger.info('Apple login successful for user: ${user.email}', 'AuthService');
+
+        Logger.info(
+          'Apple login successful for user: ${user.email}',
+          'AuthService',
+        );
         return user;
       } else {
-        Logger.warning('Apple login failed: Invalid response format', 'AuthService');
+        Logger.warning(
+          'Apple login failed: Invalid response format',
+          'AuthService',
+        );
         return null;
       }
     } catch (e) {
@@ -209,20 +238,24 @@ class AuthenticationService {
   Future<bool> sendSMSCode(String phoneNumber) async {
     try {
       Logger.info('Sending SMS code to: $phoneNumber', 'AuthService');
-      
+
       final response = await _api.request(
         endpoint: '/auth/sms/send',
         method: 'POST',
-        body: {
-          'phone_number': phoneNumber,
-        },
+        body: {'phone_number': phoneNumber},
       );
 
       if (response['status'] == 'success') {
-        Logger.info('SMS code sent successfully to: $phoneNumber', 'AuthService');
+        Logger.info(
+          'SMS code sent successfully to: $phoneNumber',
+          'AuthService',
+        );
         return true;
       } else {
-        Logger.warning('Failed to send SMS code: ${response['message']}', 'AuthService');
+        Logger.warning(
+          'Failed to send SMS code: ${response['message']}',
+          'AuthService',
+        );
         return false;
       }
     } catch (e) {
@@ -239,7 +272,7 @@ class AuthenticationService {
   }) async {
     try {
       Logger.info('Attempting SMS login for: $phoneNumber', 'AuthService');
-      
+
       final response = await _api.request(
         endpoint: '/auth/sms/verify',
         method: 'POST',
@@ -249,21 +282,29 @@ class AuthenticationService {
         },
       );
 
-      if (response['status'] == 'success' && response['token'] != null && response['user'] != null) {
+      if (response['status'] == 'success' &&
+          response['token'] != null &&
+          response['user'] != null) {
         final token = response['token'] as String;
         final userData = response['user'] as Map<String, dynamic>;
-        
+
         // Store authentication data
         await _storeToken(token);
         await _storeUserStatus(UserStatus.connected);
-        
+
         final user = User.fromJson(userData);
         await _storeUser(user);
-        
-        Logger.info('SMS login successful for user: ${user.email}', 'AuthService');
+
+        Logger.info(
+          'SMS login successful for user: ${user.email}',
+          'AuthService',
+        );
         return user;
       } else {
-        Logger.warning('SMS login failed: Invalid response format', 'AuthService');
+        Logger.warning(
+          'SMS login failed: Invalid response format',
+          'AuthService',
+        );
         return null;
       }
     } catch (e) {
@@ -276,20 +317,17 @@ class AuthenticationService {
   Future<void> logout() async {
     try {
       Logger.info('Logging out current user', 'AuthService');
-      
+
       // Try to notify the server about logout (optional, don't fail if it doesn't work)
       try {
-        await _api.request(
-          endpoint: '/auth/logout',
-          method: 'POST',
-        );
+        await _api.request(endpoint: '/auth/logout', method: 'POST');
       } catch (e) {
         Logger.warning('Server logout notification failed: $e', 'AuthService');
       }
-      
+
       // Clear local storage
       await clearStoredData();
-      
+
       Logger.info('Logout completed successfully', 'AuthService');
     } catch (e) {
       Logger.error('Logout error: $e', 'AuthService');

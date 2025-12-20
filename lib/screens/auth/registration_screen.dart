@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../controllers/user/user_controller.dart';
 import '../../constants.dart';
 import '../../app_localizations.dart';
+import '../../controllers/shared/labeled_text_form_field.dart';
+import '../../models/gender.dart' as gender_model;
+import 'sms_verification_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -15,73 +16,111 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _idNumberController = TextEditingController();
-  final _addressController = TextEditingController();
-  
-  bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
+
+  String _selectedCountryCode = '+972'; // Default to Israel
+  final List<Map<String, String>> _countryCodes = [
+    {'code': '+972', 'name': 'Israel', 'flag': '🇮🇱'},
+    {'code': '+1', 'name': 'USA/Canada', 'flag': '🇺🇸'},
+    {'code': '+44', 'name': 'UK', 'flag': '🇬🇧'},
+    {'code': '+33', 'name': 'France', 'flag': '🇫🇷'},
+    {'code': '+49', 'name': 'Germany', 'flag': '🇩🇪'},
+    {'code': '+39', 'name': 'Italy', 'flag': '🇮🇹'},
+    {'code': '+34', 'name': 'Spain', 'flag': '🇪🇸'},
+    {'code': '+31', 'name': 'Netherlands', 'flag': '🇳🇱'},
+    {'code': '+41', 'name': 'Switzerland', 'flag': '🇨🇭'},
+    {'code': '+43', 'name': 'Austria', 'flag': '🇦🇹'},
+    {'code': '+32', 'name': 'Belgium', 'flag': '🇧🇪'},
+    {'code': '+46', 'name': 'Sweden', 'flag': '🇸🇪'},
+    {'code': '+47', 'name': 'Norway', 'flag': '🇳🇴'},
+    {'code': '+45', 'name': 'Denmark', 'flag': '🇩🇰'},
+    {'code': '+358', 'name': 'Finland', 'flag': '🇫🇮'},
+    {'code': '+351', 'name': 'Portugal', 'flag': '🇵🇹'},
+    {'code': '+30', 'name': 'Greece', 'flag': '🇬🇷'},
+    {'code': '+90', 'name': 'Turkey', 'flag': '🇹🇷'},
+    {'code': '+91', 'name': 'India', 'flag': '🇮🇳'},
+    {'code': '+86', 'name': 'China', 'flag': '🇨🇳'},
+    {'code': '+81', 'name': 'Japan', 'flag': '🇯🇵'},
+    {'code': '+82', 'name': 'South Korea', 'flag': '🇰🇷'},
+    {'code': '+61', 'name': 'Australia', 'flag': '🇦🇺'},
+    {'code': '+64', 'name': 'New Zealand', 'flag': '🇳🇿'},
+    {'code': '+27', 'name': 'South Africa', 'flag': '🇿🇦'},
+    {'code': '+55', 'name': 'Brazil', 'flag': '🇧🇷'},
+    {'code': '+52', 'name': 'Mexico', 'flag': '🇲🇽'},
+    {'code': '+54', 'name': 'Argentina', 'flag': '🇦🇷'},
+    {'code': '+56', 'name': 'Chile', 'flag': '🇨🇱'},
+    {'code': '+57', 'name': 'Colombia', 'flag': '🇨🇴'},
+    {'code': '+7', 'name': 'Russia', 'flag': '🇷🇺'},
+    {'code': '+380', 'name': 'Ukraine', 'flag': '🇺🇦'},
+    {'code': '+48', 'name': 'Poland', 'flag': '🇵🇱'},
+    {'code': '+420', 'name': 'Czech Republic', 'flag': '🇨🇿'},
+    {'code': '+36', 'name': 'Hungary', 'flag': '🇭🇺'},
+    {'code': '+40', 'name': 'Romania', 'flag': '🇷🇴'},
+    {'code': '+359', 'name': 'Bulgaria', 'flag': '🇧🇬'},
+    {'code': '+385', 'name': 'Croatia', 'flag': '🇭🇷'},
+    {'code': '+381', 'name': 'Serbia', 'flag': '🇷🇸'},
+    {'code': '+62', 'name': 'Indonesia', 'flag': '🇮🇩'},
+    {'code': '+60', 'name': 'Malaysia', 'flag': '🇲🇾'},
+    {'code': '+65', 'name': 'Singapore', 'flag': '🇸🇬'},
+    {'code': '+66', 'name': 'Thailand', 'flag': '🇹🇭'},
+    {'code': '+84', 'name': 'Vietnam', 'flag': '🇻🇳'},
+    {'code': '+63', 'name': 'Philippines', 'flag': '🇵🇭'},
+    {'code': '+20', 'name': 'Egypt', 'flag': '🇪🇬'},
+    {'code': '+971', 'name': 'UAE', 'flag': '🇦🇪'},
+    {'code': '+966', 'name': 'Saudi Arabia', 'flag': '🇸🇦'},
+    {'code': '+962', 'name': 'Jordan', 'flag': '🇯🇴'},
+    {'code': '+961', 'name': 'Lebanon', 'flag': '🇱🇧'},
+    {'code': '+212', 'name': 'Morocco', 'flag': '🇲🇦'},
+    {'code': '+216', 'name': 'Tunisia', 'flag': '🇹🇳'},
+    {'code': '+213', 'name': 'Algeria', 'flag': '🇩🇿'},
+  ];
+
   bool _isLoading = false;
   String? _errorMessage;
-  String _selectedSex = 'male';
+  gender_model.Gender? _selectedGender;
+  late final ValueNotifier<gender_model.Gender?> _genderNotifier;
   DateTime? _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _genderNotifier = ValueNotifier<gender_model.Gender?>(
+      gender_model.Gender.male,
+    );
+    _selectedGender = gender_model.Gender.male;
+  }
 
   @override
   void dispose() {
     _fullNameController.dispose();
     _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
     _phoneController.dispose();
-    _idNumberController.dispose();
-    _addressController.dispose();
+    _genderNotifier.dispose();
     super.dispose();
   }
 
   Future<void> _handleRegistration() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedDate == null) {
-      setState(() {
-        _errorMessage = AppLocalizations.of(context).get('date-of-birth-required');
-      });
-      return;
-    }
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    // Navigate to SMS verification with registration data
+    final registrationData = {
+      'fullName': _fullNameController.text.trim(),
+      'email': _emailController.text.trim(),
+      'phoneNumber': '$_selectedCountryCode${_phoneController.text.trim()}',
+      'sex': _selectedGender?.name ?? 'male',
+      if (_selectedDate != null) 'dob': _selectedDate!,
+    };
 
-    final userController = Provider.of<UserController>(context, listen: false);
-    final success = await userController.register(
-      fullName: _fullNameController.text.trim(),
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-      phoneNumber: _phoneController.text.trim(),
-      sex: _selectedSex,
-      dob: _selectedDate!,
-      idNumber: _idNumberController.text.trim(),
-      address: _addressController.text.trim().isNotEmpty 
-          ? _addressController.text.trim() 
-          : null,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => SmsVerificationScreen(
+          phoneNumber: _phoneController.text.trim(),
+          countryCode: _selectedCountryCode,
+          registrationData: registrationData,
+          isRegistration: true,
+        ),
+      ),
     );
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (success) {
-      if (mounted) {
-        Navigator.of(context).pop(); // Return to previous screen
-        Navigator.of(context).pop(); // Close login screen too
-      }
-    } else {
-      setState(() {
-        _errorMessage = AppLocalizations.of(context).get('registration-failed');
-      });
-    }
   }
 
   Future<void> _selectDate() async {
@@ -102,7 +141,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         );
       },
     );
-    
+
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
@@ -124,36 +163,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (value == null || value.isEmpty) {
       return AppLocalizations.of(context).get('email-required');
     }
-    
+
     final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
     if (!emailRegex.hasMatch(value)) {
       return AppLocalizations.of(context).get('email-invalid');
     }
-    
-    return null;
-  }
 
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppLocalizations.of(context).get('password-required');
-    }
-    
-    if (value.length < 6) {
-      return AppLocalizations.of(context).get('password-min-length');
-    }
-    
-    return null;
-  }
-
-  String? _validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppLocalizations.of(context).get('confirm-password-required');
-    }
-    
-    if (value != _passwordController.text) {
-      return AppLocalizations.of(context).get('passwords-do-not-match');
-    }
-    
     return null;
   }
 
@@ -161,25 +176,64 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (value == null || value.isEmpty) {
       return AppLocalizations.of(context).get('phone-required');
     }
-    
+
     // Basic phone validation - can be improved based on requirements
     if (value.length < 10) {
       return AppLocalizations.of(context).get('phone-invalid');
     }
-    
+
     return null;
   }
 
-  String? _validateIdNumber(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppLocalizations.of(context).get('id-number-required');
-    }
-    
-    if (value.length < 5) {
-      return AppLocalizations.of(context).get('id-number-invalid');
-    }
-    
-    return null;
+  void _showGenderDropdown(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  AppLocalizations.of(context).get('gender'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              ...gender_model.Gender.values.map((gender) {
+                return ListTile(
+                  title: Text(
+                    gender.getLabel(context),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  trailing: _selectedGender == gender
+                      ? const Icon(Icons.check, color: Color(0xFF8B5CF6))
+                      : null,
+                  onTap: () {
+                    _genderNotifier.value = gender;
+                    _selectedGender = gender;
+                    Navigator.pop(context);
+                  },
+                );
+              }).toList(),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -207,7 +261,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 20),
-                
+
                 // Title
                 Text(
                   AppLocalizations.of(context).get('registration-title'),
@@ -218,20 +272,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 Text(
                   AppLocalizations.of(context).get('registration-subtitle'),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
+                  style: const TextStyle(fontSize: 16, color: Colors.white70),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: 30),
-                
+
                 // Error message
                 if (_errorMessage != null)
                   Container(
@@ -255,230 +306,310 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ],
                     ),
                   ),
-                
+
                 // Full Name field
-                TextFormField(
+                LabeledTextFormField(
                   controller: _fullNameController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).get('full-name'),
-                    prefixIcon: const Icon(Icons.person_outline),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  validator: _validateFullName,
+                  titleKey: 'full-name',
+                  hintTextKey: 'full-name',
+                  customValidator: _validateFullName,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Email field
-                TextFormField(
+                LabeledTextFormField(
                   controller: _emailController,
+                  titleKey: 'email',
+                  hintTextKey: 'email',
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).get('email'),
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  validator: _validateEmail,
+                  customValidator: _validateEmail,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
-                // Phone field
-                TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).get('phone-number'),
-                    prefixIcon: const Icon(Icons.phone_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  validator: _validatePhone,
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // ID Number field
-                TextFormField(
-                  controller: _idNumberController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).get('id-number'),
-                    prefixIcon: const Icon(Icons.badge_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  validator: _validateIdNumber,
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Date of Birth field
-                InkWell(
-                  onTap: _selectDate,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.white,
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.calendar_today_outlined, color: Colors.grey),
-                        const SizedBox(width: 12),
-                        Text(
-                          _selectedDate == null
-                              ? AppLocalizations.of(context).get('date-of-birth')
-                              : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: _selectedDate == null ? Colors.grey : Colors.black,
-                          ),
+
+                // Phone number field with country code
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title with asterisk
+                    RichText(
+                      text: TextSpan(
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Gender selection
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.white,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context).get('gender'),
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      Row(
                         children: [
-                          Expanded(
-                            child: RadioListTile<String>(
-                              title: Text(AppLocalizations.of(context).get('gender-male')),
-                              value: 'male',
-                              groupValue: _selectedSex,
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedSex = value!;
-                                });
-                              },
-                              contentPadding: EdgeInsets.zero,
-                            ),
+                          TextSpan(
+                            text: AppLocalizations.of(
+                              context,
+                            ).get('phone-number'),
                           ),
-                          Expanded(
-                            child: RadioListTile<String>(
-                              title: Text(AppLocalizations.of(context).get('gender-female')),
-                              value: 'female',
-                              groupValue: _selectedSex,
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedSex = value!;
-                                });
-                              },
-                              contentPadding: EdgeInsets.zero,
-                            ),
+                          const TextSpan(
+                            text: ' *',
+                            style: TextStyle(color: Colors.red),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Address field (optional)
-                TextFormField(
-                  controller: _addressController,
-                  decoration: InputDecoration(
-                    labelText: '${AppLocalizations.of(context).get('address')} (${AppLocalizations.of(context).get('optional')})',
-                    prefixIcon: const Icon(Icons.location_on_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
                     ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Password field
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: !_isPasswordVisible,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).get('password'),
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                    const SizedBox(height: 8),
+
+                    // Phone input row
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withAlpha(77),
+                          borderRadius: BorderRadius.circular(32),
+                          border: Border.all(
+                            color: Colors.grey[800]!,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            // Country code dropdown
+                            Container(
+                              padding: const EdgeInsets.only(left: 16),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: _selectedCountryCode,
+                                  items: _countryCodes.map((country) {
+                                    return DropdownMenuItem<String>(
+                                      value: country['code'],
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            country['code']!,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.white,
+                                            ),
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            country['flag']!,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      _selectedCountryCode = newValue!;
+                                    });
+                                  },
+                                  icon: const Icon(
+                                    Icons.keyboard_arrow_down,
+                                    color: Colors.white,
+                                  ),
+                                  iconSize: 20,
+                                  dropdownColor: Colors.grey[900],
+                                  style: const TextStyle(color: Colors.white),
+                                  isDense: true,
+                                  alignment: AlignmentDirectional.centerStart,
+                                  selectedItemBuilder: (BuildContext context) {
+                                    return _countryCodes.map<Widget>((country) {
+                                      return Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            country['flag']!,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            country['code']!,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.white,
+                                            ),
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                        ],
+                                      );
+                                    }).toList();
+                                  },
+                                ),
+                              ),
+                            ),
+
+                            // Separator
+                            Container(
+                              height: 24,
+                              width: 1,
+                              color: Colors.grey[600],
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+
+                            // Phone number input
+                            Expanded(
+                              child: TextFormField(
+                                controller: _phoneController,
+                                keyboardType: TextInputType.phone,
+                                textDirection: TextDirection.ltr,
+                                style: const TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  ).get('phone-number'),
+                                  hintStyle: TextStyle(color: Colors.grey[400]),
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 0,
+                                    vertical: 16,
+                                  ),
+                                ),
+                                validator: _validatePhone,
+                              ),
+                            ),
+
+                            const SizedBox(width: 16),
+                          ],
+                        ),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Date of Birth field
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${AppLocalizations.of(context).get('date-of-birth')} (${AppLocalizations.of(context).get('optional')})',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: _selectDate,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withAlpha(77),
+                          borderRadius: BorderRadius.circular(32),
+                          border: Border.all(
+                            color: Colors.grey[800]!,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today_outlined,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              _selectedDate == null
+                                  ? AppLocalizations.of(
+                                      context,
+                                    ).get('date-of-birth')
+                                  : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: _selectedDate == null
+                                    ? Colors.grey[400]
+                                    : Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Gender selection
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context).get('gender'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ValueListenableBuilder<gender_model.Gender?>(
+                      valueListenable: _genderNotifier,
+                      builder: (context, selectedGender, child) {
+                        return GestureDetector(
+                          onTap: () {
+                            _showGenderDropdown(context);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withAlpha(77),
+                              borderRadius: BorderRadius.circular(32),
+                              border: Border.all(
+                                color: Colors.grey[800]!,
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  selectedGender?.getLabel(context) ??
+                                      AppLocalizations.of(
+                                        context,
+                                      ).get('gender'),
+                                  style: TextStyle(
+                                    color: selectedGender != null
+                                        ? Colors.white
+                                        : Colors.grey[400],
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: Colors.grey[400],
+                                  size: 24,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
                       },
                     ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  validator: _validatePassword,
+                  ],
                 ),
-                
-                const SizedBox(height: 16),
-                
-                // Confirm Password field
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: !_isConfirmPasswordVisible,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).get('confirm-password'),
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isConfirmPasswordVisible ? Icons.visibility_off : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  validator: _validateConfirmPassword,
-                ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Register button
                 SizedBox(
                   height: 50,
@@ -502,7 +633,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
               ],
             ),

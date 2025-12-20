@@ -20,11 +20,11 @@ class User {
 
   /// The user's date of birth.
   /// Used for age verification and age-restricted events.
-  final DateTime dob;
+  final DateTime? dob;
 
   /// The user's ID number (e.g., national ID, passport).
   /// Used for identity verification at events.
-  final String idNumber;
+  final String? idNumber;
 
   /// URL or path to the user's profile picture.
   /// Optional - can be null if no picture is set.
@@ -42,9 +42,9 @@ class User {
   /// - [email]: The user's email address
   /// - [sex]: The user's sex/gender
   /// - [dob]: The user's date of birth
-  /// - [idNumber]: The user's ID number
   ///
   /// Optional parameters:
+  /// - [idNumber]: The user's ID number
   /// - [thumbnail]: URL/path to profile picture
   /// - [address]: User's physical address
   User({
@@ -52,8 +52,8 @@ class User {
     required this.phoneNumber,
     required this.email,
     required this.sex,
-    required this.dob,
-    required this.idNumber,
+    this.dob,
+    this.idNumber,
     this.thumbnail,
     this.address,
   });
@@ -72,8 +72,8 @@ class User {
       phoneNumber: json['phoneNumber'] as String,
       email: json['email'] as String,
       sex: json['sex'] as String,
-      dob: DateTime.parse(json['dob'] as String),
-      idNumber: json['idNumber'] as String,
+      dob: json['dob'] != null ? DateTime.parse(json['dob'] as String) : null,
+      idNumber: json['idNumber'] as String?,
       thumbnail: json['thumbnail'] as String?,
       address: json['address'] as String?,
     );
@@ -83,14 +83,19 @@ class User {
   ///
   /// Optional fields are only included if they are non-null.
   /// The date of birth is converted to ISO 8601 format.
-  Map<String, dynamic> toJson() => {
-        'fullName': fullName,
-        'phoneNumber': phoneNumber,
-        'email': email,
-        'sex': sex,
-        'dob': dob.toIso8601String(),
-        'idNumber': idNumber,
-        if (thumbnail != null) 'thumbnail': thumbnail,
-        if (address != null) 'address': address,
-      };
+  Map<String, dynamic> toJson() {
+    final result = {
+      'fullName': fullName,
+      'phoneNumber': phoneNumber,
+      'email': email,
+      'sex': sex,
+    };
+
+    if (dob != null) result['dob'] = dob!.toIso8601String();
+    if (idNumber != null) result['idNumber'] = idNumber!;
+    if (thumbnail != null) result['thumbnail'] = thumbnail!;
+    if (address != null) result['address'] = address!;
+
+    return result;
+  }
 }

@@ -20,7 +20,7 @@ class UserController with ChangeNotifier {
   String? get fullName => _user?.fullName;
   String? get thumbnail => _user?.thumbnail;
   String? get address => _user?.address;
-  
+
   // Status convenience getters
   bool get isLoggedIn => _status == UserStatus.connected && _user != null;
   bool get isGuest => _status == UserStatus.guest;
@@ -31,21 +31,27 @@ class UserController with ChangeNotifier {
     _setLoading(true);
     try {
       Logger.info('Initializing UserController', 'UserController');
-      
+
       // Load stored status and user data
       _status = await _authService.getStoredUserStatus();
       _user = await _authService.getStoredUser();
-      
+
       // If we have a connected status but no user, validate the token
       if (_status == UserStatus.connected && _user != null) {
         final isValid = await _authService.validateToken();
         if (!isValid) {
-          Logger.warning('Stored token is invalid, logging out', 'UserController');
+          Logger.warning(
+            'Stored token is invalid, logging out',
+            'UserController',
+          );
           await logout();
         }
       }
-      
-      Logger.info('UserController initialized with status: ${_status.displayName}', 'UserController');
+
+      Logger.info(
+        'UserController initialized with status: ${_status.displayName}',
+        'UserController',
+      );
     } catch (e) {
       Logger.error('Error initializing UserController: $e', 'UserController');
       _status = UserStatus.unknown;
@@ -60,12 +66,12 @@ class UserController with ChangeNotifier {
     _setLoading(true);
     try {
       Logger.info('Attempting login for: $email', 'UserController');
-      
+
       final user = await _authService.login(email, password);
       if (user != null) {
         _user = user;
         _status = UserStatus.connected;
-        notifyListeners();
+        _safeNotifyListeners();
         Logger.info('Login successful', 'UserController');
         return true;
       } else {
@@ -85,7 +91,7 @@ class UserController with ChangeNotifier {
     _setLoading(true);
     try {
       Logger.info('Attempting Google sign-in', 'UserController');
-      
+
       // Sign in with Google
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
@@ -94,8 +100,9 @@ class UserController with ChangeNotifier {
       }
 
       // Get authentication details
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
       // Send the Google token to your backend for verification
       final user = await _authService.loginWithGoogle(
         accessToken: googleAuth.accessToken,
@@ -108,7 +115,7 @@ class UserController with ChangeNotifier {
       if (user != null) {
         _user = user;
         _status = UserStatus.connected;
-        notifyListeners();
+        _safeNotifyListeners();
         Logger.info('Google login successful', 'UserController');
         return true;
       } else {
@@ -128,7 +135,7 @@ class UserController with ChangeNotifier {
     _setLoading(true);
     try {
       Logger.info('Attempting Apple sign-in', 'UserController');
-      
+
       // Sign in with Apple
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
@@ -136,14 +143,14 @@ class UserController with ChangeNotifier {
           AppleIDAuthorizationScopes.fullName,
         ],
       );
-      
+
       // Send the Apple credential to your backend for verification
       final user = await _authService.loginWithApple(
         identityToken: credential.identityToken,
         authorizationCode: credential.authorizationCode,
         email: credential.email,
-        fullName: credential.givenName != null && credential.familyName != null 
-            ? '${credential.givenName} ${credential.familyName}' 
+        fullName: credential.givenName != null && credential.familyName != null
+            ? '${credential.givenName} ${credential.familyName}'
             : null,
         userIdentifier: credential.userIdentifier,
       );
@@ -151,7 +158,7 @@ class UserController with ChangeNotifier {
       if (user != null) {
         _user = user;
         _status = UserStatus.connected;
-        notifyListeners();
+        _safeNotifyListeners();
         Logger.info('Apple login successful', 'UserController');
         return true;
       } else {
@@ -171,7 +178,7 @@ class UserController with ChangeNotifier {
     _setLoading(true);
     try {
       Logger.info('Sending SMS code to: $phoneNumber', 'UserController');
-      
+
       final success = await _authService.sendSMSCode(phoneNumber);
       if (success) {
         Logger.info('SMS code sent successfully', 'UserController');
@@ -193,12 +200,12 @@ class UserController with ChangeNotifier {
     _setLoading(true);
     try {
       Logger.info('Attempting SMS login for: $phoneNumber', 'UserController');
-      
+
       final user = await _authService.loginWithSMS(
         phoneNumber: phoneNumber,
         verificationCode: verificationCode,
       );
-      
+
       if (user != null) {
         _user = user;
         _status = UserStatus.connected;
@@ -221,17 +228,18 @@ class UserController with ChangeNotifier {
   Future<bool> register({
     required String fullName,
     required String email,
-    required String password,
+    String? password,
     required String phoneNumber,
     required String sex,
-    required DateTime dob,
-    required String idNumber,
+    DateTime? dob,
+    String? idNumber,
     String? address,
+    String? smsCode,
   }) async {
     _setLoading(true);
     try {
       Logger.info('Attempting registration for: $email', 'UserController');
-      
+
       final user = await _authService.register(
         fullName: fullName,
         email: email,
@@ -241,12 +249,13 @@ class UserController with ChangeNotifier {
         dob: dob,
         idNumber: idNumber,
         address: address,
+        smsCode: smsCode,
       );
-      
+
       if (user != null) {
         _user = user;
         _status = UserStatus.connected;
-        notifyListeners();
+        _safeNotifyListeners();
         Logger.info('Registration successful', 'UserController');
         return true;
       } else {
@@ -269,7 +278,7 @@ class UserController with ChangeNotifier {
       await _authService.logout();
       _user = null;
       _status = UserStatus.unknown;
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       Logger.error('Logout error: $e', 'UserController');
     } finally {
@@ -285,7 +294,7 @@ class UserController with ChangeNotifier {
       await _authService.continueAsGuest();
       _user = null;
       _status = UserStatus.guest;
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       Logger.error('Error setting guest status: $e', 'UserController');
     } finally {
@@ -297,18 +306,28 @@ class UserController with ChangeNotifier {
   void setUser(User user) {
     _user = user;
     _status = UserStatus.connected;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   /// Update user status
   void setStatus(UserStatus status) {
     _status = status;
-    notifyListeners();
+    _safeNotifyListeners();
+  }
+
+  /// Safe notification that defers to avoid calling during build
+  void _safeNotifyListeners() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   /// Private helper to manage loading state
   void _setLoading(bool loading) {
     _isLoading = loading;
-    notifyListeners();
+    // Defer notifyListeners to avoid calling during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 }
