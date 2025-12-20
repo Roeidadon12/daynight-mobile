@@ -86,6 +86,9 @@ const Map<String, String> heTexts = {
   'terms-and-conditions': 'תנאים והגבלות',
   'and': 'ו',
   'privacy-policy': 'מדיניות פרטיות',
+  'by-pressing-continue-approve': 'על ידי לחיצה על כפתור המשך אתה מאשר את ',
+  'terms-and-conditions-link': 'התנאים וההגבלות',
+  'privacy-policy-link': 'מדיניות הפרטיות',
   'payment-success': 'תשלום בוצע בהצלחה',
   'enjoy': 'תהנו',
   'purchase-completed-successfully': 'הרכישה הושלמה בהצלחה!',
@@ -102,7 +105,6 @@ const Map<String, String> heTexts = {
   'create-first-event': 'צרו את האירוע הראשון שלכם כדי להתחיל',
   'create-new-event': 'יצירת אירוע',
   'create-event': 'צור אירוע',
-
   'create-event-basic-info': 'פרטים על האירוע',
   'create-event-basic-info-description': 'הצעד הראשון לאירוע מוצלח: הגדר את הבסיס.',
   'create-event-design': 'תיאור האירוע',
@@ -111,7 +113,6 @@ const Map<String, String> heTexts = {
   'create-event-details-description': 'קח את האירוע שלך קדימה עם הגדרות מתקדמות שיעזרו לך להצליח כמו הגדולים!',
   'create-event-tickets-pricing': 'פרטי חשבון',
   'create-event-tickets-pricing-description': 'לאן תרצה לקבל את הכסף?',
-
   'event-name': 'שם האירוע',
   'enter-event-name': 'שם הרשמי של האירוע שיופיע לכולם',
   'start-time': 'שעת התחלה',
@@ -138,8 +139,6 @@ const Map<String, String> heTexts = {
   'create-event-description': 'תיאור האירוע',
   'create-event-description-instructions': 'כתוב תיאור שיגרום להם לרצות להגיע ומה יהיה באירוע',
   'create-event-continue-to-advanced-settings': 'המשך להגדרות מתקדמות',
-  
-  // Form fields
   'organizer-name': 'שם המארגן',
   'enter-organizer-name': 'הזן שם המארגן',
   'organizer-name-required': 'שם המארגן הוא שדה חובה',
@@ -149,8 +148,6 @@ const Map<String, String> heTexts = {
   'private-event-description': 'רק משתמשים מוזמנים יכולים לראות את האירוע הזה',
   'i-agree-to-the': 'אני מסכים ל',
   'terms-of-service': 'תנאי השירות',
-  
-  // Users tracking section
   'users-tracking': 'מעקב משתמשים',
   'tracking-field-1': 'שדה מעקב 1',
   'enter-tracking-field-1': 'הזן שדה מעקב 1',
@@ -160,8 +157,6 @@ const Map<String, String> heTexts = {
   'enter-tracking-field-3': 'הזן שדה מעקב 3',
   'tracking-field-4': 'שדה מעקב 4',
   'enter-tracking-field-4': 'הזן שדה מעקב 4',
-  
-  // Ticket management
   'free-event': 'אירוע חינמי',
   'free-event-description': 'האירוע הזה חינמי להשתתפות',
   'ticket-types': 'סוגי כרטיסים',
@@ -182,8 +177,6 @@ const Map<String, String> heTexts = {
   'add-first-ticket-type': 'הוסף סוג כרטיס ראשון',
   'remove': 'הסר',
   'previous': 'קודם',
-  
-  // Event creation success
   'event-created': 'האירוע נוצר',
   'event-ready-to-share': 'האירוע שלכם מוכן לשיתוף עם העולם!',
   'congratulations': 'ברכותינו',
@@ -196,8 +189,6 @@ const Map<String, String> heTexts = {
   'manage-my-event': 'נהל את האירוע שלי',
   'back-to-events': 'חזרה לאירועים',
   'to-main-screen': 'למסך הראשי',
-
-  // Authentication and User Status
   'connect-subscribe': 'התחברות / רשומה',
   'connect-with-google': 'התחבר באמצעות Google',
   'connect-with-apple': 'התחבר באמצעות Apple',
@@ -247,4 +238,5 @@ const Map<String, String> heTexts = {
   'user-status-connected': 'מחובר',
   'user-status-guest': 'אורח',
   'user-status-unknown': 'לא ידוע',
+  'phone-number-required-for-identification': 'מספר טלפון נדרש לצורך זיהוי',
 };

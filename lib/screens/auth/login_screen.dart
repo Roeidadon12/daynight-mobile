@@ -15,17 +15,14 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
   final _smsCodeController = TextEditingController();
-  bool _isPasswordVisible = false;
   bool _isLoading = false;
   bool _isAwaitingSMS = false; // SMS verification mode
   String? _errorMessage;
 
   @override
   void dispose() {
-    _passwordController.dispose();
     _phoneController.dispose();
     _smsCodeController.dispose();
     super.dispose();
@@ -128,16 +125,47 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppLocalizations.of(context).get('password-required');
-    }
-    
-    if (value.length < 6) {
-      return AppLocalizations.of(context).get('password-min-length');
-    }
-    
-    return null;
+  void _openTermsAndConditions() {
+    // TODO: Replace with actual EULA URL
+    const eulaUrl = 'https://example.com/terms-and-conditions';
+    _showUrlDialog('Terms and Conditions', eulaUrl);
+  }
+
+  void _openPrivacyPolicy() {
+    // TODO: Replace with actual Privacy Policy URL
+    const privacyPolicyUrl = 'https://example.com/privacy-policy';
+    _showUrlDialog('Privacy Policy', privacyPolicyUrl);
+  }
+
+  void _showUrlDialog(String title, String url) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Please visit the following URL:'),
+              const SizedBox(height: 8),
+              SelectableText(
+                url,
+                style: const TextStyle(
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   String? _validatePhoneNumber(String? value) {
@@ -389,6 +417,58 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: _validatePhoneNumber,
                 ),
                 
+                const SizedBox(height: 16),
+                
+                // Terms and Privacy Policy text
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: AppLocalizations.of(context).get('by-pressing-continue-approve'),
+                        ),
+                        WidgetSpan(
+                          child: GestureDetector(
+                            onTap: () => _openTermsAndConditions(),
+                            child: Text(
+                              AppLocalizations.of(context).get('terms-and-conditions-link'),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' ${AppLocalizations.of(context).get('and')} ',
+                        ),
+                        WidgetSpan(
+                          child: GestureDetector(
+                            onTap: () => _openPrivacyPolicy(),
+                            child: Text(
+                              AppLocalizations.of(context).get('privacy-policy-link'),
+                              style: TextStyle(
+                                color: kBrandPrimary,
+                                fontSize: 12,
+                                decoration: TextDecoration.underline,
+                                decorationColor: kBrandPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
                 const SizedBox(height: 20),
                 
                 // SMS code field (only show in SMS awaiting mode)
@@ -410,33 +490,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   
                   const SizedBox(height: 24),
                 ],
-                
-                // Password field (hidden during SMS flow)
-                if (!_isAwaitingSMS)
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: !_isPasswordVisible,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).get('password'),
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                    validator: _validatePassword,
-                  ),
                 
                 if (!_isAwaitingSMS) const SizedBox(height: 24),
                 

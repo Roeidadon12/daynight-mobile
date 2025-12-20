@@ -86,6 +86,9 @@ const Map<String, String> enTexts = {
   'terms-and-conditions': 'Terms and Conditions',
   'and': 'and',
   'privacy-policy': 'Privacy Policy',
+  'by-pressing-continue-approve': 'By pressing on the continue button you approve the ',
+  'terms-and-conditions-link': 'Terms and Conditions',
+  'privacy-policy-link': 'Privacy Policy',
   'payment-success': 'Payment Success',
   'enjoy': 'ENJOY',
   'purchase-completed-successfully': 'Your purchase has been completed successfully!',
@@ -102,8 +105,6 @@ const Map<String, String> enTexts = {
   'create-first-event': 'Create your first event to get started',
   'create-new-event': 'Create Event',
   'create-event': 'Create event',
-  
-
   'create-event-basic-info': 'Event Details',
   'create-event-basic-info-description': 'The first step to a successful event: define the basics.',
   'create-event-design': 'Event Description',
@@ -112,7 +113,6 @@ const Map<String, String> enTexts = {
   'create-event-details-description': 'Take your event to the next level with advanced settings that help you succeed like the pros!',
   'create-event-tickets-pricing': 'Account Details',
   'create-event-tickets-pricing-description': 'Where would you like to receive the money?',
-
   'event-name': 'Event Name',
   'enter-event-name': 'The official name of your event that will appear for all',
   'start-time': 'Start Time',
@@ -139,8 +139,6 @@ const Map<String, String> enTexts = {
   'create-event-description': 'Event Description',
   'create-event-description-instructions': 'Write a description that will make them want to come and what will be at the event',
   'create-event-continue-to-advanced-settings': 'Continue to Advanced Settings',
-  
-  // Form fields
   'organizer-name': 'Organizer Name',
   'enter-organizer-name': 'Enter organizer name',
   'organizer-name-required': 'Organizer name is required',
@@ -150,8 +148,6 @@ const Map<String, String> enTexts = {
   'private-event-description': 'Only invited users can see this event',
   'i-agree-to-the': 'I agree to the',
   'terms-of-service': 'Terms of Service',
-  
-  // Users tracking section
   'users-tracking': 'Users Tracking',
   'tracking-field-1': 'Tracking Field 1',
   'enter-tracking-field-1': 'Enter tracking field 1',
@@ -161,8 +157,6 @@ const Map<String, String> enTexts = {
   'enter-tracking-field-3': 'Enter tracking field 3',
   'tracking-field-4': 'Tracking Field 4',
   'enter-tracking-field-4': 'Enter tracking field 4',
-  
-  // Ticket management
   'free-event': 'Free Event',
   'free-event-description': 'This event is free to attend',
   'ticket-types': 'Ticket Types',
@@ -183,8 +177,6 @@ const Map<String, String> enTexts = {
   'add-first-ticket-type': 'Add First Ticket Type',
   'remove': 'Remove',
   'previous': 'Previous',
-  
-  // Event creation success
   'event-created': 'Event Created',
   'event-ready-to-share': 'Your event is ready to share with the world!',
   'congratulations': 'Congratulations',
@@ -197,8 +189,6 @@ const Map<String, String> enTexts = {
   'manage-my-event': 'Manage My Event',
   'back-to-events': 'Back to Events',
   'to-main-screen': 'To Main Screen',
-  
-  // Authentication and User Status
   'connect-subscribe': 'Connect/Subscribe',
   'connect-with-google': 'Connect with Google',
   'connect-with-apple': 'Connect with Apple',
@@ -248,4 +238,5 @@ const Map<String, String> enTexts = {
   'user-status-connected': 'Connected',
   'user-status-guest': 'Guest',
   'user-status-unknown': 'Unknown',
+  'phone-number-required-for-identification': 'Phone number is required for identification',
 };
