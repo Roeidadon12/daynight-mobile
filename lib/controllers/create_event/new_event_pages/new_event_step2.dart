@@ -167,12 +167,15 @@ class _NewEventStep2State extends State<NewEventStep2> {
           // Navigation Buttons
           Container(
             padding: const EdgeInsets.all(16),
-            child: PrimaryButton(
-              onPressed: _saveAndNext,
-              textKey: 'create-event-continue-to-advanced-settings',
-              disabled: !_isFormValid(),
-              trailingIcon: Icons.arrow_forward,
-              flexible: false,
+            child: SizedBox(
+              width: double.infinity,
+              child: PrimaryButton(
+                onPressed: _saveAndNext,
+                textKey: 'create-event-continue-to-advanced-settings',
+                disabled: !_isFormValid(),
+                trailingIcon: Icons.arrow_forward,
+                flexible: false,
+              ),
             ),
           ),
         ],

@@ -1087,12 +1087,15 @@ class _NewEventStep1State extends State<NewEventStep1> {
           // Continue Button
           Container(
             padding: const EdgeInsets.all(16),
-            child: PrimaryButton(
-              onPressed: _saveAndNext,
-              textKey: 'create-event-continue-to-description',
-              disabled: !_isFormValid(),
-              trailingIcon: Icons.arrow_forward,
-              flexible: false,
+            child: SizedBox(
+              width: double.infinity,
+              child: PrimaryButton(
+                onPressed: _saveAndNext,
+                textKey: 'create-event-continue-to-description',
+                disabled: !_isFormValid(),
+                trailingIcon: Icons.arrow_forward,
+                flexible: false,
+              ),
             ),
           ),
         ],
