@@ -3,6 +3,7 @@ import '../../../app_localizations.dart';
 import '../../../constants.dart';
 import '../../../models/create_event_data.dart';
 import '../../shared/primary_button.dart';
+import '../../shared/labeled_text_form_field.dart';
 
 class NewEventStep3 extends StatefulWidget {
   final Map<String, dynamic> eventData;
@@ -24,55 +25,67 @@ class NewEventStep3 extends StatefulWidget {
 
 class _NewEventStep3State extends State<NewEventStep3> {
   final _formKey = GlobalKey<FormState>();
-  List<CreateEventTicketType> _ticketTypes = [];
-  bool _isFreeEvent = false;
+  final _organizerNameController = TextEditingController();
+  final _urlSuffixController = TextEditingController();
+  final _trackingField1Controller = TextEditingController();
+  final _trackingField2Controller = TextEditingController();
+  final _trackingField3Controller = TextEditingController();
+  final _trackingField4Controller = TextEditingController();
+  bool _isPrivateEvent = false;
+  bool _termsAccepted = false;
+  bool _isUserTrackingExpanded = false;
   
   @override
   void initState() {
     super.initState();
     // Initialize with existing data if any
-    _isFreeEvent = widget.eventData['isFreeEvent'] ?? false;
-    
-    // Initialize ticket types from saved data or create default one
-    final savedTickets = widget.eventData['ticketTypes'] as List<CreateEventTicketType>?;
-    if (savedTickets != null && savedTickets.isNotEmpty) {
-      _ticketTypes = savedTickets;
-    } else if (!_isFreeEvent) {
-      _addTicketType();
-    }
+    _organizerNameController.text = widget.eventData['organizerName'] ?? '';
+    _urlSuffixController.text = widget.eventData['urlSuffix'] ?? '';
+    _trackingField1Controller.text = widget.eventData['trackingField1'] ?? '';
+    _trackingField2Controller.text = widget.eventData['trackingField2'] ?? '';
+    _trackingField3Controller.text = widget.eventData['trackingField3'] ?? '';
+    _trackingField4Controller.text = widget.eventData['trackingField4'] ?? '';
+    _isPrivateEvent = widget.eventData['isPrivateEvent'] ?? false;
+    _termsAccepted = widget.eventData['termsAccepted'] ?? false;
+    _isUserTrackingExpanded = widget.eventData['isUserTrackingExpanded'] ?? false;
+  }
+
+  @override
+  void dispose() {
+    _organizerNameController.dispose();
+    _urlSuffixController.dispose();
+    _trackingField1Controller.dispose();
+    _trackingField2Controller.dispose();
+    _trackingField3Controller.dispose();
+    _trackingField4Controller.dispose();
+    super.dispose();
   }
 
   bool _isFormValid() {
-    if (_isFreeEvent) return true;
-    
-    return _ticketTypes.isNotEmpty && 
-           _ticketTypes.every((ticket) => 
-               ticket.name.isNotEmpty && 
-               ticket.quantity > 0);
+    return _organizerNameController.text.trim().isNotEmpty && _termsAccepted;
   }
 
-  void _addTicketType() {
-    setState(() {
-      _ticketTypes.add(CreateEventTicketType(
-        name: '',
-        price: 0.0,
-        quantity: 1,
-        description: '',
-      ));
-    });
-  }
 
-  void _removeTicketType(int index) {
-    setState(() {
-      _ticketTypes.removeAt(index);
-    });
-  }
 
   void _saveAndComplete() {
     if (_formKey.currentState!.validate() && _isFormValid()) {
-      // Save all form data
-      widget.onDataChanged('isFreeEvent', _isFreeEvent);
-      widget.onDataChanged('ticketTypes', _ticketTypes);
+      // Create final URL by combining domain with suffix
+      String finalUrl = 'Daynight.co.il/Event/';
+      if (_urlSuffixController.text.isNotEmpty) {
+        finalUrl += _urlSuffixController.text;
+      }
+      
+      // Save form data
+      widget.onDataChanged('organizerName', _organizerNameController.text);
+      widget.onDataChanged('urlSuffix', _urlSuffixController.text);
+      widget.onDataChanged('finalUrl', finalUrl);
+      widget.onDataChanged('isPrivateEvent', _isPrivateEvent);
+      widget.onDataChanged('termsAccepted', _termsAccepted);
+      widget.onDataChanged('trackingField1', _trackingField1Controller.text);
+      widget.onDataChanged('trackingField2', _trackingField2Controller.text);
+      widget.onDataChanged('trackingField3', _trackingField3Controller.text);
+      widget.onDataChanged('trackingField4', _trackingField4Controller.text);
+      widget.onDataChanged('isUserTrackingExpanded', _isUserTrackingExpanded);
       
       widget.onComplete();
     }
@@ -92,323 +105,265 @@ class _NewEventStep3State extends State<NewEventStep3> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Free Event Toggle
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[800],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: SwitchListTile(
-                        title: Text(
-                          AppLocalizations.of(context).get('free-event'),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        subtitle: Text(
-                          AppLocalizations.of(context).get('free-event-description'),
-                          style: TextStyle(color: Colors.grey[400], fontSize: 12),
-                        ),
-                        value: _isFreeEvent,
-                        onChanged: (bool value) {
-                          setState(() {
-                            _isFreeEvent = value;
-                            if (value) {
-                              _ticketTypes.clear();
-                            } else if (_ticketTypes.isEmpty) {
-                              _addTicketType();
-                            }
-                          });
-                        },
-                        activeColor: kBrandPrimary,
-                      ),
+                    // Organizer Name
+                    LabeledTextFormField(
+                      controller: _organizerNameController,
+                      titleKey: 'organizer-name',
+                      hintTextKey: 'enter-organizer-name',
+                      errorTextKey: 'organizer-name-required',
+                      isRequired: true,
+                      onChanged: (value) => setState(() {}),
                     ),
                     
-                    if (!_isFreeEvent) ...[
-                      const SizedBox(height: 24),
-                      
-                      // Ticket Types Header
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context).get('ticket-types'),
+                    const SizedBox(height: 24),
+                    
+                    // URL Address
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title
+                        RichText(
+                          text: TextSpan(
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                             ),
-                          ),
-                          IconButton(
-                            onPressed: _addTicketType,
-                            icon: const Icon(
-                              Icons.add_circle,
-                              color: Colors.white,
-                            ),
-                            tooltip: AppLocalizations.of(context).get('add-ticket-type'),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 16),
-                      
-                      // Ticket Types List
-                      ..._ticketTypes.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final ticket = entry.value;
-                        
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[850],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey[700]!),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Header with delete button
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    '${AppLocalizations.of(context).get('ticket-type')} ${index + 1}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  if (_ticketTypes.length > 1)
-                                    IconButton(
-                                      onPressed: () => _removeTicketType(index),
-                                      icon: const Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
-                                        size: 20,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              
-                              const SizedBox(height: 12),
-                              
-                              // Ticket Name
-                              TextFormField(
-                                initialValue: ticket.name,
-                                style: const TextStyle(color: Colors.white),
-                                decoration: InputDecoration(
-                                  labelText: AppLocalizations.of(context).get('ticket-name'),
-                                  labelStyle: TextStyle(color: Colors.grey[400]),
-                                  hintText: AppLocalizations.of(context).get('enter-ticket-name'),
-                                  hintStyle: TextStyle(color: Colors.grey[500]),
-                                  filled: true,
-                                  fillColor: Colors.grey[800],
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return AppLocalizations.of(context).get('ticket-name-required');
-                                  }
-                                  return null;
-                                },
-                                onChanged: (value) {
-                                  ticket.name = value;
-                                  setState(() {});
-                                },
-                              ),
-                              
-                              const SizedBox(height: 12),
-                              
-                              // Price and Quantity Row
-                              Row(
-                                children: [
-                                  // Price
-                                  Expanded(
-                                    child: TextFormField(
-                                      initialValue: ticket.price.toString(),
-                                      style: const TextStyle(color: Colors.white),
-                                      keyboardType: TextInputType.number,
-                                      decoration: InputDecoration(
-                                        labelText: AppLocalizations.of(context).get('price'),
-                                        labelStyle: TextStyle(color: Colors.grey[400]),
-                                        hintText: '0.00',
-                                        hintStyle: TextStyle(color: Colors.grey[500]),
-                                        filled: true,
-                                        fillColor: Colors.grey[800],
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        suffixText: '₪',
-                                        suffixStyle: TextStyle(color: Colors.grey[400]),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return AppLocalizations.of(context).get('price-required');
-                                        }
-                                        if (double.tryParse(value) == null) {
-                                          return AppLocalizations.of(context).get('price-must-be-number');
-                                        }
-                                        return null;
-                                      },
-                                      onChanged: (value) {
-                                        ticket.price = double.tryParse(value) ?? 0.0;
-                                        setState(() {});
-                                      },
-                                    ),
-                                  ),
-                                  
-                                  const SizedBox(width: 12),
-                                  
-                                  // Quantity
-                                  Expanded(
-                                    child: TextFormField(
-                                      initialValue: ticket.quantity.toString(),
-                                      style: const TextStyle(color: Colors.white),
-                                      keyboardType: TextInputType.number,
-                                      decoration: InputDecoration(
-                                        labelText: AppLocalizations.of(context).get('quantity'),
-                                        labelStyle: TextStyle(color: Colors.grey[400]),
-                                        hintText: '1',
-                                        hintStyle: TextStyle(color: Colors.grey[500]),
-                                        filled: true,
-                                        fillColor: Colors.grey[800],
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return AppLocalizations.of(context).get('quantity-required');
-                                        }
-                                        final qty = int.tryParse(value);
-                                        if (qty == null || qty <= 0) {
-                                          return AppLocalizations.of(context).get('quantity-must-be-positive');
-                                        }
-                                        return null;
-                                      },
-                                      onChanged: (value) {
-                                        ticket.quantity = int.tryParse(value) ?? 1;
-                                        setState(() {});
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              
-                              const SizedBox(height: 12),
-                              
-                              // Description
-                              TextFormField(
-                                initialValue: ticket.description,
-                                style: const TextStyle(color: Colors.white),
-                                maxLines: 2,
-                                decoration: InputDecoration(
-                                  labelText: AppLocalizations.of(context).get('description-optional'),
-                                  labelStyle: TextStyle(color: Colors.grey[400]),
-                                  hintText: AppLocalizations.of(context).get('enter-ticket-description'),
-                                  hintStyle: TextStyle(color: Colors.grey[500]),
-                                  filled: true,
-                                  fillColor: Colors.grey[800],
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                ),
-                                onChanged: (value) {
-                                  ticket.description = value;
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                      
-                      if (_ticketTypes.isEmpty)
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[850],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey[700]!),
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.confirmation_number,
-                                color: Colors.grey[400],
-                                size: 48,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                AppLocalizations.of(context).get('no-ticket-types'),
-                                style: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontSize: 16,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton.icon(
-                                onPressed: _addTicketType,
-                                icon: const Icon(Icons.add),
-                                label: Text(AppLocalizations.of(context).get('add-first-ticket-type')),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: kBrandPrimary,
-                                  foregroundColor: Colors.white,
-                                ),
+                              TextSpan(
+                                text: AppLocalizations.of(context).get('url-address'),
                               ),
                             ],
                           ),
                         ),
-                    ],
+                        const SizedBox(height: 8),
+                        // Combined URL Input
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(32),
+                            border: Border.all(color: Colors.grey[700]!),
+                          ),
+                          child: Directionality(
+                            textDirection: Directionality.of(context),
+                            child: Row(
+                              children: [
+                                // Editable suffix part (left in LTR, right in RTL)
+                                Expanded(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(32),
+                                      border: Border.all(color: Colors.grey[600]!, width: 1),
+                                    ),
+                                    child: TextFormField(
+                                      controller: _urlSuffixController,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: AppLocalizations.of(context).get('your-event-name'),
+                                        hintStyle: TextStyle(
+                                          color: Colors.grey[500],
+                                          fontSize: 16,
+                                        ),
+                                        border: InputBorder.none,
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                      ),
+                                      onChanged: (value) => setState(() {}),
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                  ),
+                                ),
+                                // Fixed domain part (right in LTR, left in RTL)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  child: Text(
+                                    'Daynight.co.il/Event/',
+                                    style: TextStyle(
+                                      color: Colors.grey[400],
+                                      fontSize: 16,
+                                      fontFamily: 'monospace',
+                                    ),
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Private Event Switch
+                    SwitchListTile(
+                      title: Text(
+                        AppLocalizations.of(context).get('private-event'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Text(
+                        AppLocalizations.of(context).get('private-event-description'),
+                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                      ),
+                      value: _isPrivateEvent,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _isPrivateEvent = value;
+                        });
+                      },
+                      activeColor: kBrandPrimary,
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Users Tracking Section
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              _isUserTrackingExpanded = !_isUserTrackingExpanded;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Row(
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context).get('users-tracking'),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Icon(
+                                  _isUserTrackingExpanded
+                                      ? Icons.keyboard_arrow_up
+                                      : Icons.keyboard_arrow_down,
+                                  color: Colors.white,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        if (_isUserTrackingExpanded) ...[
+                          const SizedBox(height: 16),
+                          LabeledTextFormField(
+                            controller: _trackingField1Controller,
+                            titleKey: 'tracking-field-1',
+                            hintTextKey: 'enter-tracking-field-1',
+                            isRequired: false,
+                            onChanged: (value) => setState(() {}),
+                          ),
+                          const SizedBox(height: 16),
+                          LabeledTextFormField(
+                            controller: _trackingField2Controller,
+                            titleKey: 'tracking-field-2',
+                            hintTextKey: 'enter-tracking-field-2',
+                            isRequired: false,
+                            onChanged: (value) => setState(() {}),
+                          ),
+                          const SizedBox(height: 16),
+                          LabeledTextFormField(
+                            controller: _trackingField3Controller,
+                            titleKey: 'tracking-field-3',
+                            hintTextKey: 'enter-tracking-field-3',
+                            isRequired: false,
+                            onChanged: (value) => setState(() {}),
+                          ),
+                          const SizedBox(height: 16),
+                          LabeledTextFormField(
+                            controller: _trackingField4Controller,
+                            titleKey: 'tracking-field-4',
+                            hintTextKey: 'enter-tracking-field-4',
+                            isRequired: false,
+                            onChanged: (value) => setState(() {}),
+                          ),
+                        ],
+                      ],
+                    ),
+                    
                   ],
                 ),
               ),
             ),
           ),
           
-          // Navigation Buttons
+          // Privacy Policy and EULA Section - Fixed at bottom
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Back Button
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: widget.onPrevious,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: BorderSide(color: Colors.grey[600]!),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: Text(AppLocalizations.of(context).get('back')),
-                  ),
+                Checkbox(
+                  value: _termsAccepted,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _termsAccepted = value ?? false;
+                    });
+                  },
+                  activeColor: kBrandPrimary,
+                  checkColor: Colors.white,
+                  side: BorderSide(color: Colors.grey[600]!),
                 ),
-                
-                const SizedBox(width: 16),
-                
-                // Create Event Button
                 Expanded(
-                  flex: 2,
-                  child: PrimaryButton(
-                    onPressed: _saveAndComplete,
-                    textKey: 'create-event',
-                    disabled: !_isFormValid(),
-                    trailingIcon: Icons.check,
-                    flexible: false,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          color: Colors.grey[300],
+                          fontSize: 14,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: AppLocalizations.of(context).get('i-agree-to-the'),
+                          ),
+                          TextSpan(
+                            text: ' ${AppLocalizations.of(context).get('privacy-policy')}',
+                            style: TextStyle(
+                              color: kBrandPrimary,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                          TextSpan(
+                            text: ' ${AppLocalizations.of(context).get('and')} ',
+                          ),
+                          TextSpan(
+                            text: AppLocalizations.of(context).get('terms-of-service'),
+                            style: TextStyle(
+                              color: kBrandPrimary,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
+            ),
+          ),
+          
+          // Navigation Buttons
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              child: PrimaryButton(
+                onPressed: _saveAndComplete,
+                textKey: 'create-event',
+                disabled: !_isFormValid(),
+                trailingIcon: Icons.arrow_forward,
+                flexible: false,
+              ),
             ),
           ),
         ],

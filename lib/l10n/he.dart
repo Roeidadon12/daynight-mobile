@@ -138,4 +138,26 @@ const Map<String, String> heTexts = {
   'create-event-description': 'תיאור האירוע',
   'create-event-description-instructions': 'כתוב תיאור שיגרום להם לרצות להגיע ומה יהיה באירוע',
   'create-event-continue-to-advanced-settings': 'המשך להגדרות מתקדמות',
+  
+  // Form fields
+  'organizer-name': 'שם המארגן',
+  'enter-organizer-name': 'הזן שם המארגן',
+  'organizer-name-required': 'שם המארגן הוא שדה חובה',
+  'url-address': 'כתובת URL',
+  'your-event-name': 'שם האירוע שלך',
+  'private-event': 'אירוע פרטי',
+  'private-event-description': 'רק משתמשים מוזמנים יכולים לראות את האירוע הזה',
+  'i-agree-to-the': 'אני מסכים ל',
+  'terms-of-service': 'תנאי השירות',
+  
+  // Users tracking section
+  'users-tracking': 'מעקב משתמשים',
+  'tracking-field-1': 'שדה מעקב 1',
+  'enter-tracking-field-1': 'הזן שדה מעקב 1',
+  'tracking-field-2': 'שדה מעקב 2',
+  'enter-tracking-field-2': 'הזן שדה מעקב 2',
+  'tracking-field-3': 'שדה מעקב 3',
+  'enter-tracking-field-3': 'הזן שדה מעקב 3',
+  'tracking-field-4': 'שדה מעקב 4',
+  'enter-tracking-field-4': 'הזן שדה מעקב 4',
 };

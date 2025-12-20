@@ -139,4 +139,26 @@ const Map<String, String> enTexts = {
   'create-event-description': 'Event Description',
   'create-event-description-instructions': 'Write a description that will make them want to come and what will be at the event',
   'create-event-continue-to-advanced-settings': 'Continue to Advanced Settings',
+  
+  // Form fields
+  'organizer-name': 'Organizer Name',
+  'enter-organizer-name': 'Enter organizer name',
+  'organizer-name-required': 'Organizer name is required',
+  'url-address': 'URL Address',
+  'your-event-name': 'Your event name',
+  'private-event': 'Private Event',
+  'private-event-description': 'Only invited users can see this event',
+  'i-agree-to-the': 'I agree to the',
+  'terms-of-service': 'Terms of Service',
+  
+  // Users tracking section
+  'users-tracking': 'Users Tracking',
+  'tracking-field-1': 'Tracking Field 1',
+  'enter-tracking-field-1': 'Enter tracking field 1',
+  'tracking-field-2': 'Tracking Field 2',
+  'enter-tracking-field-2': 'Enter tracking field 2',
+  'tracking-field-3': 'Tracking Field 3',
+  'enter-tracking-field-3': 'Enter tracking field 3',
+  'tracking-field-4': 'Tracking Field 4',
+  'enter-tracking-field-4': 'Enter tracking field 4',
 };
