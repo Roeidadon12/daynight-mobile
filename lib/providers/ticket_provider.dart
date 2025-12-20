@@ -2,8 +2,9 @@ import 'package:day_night/models/ticket_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
-class TicketNotifier extends StateNotifier<List<TicketItem>> {
-  TicketNotifier() : super([]);
+class TicketNotifier extends Notifier<List<TicketItem>> {
+  @override
+  List<TicketItem> build() => [];
 
   void addItem(TicketItem item) => state = [...state, item];
 
@@ -22,6 +23,6 @@ class TicketNotifier extends StateNotifier<List<TicketItem>> {
   void clear() => state = [];
 }
 
-final ticketProvider = StateNotifierProvider<TicketNotifier, List<TicketItem>>(
-  (ref) => TicketNotifier(),
+final ticketProvider = NotifierProvider<TicketNotifier, List<TicketItem>>(
+  () => TicketNotifier(),
 );
