@@ -157,6 +157,121 @@ class AuthenticationService {
     }
   }
 
+  /// Authenticates a user with Apple Sign-In
+  /// Returns the authenticated user on success, null on failure
+  Future<User?> loginWithApple({
+    required String? identityToken,
+    required String? authorizationCode,
+    required String? email,
+    required String? fullName,
+    required String? userIdentifier,
+  }) async {
+    try {
+      Logger.info('Attempting Apple login for email: $email', 'AuthService');
+      
+      final response = await _api.request(
+        endpoint: '/auth/apple',
+        method: 'POST',
+        body: {
+          'identity_token': identityToken,
+          'authorization_code': authorizationCode,
+          'email': email,
+          'full_name': fullName,
+          'user_identifier': userIdentifier,
+        },
+      );
+
+      if (response['status'] == 'success' && response['token'] != null && response['user'] != null) {
+        final token = response['token'] as String;
+        final userData = response['user'] as Map<String, dynamic>;
+        
+        // Store authentication data
+        await _storeToken(token);
+        await _storeUserStatus(UserStatus.connected);
+        
+        final user = User.fromJson(userData);
+        await _storeUser(user);
+        
+        Logger.info('Apple login successful for user: ${user.email}', 'AuthService');
+        return user;
+      } else {
+        Logger.warning('Apple login failed: Invalid response format', 'AuthService');
+        return null;
+      }
+    } catch (e) {
+      Logger.error('Apple login error: $e', 'AuthService');
+      return null;
+    }
+  }
+
+  /// Send SMS verification code to phone number
+  /// Returns true on success, false on failure
+  Future<bool> sendSMSCode(String phoneNumber) async {
+    try {
+      Logger.info('Sending SMS code to: $phoneNumber', 'AuthService');
+      
+      final response = await _api.request(
+        endpoint: '/auth/sms/send',
+        method: 'POST',
+        body: {
+          'phone_number': phoneNumber,
+        },
+      );
+
+      if (response['status'] == 'success') {
+        Logger.info('SMS code sent successfully to: $phoneNumber', 'AuthService');
+        return true;
+      } else {
+        Logger.warning('Failed to send SMS code: ${response['message']}', 'AuthService');
+        return false;
+      }
+    } catch (e) {
+      Logger.error('SMS code sending error: $e', 'AuthService');
+      return false;
+    }
+  }
+
+  /// Authenticates a user with SMS verification code
+  /// Returns the authenticated user on success, null on failure
+  Future<User?> loginWithSMS({
+    required String phoneNumber,
+    required String verificationCode,
+  }) async {
+    try {
+      Logger.info('Attempting SMS login for: $phoneNumber', 'AuthService');
+      
+      final response = await _api.request(
+        endpoint: '/auth/sms/verify',
+        method: 'POST',
+        body: {
+          'phone_number': phoneNumber,
+          'verification_code': verificationCode,
+        },
+      );
+
+      if (response['status'] == 'success' && response['token'] != null && response['user'] != null) {
+        final token = response['token'] as String;
+        final userData = response['user'] as Map<String, dynamic>;
+        
+        // Store authentication data
+        await _storeToken(token);
+        await _storeUserStatus(UserStatus.connected);
+        
+        final user = User.fromJson(userData);
+        await _storeUser(user);
+        
+        Logger.info('SMS login successful for user: ${user.email}', 'AuthService');
+        return user;
+      } else {
+        Logger.warning('SMS login failed: Invalid response format', 'AuthService');
+        return null;
+      }
+    } catch (e) {
+      Logger.error('SMS login error: $e', 'AuthService');
+      return null;
+    }
+  }
+
   /// Logs out the current user and clears all stored authentication data
   Future<void> logout() async {
     try {

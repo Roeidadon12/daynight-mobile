@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/user/user_controller.dart';
@@ -14,46 +15,20 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _smsCodeController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isLoading = false;
+  bool _isAwaitingSMS = false; // SMS verification mode
   String? _errorMessage;
 
   @override
   void dispose() {
-    _emailController.dispose();
     _passwordController.dispose();
+    _phoneController.dispose();
+    _smsCodeController.dispose();
     super.dispose();
-  }
-
-  Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    final userController = Provider.of<UserController>(context, listen: false);
-    final success = await userController.login(
-      _emailController.text.trim(),
-      _passwordController.text,
-    );
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (success) {
-      if (mounted) {
-        Navigator.of(context).pop(); // Return to previous screen
-      }
-    } else {
-      setState(() {
-        _errorMessage = AppLocalizations.of(context).get('login-failed');
-      });
-    }
   }
 
   Future<void> _handleGoogleLogin() async {
@@ -67,6 +42,71 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       setState(() {
         _errorMessage = AppLocalizations.of(context).get('login-failed');
+      });
+    }
+  }
+
+  Future<void> _handleAppleLogin() async {
+    final userController = Provider.of<UserController>(context, listen: false);
+    final success = await userController.loginWithApple();
+    
+    if (success) {
+      if (mounted) {
+        Navigator.of(context).pop(); // Return to previous screen
+      }
+    } else {
+      setState(() {
+        _errorMessage = AppLocalizations.of(context).get('login-failed');
+      });
+    }
+  }
+
+  Future<void> _handleSendSMS() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final userController = Provider.of<UserController>(context, listen: false);
+    final success = await userController.sendSMSCode(_phoneController.text.trim());
+
+    setState(() {
+      _isLoading = false;
+      if (success) {
+        _isAwaitingSMS = true;
+      } else {
+        _errorMessage = AppLocalizations.of(context).get('sms-send-failed');
+      }
+    });
+  }
+
+  Future<void> _handleSMSLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final userController = Provider.of<UserController>(context, listen: false);
+    final success = await userController.loginWithSMS(
+      _phoneController.text.trim(),
+      _smsCodeController.text.trim(),
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (success) {
+      if (mounted) {
+        Navigator.of(context).pop(); // Return to previous screen
+      }
+    } else {
+      setState(() {
+        _errorMessage = AppLocalizations.of(context).get('sms-verification-failed');
       });
     }
   }
@@ -95,6 +135,31 @@ class _LoginScreenState extends State<LoginScreen> {
     
     if (value.length < 6) {
       return AppLocalizations.of(context).get('password-min-length');
+    }
+    
+    return null;
+  }
+
+  String? _validatePhoneNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return AppLocalizations.of(context).get('phone-required');
+    }
+    
+    // Basic phone number validation
+    if (value.length < 9) {
+      return AppLocalizations.of(context).get('phone-min-length');
+    }
+    
+    return null;
+  }
+
+  String? _validateSMSCode(String? value) {
+    if (value == null || value.isEmpty) {
+      return AppLocalizations.of(context).get('sms-code-required');
+    }
+    
+    if (value.length < 4) {
+      return AppLocalizations.of(context).get('sms-code-min-length');
     }
     
     return null;
@@ -162,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withValues(alpha: 0.1),
                       border: Border.all(color: Colors.red),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -180,91 +245,206 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 
-                // Google login button
-                Container(
-                  height: 50,
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleGoogleLogin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1a1a1a), // Dark background
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25), // More rounded
-                        side: BorderSide(color: Colors.grey.shade600, width: 1),
+                // SMS mode back button
+                if (_isAwaitingSMS) ...[
+                  Row(
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _isAwaitingSMS = false;
+                            _smsCodeController.clear();
+                            _errorMessage = null;
+                          });
+                        },
+                        icon: const Icon(Icons.arrow_back, color: Colors.white70),
+                        label: Text(
+                          AppLocalizations.of(context).get('back-to-phone'),
+                          style: const TextStyle(color: Colors.white70),
+                        ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  Text(
+                    '${AppLocalizations.of(context).get('sms-sent-to')} ${_phoneController.text}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'G',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                
+                // Social login buttons (only show when not awaiting SMS)
+                if (!_isAwaitingSMS) ...[
+                  // Google login button
+                  SizedBox(
+                    height: 50,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _handleGoogleLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1a1a1a), // Dark background
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25), // More rounded
+                          side: BorderSide(color: Colors.grey.shade600, width: 1),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'G',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          AppLocalizations.of(context).get('connect-with-google'),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white,
+                          const SizedBox(width: 12),
+                          Text(
+                            AppLocalizations.of(context).get('connect-with-google'),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                
-                const SizedBox(height: 20),
-                
-                // Password field
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: !_isPasswordVisible,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).get('password'),
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                  
+                  const SizedBox(height: 20),
+                  
+                  // Apple login button (iOS only)
+                  if (Platform.isIOS)
+                    SizedBox(
+                      height: 50,
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _handleAppleLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25), // More rounded
+                            side: BorderSide(color: Colors.grey.shade600, width: 1),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.apple,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              AppLocalizations.of(context).get('connect-with-apple'),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
                     ),
+                  
+                  if (Platform.isIOS) const SizedBox(height: 20),
+                ],
+                
+                // Phone number field
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).get('phone-number'),
+                    prefixIcon: const Icon(Icons.phone_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     filled: true,
                     fillColor: Colors.white,
                   ),
-                  validator: _validatePassword,
+                  validator: _validatePhoneNumber,
                 ),
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 
-                // Login button
+                // SMS code field (only show in SMS awaiting mode)
+                if (_isAwaitingSMS) ...[
+                  TextFormField(
+                    controller: _smsCodeController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context).get('sms-verification-code'),
+                      prefixIcon: const Icon(Icons.sms_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    validator: _validateSMSCode,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                ],
+                
+                // Password field (hidden during SMS flow)
+                if (!_isAwaitingSMS)
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: !_isPasswordVisible,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context).get('password'),
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    validator: _validatePassword,
+                  ),
+                
+                if (!_isAwaitingSMS) const SizedBox(height: 24),
+                
+                // Main action button
                 SizedBox(
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleLogin,
+                    onPressed: _isLoading ? null : (_isAwaitingSMS ? _handleSMSLogin : _handleSendSMS),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: kBrandPrimary,
                       shape: RoundedRectangleBorder(
@@ -274,7 +454,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : Text(
-                            AppLocalizations.of(context).get('login'),
+                            _isAwaitingSMS 
+                              ? AppLocalizations.of(context).get('verify-sms-code')
+                              : AppLocalizations.of(context).get('send-sms-code'),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,

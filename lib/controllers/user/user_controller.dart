@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../models/user.dart';
 import '../../models/user_status.dart';
 import '../../services/authentication_service.dart';
@@ -116,6 +117,100 @@ class UserController with ChangeNotifier {
       }
     } catch (e) {
       Logger.error('Google login error: $e', 'UserController');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Login with Apple
+  Future<bool> loginWithApple() async {
+    _setLoading(true);
+    try {
+      Logger.info('Attempting Apple sign-in', 'UserController');
+      
+      // Sign in with Apple
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      
+      // Send the Apple credential to your backend for verification
+      final user = await _authService.loginWithApple(
+        identityToken: credential.identityToken,
+        authorizationCode: credential.authorizationCode,
+        email: credential.email,
+        fullName: credential.givenName != null && credential.familyName != null 
+            ? '${credential.givenName} ${credential.familyName}' 
+            : null,
+        userIdentifier: credential.userIdentifier,
+      );
+
+      if (user != null) {
+        _user = user;
+        _status = UserStatus.connected;
+        notifyListeners();
+        Logger.info('Apple login successful', 'UserController');
+        return true;
+      } else {
+        Logger.warning('Apple login failed', 'UserController');
+        return false;
+      }
+    } catch (e) {
+      Logger.error('Apple login error: $e', 'UserController');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Send SMS verification code
+  Future<bool> sendSMSCode(String phoneNumber) async {
+    _setLoading(true);
+    try {
+      Logger.info('Sending SMS code to: $phoneNumber', 'UserController');
+      
+      final success = await _authService.sendSMSCode(phoneNumber);
+      if (success) {
+        Logger.info('SMS code sent successfully', 'UserController');
+        return true;
+      } else {
+        Logger.warning('Failed to send SMS code', 'UserController');
+        return false;
+      }
+    } catch (e) {
+      Logger.error('SMS code sending error: $e', 'UserController');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Login with SMS verification code
+  Future<bool> loginWithSMS(String phoneNumber, String verificationCode) async {
+    _setLoading(true);
+    try {
+      Logger.info('Attempting SMS login for: $phoneNumber', 'UserController');
+      
+      final user = await _authService.loginWithSMS(
+        phoneNumber: phoneNumber,
+        verificationCode: verificationCode,
+      );
+      
+      if (user != null) {
+        _user = user;
+        _status = UserStatus.connected;
+        notifyListeners();
+        Logger.info('SMS login successful', 'UserController');
+        return true;
+      } else {
+        Logger.warning('SMS login failed', 'UserController');
+        return false;
+      }
+    } catch (e) {
+      Logger.error('SMS login error: $e', 'UserController');
       return false;
     } finally {
       _setLoading(false);
