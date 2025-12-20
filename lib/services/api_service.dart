@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'exceptions/api_exceptions.dart';
+import '../exceptions/api_exceptions.dart';
 
 /// Service class for handling HTTP requests.
 class ApiService {
