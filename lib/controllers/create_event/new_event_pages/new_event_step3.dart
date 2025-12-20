@@ -214,7 +214,7 @@ class _NewEventStep3State extends State<NewEventStep3> {
                           _isPrivateEvent = value;
                         });
                       },
-                      activeColor: kBrandPrimary,
+                      activeThumbColor: kBrandPrimary,
                     ),
                     
                     const SizedBox(height: 24),
@@ -308,7 +308,12 @@ class _NewEventStep3State extends State<NewEventStep3> {
                       _termsAccepted = value ?? false;
                     });
                   },
-                  activeColor: kBrandPrimary,
+                  fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return kBrandPrimary;
+                    }
+                    return Colors.transparent;
+                  }),
                   checkColor: Colors.white,
                   side: BorderSide(color: Colors.grey[600]!),
                 ),
