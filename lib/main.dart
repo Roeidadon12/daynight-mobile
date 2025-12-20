@@ -15,6 +15,7 @@ import 'services/event_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'providers/search_provider.dart';
+import 'controllers/user/user_controller.dart';
 
 Future<void> setAppLanguageIdByDeviceLocale() async {
   try {
@@ -49,6 +50,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider<SearchProvider>.value(value: SearchProvider()),
+        ChangeNotifierProvider<UserController>(create: (_) => UserController()),
       ],
       child: const MyApp(),
     ),
@@ -94,15 +96,23 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
   @override
   void initState() {
     super.initState();
-    _initializeApp();
+    // Defer initialization to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeApp();
+    });
   }
 
   Future<void> _initializeApp() async {
     final eventService = EventService();
-    // Pre-fetch initial data
+    
+    // Initialize user authentication status
+    final userController = Provider.of<UserController>(context, listen: false);
+    
+    // Pre-fetch initial data and initialize user controller
     await Future.wait([
       eventService.getEventsByDate('today'),
       eventService.getEventsByDate('week'),
+      userController.initialize(), // Initialize user authentication state
     ]);
     
     // Add a minimum splash screen duration
