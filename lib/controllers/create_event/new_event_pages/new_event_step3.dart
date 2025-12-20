@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../app_localizations.dart';
 import '../../../constants.dart';
-import '../../../models/create_event_data.dart';
 import '../../shared/primary_button.dart';
 import '../../shared/labeled_text_form_field.dart';
 
