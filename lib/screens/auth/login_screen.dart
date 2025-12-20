@@ -88,19 +88,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppLocalizations.of(context).get('email-required');
-    }
-    
-    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-    if (!emailRegex.hasMatch(value)) {
-      return AppLocalizations.of(context).get('email-invalid');
-    }
-    
-    return null;
-  }
-
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return AppLocalizations.of(context).get('password-required');

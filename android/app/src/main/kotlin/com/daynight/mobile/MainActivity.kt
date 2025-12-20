@@ -1,4 +1,4 @@
-package com.example.day_night
+package com.daynight.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 
