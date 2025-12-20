@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../models/user.dart';
 import '../../models/user_status.dart';
 import '../../services/authentication_service.dart';
@@ -8,6 +9,7 @@ class UserController with ChangeNotifier {
   User? _user;
   UserStatus _status = UserStatus.unknown;
   final AuthenticationService _authService = AuthenticationService();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   bool _isLoading = false;
 
   // Getters
@@ -71,6 +73,49 @@ class UserController with ChangeNotifier {
       }
     } catch (e) {
       Logger.error('Login error: $e', 'UserController');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Login with Google
+  Future<bool> loginWithGoogle() async {
+    _setLoading(true);
+    try {
+      Logger.info('Attempting Google sign-in', 'UserController');
+      
+      // Sign in with Google
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        Logger.info('Google sign-in cancelled by user', 'UserController');
+        return false;
+      }
+
+      // Get authentication details
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      
+      // Send the Google token to your backend for verification
+      final user = await _authService.loginWithGoogle(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+        email: googleUser.email,
+        displayName: googleUser.displayName ?? '',
+        photoUrl: googleUser.photoUrl,
+      );
+
+      if (user != null) {
+        _user = user;
+        _status = UserStatus.connected;
+        notifyListeners();
+        Logger.info('Google login successful', 'UserController');
+        return true;
+      } else {
+        Logger.warning('Google login failed', 'UserController');
+        return false;
+      }
+    } catch (e) {
+      Logger.error('Google login error: $e', 'UserController');
       return false;
     } finally {
       _setLoading(false);

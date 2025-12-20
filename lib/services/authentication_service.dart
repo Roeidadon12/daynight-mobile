@@ -110,6 +110,53 @@ class AuthenticationService {
     }
   }
 
+  /// Authenticates a user with Google Sign-In
+  /// Returns the authenticated user on success, null on failure
+  Future<User?> loginWithGoogle({
+    required String? accessToken,
+    required String? idToken,
+    required String email,
+    required String displayName,
+    String? photoUrl,
+  }) async {
+    try {
+      Logger.info('Attempting Google login for email: $email', 'AuthService');
+      
+      final response = await _api.request(
+        endpoint: '/auth/google',
+        method: 'POST',
+        body: {
+          'access_token': accessToken,
+          'id_token': idToken,
+          'email': email,
+          'display_name': displayName,
+          if (photoUrl != null) 'photo_url': photoUrl,
+        },
+      );
+
+      if (response['status'] == 'success' && response['token'] != null && response['user'] != null) {
+        final token = response['token'] as String;
+        final userData = response['user'] as Map<String, dynamic>;
+        
+        // Store authentication data
+        await _storeToken(token);
+        await _storeUserStatus(UserStatus.connected);
+        
+        final user = User.fromJson(userData);
+        await _storeUser(user);
+        
+        Logger.info('Google login successful for user: ${user.email}', 'AuthService');
+        return user;
+      } else {
+        Logger.warning('Google login failed: Invalid response format', 'AuthService');
+        return null;
+      }
+    } catch (e) {
+      Logger.error('Google login error: $e', 'AuthService');
+      return null;
+    }
+  }
+
   /// Logs out the current user and clears all stored authentication data
   Future<void> logout() async {
     try {

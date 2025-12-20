@@ -56,6 +56,21 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _handleGoogleLogin() async {
+    final userController = Provider.of<UserController>(context, listen: false);
+    final success = await userController.loginWithGoogle();
+    
+    if (success) {
+      if (mounted) {
+        Navigator.of(context).pop(); // Return to previous screen
+      }
+    } else {
+      setState(() {
+        _errorMessage = AppLocalizations.of(context).get('login-failed');
+      });
+    }
+  }
+
   Future<void> _handleGuestLogin() async {
     final userController = Provider.of<UserController>(context, listen: false);
     await userController.continueAsGuest();
@@ -109,6 +124,15 @@ class _LoginScreenState extends State<LoginScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        title: Text(
+          AppLocalizations.of(context).get('connect-subscribe'),
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -120,29 +144,30 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: 40),
                 
-                // Title
+                // Connect/Subscribe title - large and aligned to start
                 Text(
-                  AppLocalizations.of(context).get('login-title'),
+                  AppLocalizations.of(context).get('connect-subscribe'),
                   style: const TextStyle(
-                    fontSize: 32,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.start,
                 ),
                 
                 const SizedBox(height: 8),
                 
+                // Subtitle - smaller text aligned to start
                 Text(
-                  AppLocalizations.of(context).get('login-subtitle'),
+                  AppLocalizations.of(context).get('phone-number-required-for-identification'),
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.white70,
                   ),
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.start,
                 ),
                 
-                const SizedBox(height: 40),
+                const SizedBox(height: 50),
                 
                 // Error message
                 if (_errorMessage != null)
@@ -168,23 +193,57 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 
-                // Email field
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).get('email'),
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                // Google login button
+                Container(
+                  height: 50,
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleGoogleLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1a1a1a), // Dark background
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25), // More rounded
+                        side: BorderSide(color: Colors.grey.shade600, width: 1),
+                      ),
                     ),
-                    filled: true,
-                    fillColor: Colors.white,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'G',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          AppLocalizations.of(context).get('connect-with-google'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  validator: _validateEmail,
                 ),
                 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 
                 // Password field
                 TextFormField(

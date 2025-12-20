@@ -199,6 +199,8 @@ const Map<String, String> enTexts = {
   'to-main-screen': 'To Main Screen',
   
   // Authentication and User Status
+  'connect-subscribe': 'Connect/Subscribe',
+  'connect-with-google': 'Connect with Google',
   'login': 'Login',
   'login-title': 'Welcome Back',
   'login-subtitle': 'Sign in to your account to continue',

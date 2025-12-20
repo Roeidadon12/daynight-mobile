@@ -7,7 +7,7 @@ import '../../screens/auth/login_screen.dart';
 /// Widget displayed for connected users showing their profile information
 class UserProfileSection extends StatelessWidget {
   final User user;
-  
+
   const UserProfileSection({super.key, required this.user});
 
   @override
@@ -41,7 +41,11 @@ class UserProfileSection extends StatelessWidget {
                     Row(
                       textDirection: Directionality.of(context),
                       children: [
-                        const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 20),
+                        const Icon(
+                          Icons.keyboard_arrow_down,
+                          color: Colors.white70,
+                          size: 20,
+                        ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -61,7 +65,7 @@ class UserProfileSection extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            
+
             // Profile Action Button
             IconButton(
               onPressed: () {
@@ -77,15 +81,19 @@ class UserProfileSection extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
               ),
             ),
-            
+
             const SizedBox(width: 8),
-            
+
             // Profile Picture
             CircleAvatar(
               backgroundColor: Colors.grey.shade800,
-              backgroundImage: user.thumbnail != null ? NetworkImage(user.thumbnail!) : null,
+              backgroundImage: user.thumbnail != null
+                  ? NetworkImage(user.thumbnail!)
+                  : null,
               radius: 32,
-              child: user.thumbnail == null ? const Icon(Icons.person, size: 32, color: Colors.white) : null,
+              child: user.thumbnail == null
+                  ? const Icon(Icons.person, size: 32, color: Colors.white)
+                  : null,
             ),
           ],
         ),
@@ -128,7 +136,11 @@ class GuestProfileSection extends StatelessWidget {
                   Row(
                     textDirection: Directionality.of(context),
                     children: [
-                      const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 20),
+                      const Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.white70,
+                        size: 20,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
@@ -147,7 +159,7 @@ class GuestProfileSection extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            
+
             // Login Button
             ElevatedButton(
               onPressed: () {
@@ -163,7 +175,10 @@ class GuestProfileSection extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
               child: Text(
                 AppLocalizations.of(context).get('login'),

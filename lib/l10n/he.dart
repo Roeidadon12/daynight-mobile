@@ -198,6 +198,8 @@ const Map<String, String> heTexts = {
   'to-main-screen': 'למסך הראשי',
 
   // Authentication and User Status
+  'connect-subscribe': 'התחברות / רשומה',
+  'connect-with-google': 'התחבר באמצעות Google',
   'login': 'התחברות',
   'login-title': 'ברוכים השבים',
   'login-subtitle': 'התחברו לחשבון שלכם כדי להמשיך',
