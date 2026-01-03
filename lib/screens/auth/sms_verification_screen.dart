@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import '../../controllers/user/user_controller.dart';
 import '../../constants.dart';
 import '../../app_localizations.dart';
@@ -22,9 +24,10 @@ class SmsVerificationScreen extends StatefulWidget {
   State<SmsVerificationScreen> createState() => _SmsVerificationScreenState();
 }
 
-class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
+class _SmsVerificationScreenState extends State<SmsVerificationScreen> with CodeAutoFill {
   final _formKey = GlobalKey<FormState>();
-  final _smsCodeController = TextEditingController();
+  final List<TextEditingController> _otpControllers = List.generate(6, (index) => TextEditingController());
+  final List<FocusNode> _otpFocusNodes = List.generate(6, (index) => FocusNode());
   bool _isLoading = false;
   String? _errorMessage;
   int _resendCooldown = 0;
@@ -32,13 +35,55 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
   @override
   void initState() {
     super.initState();
+    _initSmsListener();
     _sendOtpCode();
   }
 
   @override
   void dispose() {
-    _smsCodeController.dispose();
+    SmsAutoFill().unregisterListener();
+    cancel();
+    for (var controller in _otpControllers) {
+      controller.dispose();
+    }
+    for (var focusNode in _otpFocusNodes) {
+      focusNode.dispose();
+    }
     super.dispose();
+  }
+
+  Future<void> _initSmsListener() async {
+    try {
+      // Start listening for SMS
+      SmsAutoFill().listenForCode;
+    } catch (e) {
+      debugPrint('SMS Auto-fill initialization failed: $e');
+    }
+  }
+
+  @override
+  void codeUpdated() {
+    // This method is called when SMS code is received
+    if (code != null && code!.length == 6) {
+      _fillOtpFields(code!);
+    }
+  }
+
+  void _fillOtpFields(String otpCode) {
+    setState(() {
+      for (int i = 0; i < otpCode.length && i < 6; i++) {
+        _otpControllers[i].text = otpCode[i];
+      }
+      // Clear error message if any
+      if (_errorMessage != null) {
+        _errorMessage = null;
+      }
+    });
+    
+    // Auto-verify if all fields are filled
+    if (otpCode.length == 6) {
+      _handleSMSVerification();
+    }
   }
 
   Future<void> _sendOtpCode() async {
@@ -77,7 +122,15 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
   }
 
   Future<void> _handleSMSVerification() async {
-    if (!_formKey.currentState!.validate()) return;
+    // Combine all OTP digits
+    final otpCode = _otpControllers.map((controller) => controller.text).join();
+    
+    if (otpCode.length != 6) {
+      setState(() {
+        _errorMessage = AppLocalizations.of(context).get('sms-code-invalid');
+      });
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -86,7 +139,6 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
 
     final userController = Provider.of<UserController>(context, listen: false);
     final fullPhoneNumber = '${widget.countryCode}${widget.phoneNumber}';
-    final otpCode = _smsCodeController.text.trim();
 
     try {
       // First verify the OTP code
@@ -161,19 +213,30 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
     }
   }
 
-  String? _validateSMSCode(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppLocalizations.of(context).get('sms-code-required');
+  void _onOtpChanged(String value, int index) {
+    if (value.isNotEmpty) {
+      // Clear error message when user starts typing
+      if (_errorMessage != null) {
+        setState(() {
+          _errorMessage = null;
+        });
+      }
+      
+      // Move to next field if current field has a digit
+      if (index < 5) {
+        _otpFocusNodes[index + 1].requestFocus();
+      } else {
+        // All fields filled, remove focus
+        FocusScope.of(context).unfocus();
+      }
     }
-    if (value.length != 6) {
-      return AppLocalizations.of(context).get('sms-code-invalid');
-    }
-    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final fullPhoneNumber = '${widget.countryCode}${widget.phoneNumber}';
+    final last4Digits = widget.phoneNumber.length >= 4 
+        ? widget.phoneNumber.substring(widget.phoneNumber.length - 4)
+        : widget.phoneNumber;
     
     return Scaffold(
       backgroundColor: kMainBackgroundColor,
@@ -199,15 +262,6 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
               children: [
                 const SizedBox(height: 40),
                 
-                // Icon
-                Icon(
-                  Icons.sms_outlined,
-                  size: 80,
-                  color: kBrandPrimary,
-                ),
-                
-                const SizedBox(height: 32),
-                
                 // Title
                 Text(
                   AppLocalizations.of(context).get('verify-phone-number'),
@@ -223,7 +277,7 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
                 
                 // Description
                 Text(
-                  AppLocalizations.of(context).get('sms-sent-to') + ' $fullPhoneNumber',
+                  AppLocalizations.of(context).get('sms-sent-to') + ' ***$last4Digits',
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.white70,
@@ -257,7 +311,7 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
                     ),
                   ),
                 
-                // SMS Code field
+                // SMS Code field - 6 separate squares
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -269,53 +323,82 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _smsCodeController,
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      maxLength: 6,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 8,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: '000000',
-                        hintStyle: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 8,
-                        ),
-                        filled: true,
-                        fillColor: Colors.black.withAlpha(77),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32),
-                          borderSide: BorderSide(
-                            color: Colors.grey[800]!,
-                            width: 1,
+                    const SizedBox(height: 16),
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(6, (index) {
+                        return SizedBox(
+                          width: 60,
+                          height: 70,
+                          child: TextFormField(
+                            controller: _otpControllers[index],
+                            focusNode: _otpFocusNodes[index],
+                            textAlign: TextAlign.center,
+                            keyboardType: TextInputType.number,
+                            maxLength: 1,
+                            autofillHints: index == 0 ? [AutofillHints.oneTimeCode] : null,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            decoration: InputDecoration(
+                              counterText: '',
+                              filled: true,
+                              fillColor: Colors.black.withAlpha(77),
+                              contentPadding: const EdgeInsets.all(0),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Colors.grey[800]!,
+                                  width: 2,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Colors.grey[800]!,
+                                  width: 2,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: kBrandPrimary,
+                                  width: 2,
+                                ),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Colors.red,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            onChanged: (value) {
+                              if (value.length == 1) {
+                                _onOtpChanged(value, index);
+                              }
+                            },
+                            onTap: () {
+                              // Clear error when user taps on field
+                              if (_errorMessage != null) {
+                                setState(() {
+                                  _errorMessage = null;
+                                });
+                              }
+                            },
+                            inputFormatters: [
+                              // Only allow single digit
+                              LengthLimitingTextInputFormatter(1),
+                            ],
                           ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32),
-                          borderSide: BorderSide(
-                            color: Colors.grey[800]!,
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF8B5CF6),
-                            width: 2,
-                          ),
-                        ),
-                        counterText: '',
-                      ),
-                      validator: _validateSMSCode,
+                        );
+                      }),
+                    ),
                     ),
                   ],
                 ),

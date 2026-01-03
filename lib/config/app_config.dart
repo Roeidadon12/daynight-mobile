@@ -8,6 +8,9 @@ abstract class AppConfig {
   String get coverImageBaseUrl;
   String get organizerImageBaseUrl;
   
+  // Authentication
+  String get appToken; // Bearer token for API requests
+  
   // Default Settings
   int get defaultLanguageId;
   

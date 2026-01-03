@@ -256,6 +256,11 @@ class AuthenticationService {
         endpoint: ApiCommands.getSendOtp.value,
         method: 'POST',
         body: requestBody,
+        headers: {
+          'Accept': 'application/json',
+          'x-api-key': kAppToken,
+          'Content-Type': 'application/json',
+        },
       );
 
       if (response['status'] == 'success') {
@@ -293,13 +298,18 @@ class AuthenticationService {
 
       final requestBody = {
         'phone': fullPhoneNumber,
-        'otp_code': otpCode,
+        'otp': otpCode,
       };
 
       final response = await _api.request(
         endpoint: ApiCommands.verifyOtp.value,
         method: 'POST',
         body: requestBody,
+        headers: {
+          'Accept': 'application/json',
+          'x-api-key': kAppToken,
+          'Content-Type': 'application/json',
+        },
       );
 
       if (response['status'] == 'success') {

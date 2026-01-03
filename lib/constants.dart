@@ -12,6 +12,9 @@ String get kCoverImageBaseUrl => config.coverImageBaseUrl;
 String get kOrganizerImageBaseUrl => config.organizerImageBaseUrl;
 int kAppLanguageId = config.defaultLanguageId; // Can be updated at runtime
 
+// Authentication
+String get kAppToken => config.appToken; // Bearer token for API requests
+
 // Colors
 Color get kMainBackgroundColor => config.mainBackgroundColor;
 Color get kBrandPrimary => config.brandPrimary;

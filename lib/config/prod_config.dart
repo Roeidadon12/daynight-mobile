@@ -18,6 +18,9 @@ class ProdConfig implements AppConfig {
   String get organizerImageBaseUrl => '$baseUrl/assets/admin/img/organizer-photo';
 
   @override
+  String get appToken => '05cf2bd6f78994ea4f71ed6a073643cd328c85c9f50423b655e1e01444e08bc7'; // Production app token
+  
+  @override
   int get defaultLanguageId => 22;
   
   @override
