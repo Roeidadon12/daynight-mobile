@@ -35,7 +35,9 @@ enum ApiCommands {
   getEventDetails('/event/details'),
   updateEvent('/events'),
   deleteEvent('/events'),
-  getLanguages('/languages');
+  getLanguages('/languages'),
+  getSendOtp('/send-otp'),
+  verifyOtp('/verify-otp');
 
   final String value;
   const ApiCommands(this.value);

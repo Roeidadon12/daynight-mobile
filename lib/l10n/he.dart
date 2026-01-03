@@ -212,6 +212,7 @@ const Map<String, String> heTexts = {
   'login-subtitle': 'התחברו לחשבון שלכם כדי להמשיך',
   'login-failed': 'ההתחברות נכשלה. אנא בדקו את הפרטים שלכם.',
   'email': 'דואר אלקטרוני',
+  'email-optional': 'דואר אלקטרוני (אופציונלי)',
   'email-required': 'דואר אלקטרוני נדרש',
   'email-invalid': 'אנא הכניסו כתובת דואר אלקטרוני תקינה',
   'password': 'סיסמה',

@@ -9,6 +9,9 @@ class ProdConfig implements AppConfig {
   String get apiBaseUrl => '$baseUrl/api';
   
   @override
+  String get loginBaseUrl => '$baseUrl/api';
+
+  @override
   String get coverImageBaseUrl => '$baseUrl/assets/admin/img/event/cover-image';
   
   @override

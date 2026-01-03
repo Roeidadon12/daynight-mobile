@@ -4,6 +4,7 @@ abstract class AppConfig {
   // API Configuration
   String get baseUrl;
   String get apiBaseUrl;
+  String get loginBaseUrl;
   String get coverImageBaseUrl;
   String get organizerImageBaseUrl;
   

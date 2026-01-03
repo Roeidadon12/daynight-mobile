@@ -11,6 +11,9 @@ class DevConfig implements AppConfig {
   
   @override
   String get apiBaseUrl => '$baseUrl/api';
+
+  @override
+  String get loginBaseUrl => '$primaryDomain/api';
   
   @override
   String get coverImageBaseUrl => '$baseUrl/assets/admin/img/event/cover-image';

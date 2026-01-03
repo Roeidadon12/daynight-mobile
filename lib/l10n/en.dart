@@ -212,6 +212,7 @@ const Map<String, String> enTexts = {
   'login-subtitle': 'Sign in to your account to continue',
   'login-failed': 'Login failed. Please check your credentials.',
   'email': 'Email',
+  'email-optional': 'Email (Optional)',
   'email-required': 'Email is required',
   'email-invalid': 'Please enter a valid email address',
   'password': 'Password',

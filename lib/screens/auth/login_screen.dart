@@ -5,7 +5,6 @@ import '../../controllers/user/user_controller.dart';
 import '../../controllers/shared/labeled_text_form_field.dart';
 import '../../constants.dart';
 import '../../app_localizations.dart';
-import 'registration_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -128,14 +127,17 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final userController = Provider.of<UserController>(context, listen: false);
-    final success = await userController.sendSMSCode(_phoneController.text.trim());
+    final response = await userController.sendOtpCode(
+      _phoneController.text.trim(),
+      countryCode: _selectedCountryCode,
+    );
 
     setState(() {
       _isLoading = false;
-      if (success) {
+      if (response != null && response['status'] == 'success') {
         _isAwaitingSMS = true;
       } else {
-        _errorMessage = AppLocalizations.of(context).get('sms-send-failed');
+        _errorMessage = response?['message'] ?? AppLocalizations.of(context).get('sms-send-failed');
       }
     });
   }
@@ -167,14 +169,6 @@ class _LoginScreenState extends State<LoginScreen> {
         _errorMessage = AppLocalizations.of(context).get('sms-verification-failed');
       });
     }
-  }
-
-  void _navigateToRegistration() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const RegistrationScreen(),
-      ),
-    );
   }
 
   void _openTermsAndConditions() {
@@ -221,8 +215,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   String? _validateEmail(String? value) {
+    // Email is optional, but if provided it must be valid
     if (value == null || value.isEmpty) {
-      return AppLocalizations.of(context).get('email-required');
+      return null; // Allow empty email
     }
     
     // Comprehensive email validation using regex
@@ -499,10 +494,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   
-                  // Email field
+                  // Email field (optional)
                   LabeledTextFormField(
                     controller: _emailController,
-                    titleKey: 'email',
+                    titleKey: 'email-optional',
                     hintTextKey: 'email',
                     keyboardType: TextInputType.emailAddress,
                     customValidator: _validateEmail,
@@ -714,19 +709,85 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 // SMS code field (only show in SMS awaiting mode)
                 if (_isAwaitingSMS) ...[
-                  TextFormField(
-                    controller: _smsCodeController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).get('sms-verification-code'),
-                      prefixIcon: const Icon(Icons.sms_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title with asterisk
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: AppLocalizations.of(context).get('sms-verification-code'),
+                            ),
+                            const TextSpan(
+                              text: ' *',
+                              style: TextStyle(
+                                color: Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                    validator: _validateSMSCode,
+                      const SizedBox(height: 8),
+                      
+                      // SMS code input field
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withAlpha(77),
+                          borderRadius: BorderRadius.circular(32),
+                          border: Border.all(
+                            color: Colors.grey[800]!,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            // SMS icon
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              child: Icon(
+                                Icons.sms_outlined,
+                                color: Colors.grey[400],
+                                size: 20,
+                              ),
+                            ),
+                            
+                            // Separator
+                            Container(
+                              height: 24,
+                              width: 1,
+                              color: Colors.grey[600],
+                              margin: const EdgeInsets.only(right: 8),
+                            ),
+                            
+                            // SMS code input
+                            Expanded(
+                              child: TextFormField(
+                                controller: _smsCodeController,
+                                keyboardType: TextInputType.number,
+                                style: const TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                  hintText: AppLocalizations.of(context).get('sms-verification-code'),
+                                  hintStyle: TextStyle(color: Colors.grey[400]),
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+                                ),
+                                validator: _validateSMSCode,
+                              ),
+                            ),
+                            
+                            const SizedBox(width: 16),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   
                   const SizedBox(height: 24),
@@ -761,28 +822,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 
                 const SizedBox(height: 24),
-                
-                
-                // Registration prompt
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context).get('no-account'),
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                    TextButton(
-                      onPressed: _navigateToRegistration,
-                      child: Text(
-                        AppLocalizations.of(context).get('create-account'),
-                        style: TextStyle(
-                          color: kBrandPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),

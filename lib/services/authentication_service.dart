@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:day_night/models/enums.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
 import '../constants.dart';
@@ -16,7 +17,7 @@ class AuthenticationService {
 
   AuthenticationService()
     : _api = ApiService(
-        baseUrl: kApiBaseUrl,
+        baseUrl: kLoginBaseUrl,
         timeout: const Duration(seconds: 30),
       );
 
@@ -234,15 +235,27 @@ class AuthenticationService {
   }
 
   /// Send SMS verification code to phone number
-  /// Returns true on success, false on failure
-  Future<bool> sendSMSCode(String phoneNumber) async {
+  /// Returns the response object on success, null on failure
+  Future<Map<String, dynamic>?> sendOtpCode(String phoneNumber, String countryCode) async {
     try {
       Logger.info('Sending SMS code to: $phoneNumber', 'AuthService');
 
+      // Remove leading 0 from phone number if present
+      String cleanPhoneNumber = phoneNumber.startsWith('0') 
+          ? phoneNumber.substring(1) 
+          : phoneNumber;
+      
+      // Concatenate country code with cleaned phone number
+      String fullPhoneNumber = countryCode + cleanPhoneNumber;
+
+      final requestBody = {
+        'phone': fullPhoneNumber,
+      };
+
       final response = await _api.request(
-        endpoint: '/auth/sms/send',
+        endpoint: ApiCommands.getSendOtp.value,
         method: 'POST',
-        body: {'phone_number': phoneNumber},
+        body: requestBody,
       );
 
       if (response['status'] == 'success') {
@@ -250,17 +263,61 @@ class AuthenticationService {
           'SMS code sent successfully to: $phoneNumber',
           'AuthService',
         );
-        return true;
+        return response;
       } else {
         Logger.warning(
           'Failed to send SMS code: ${response['message']}',
           'AuthService',
         );
-        return false;
+        return null;
       }
     } catch (e) {
       Logger.error('SMS code sending error: $e', 'AuthService');
-      return false;
+      return null;
+    }
+  }
+
+  /// Verify OTP code for phone number
+  /// Returns the response object on success, null on failure
+  Future<Map<String, dynamic>?> verifyOtpCode(String phoneNumber, String otpCode, String countryCode) async {
+    try {
+      Logger.info('Verifying OTP code for: $phoneNumber', 'AuthService');
+
+      // Remove leading 0 from phone number if present
+      String cleanPhoneNumber = phoneNumber.startsWith('0') 
+          ? phoneNumber.substring(1) 
+          : phoneNumber;
+      
+      // Concatenate country code with cleaned phone number
+      String fullPhoneNumber = countryCode + cleanPhoneNumber;
+
+      final requestBody = {
+        'phone': fullPhoneNumber,
+        'otp_code': otpCode,
+      };
+
+      final response = await _api.request(
+        endpoint: ApiCommands.verifyOtp.value,
+        method: 'POST',
+        body: requestBody,
+      );
+
+      if (response['status'] == 'success') {
+        Logger.info(
+          'OTP verification successful for: $phoneNumber',
+          'AuthService',
+        );
+        return response;
+      } else {
+        Logger.warning(
+          'OTP verification failed: ${response['message']}',
+          'AuthService',
+        );
+        return null;
+      }
+    } catch (e) {
+      Logger.error('OTP verification error: $e', 'AuthService');
+      return null;
     }
   }
 

@@ -174,22 +174,47 @@ class UserController with ChangeNotifier {
   }
 
   /// Send SMS verification code
-  Future<bool> sendSMSCode(String phoneNumber) async {
+  Future<Map<String, dynamic>?> sendOtpCode(String phoneNumber, {String? countryCode}) async {
     _setLoading(true);
     try {
+      // Concatenate country code with phone number if provided
+      // Remove leading zero from phone number when adding country code
+
       Logger.info('Sending SMS code to: $phoneNumber', 'UserController');
 
-      final success = await _authService.sendSMSCode(phoneNumber);
-      if (success) {
+      final response = await _authService.sendOtpCode(phoneNumber, countryCode ?? '');
+      if (response != null) {
         Logger.info('SMS code sent successfully', 'UserController');
-        return true;
+        return response;
       } else {
         Logger.warning('Failed to send SMS code', 'UserController');
-        return false;
+        return null;
       }
     } catch (e) {
       Logger.error('SMS code sending error: $e', 'UserController');
-      return false;
+      return null;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Verify OTP code
+  Future<Map<String, dynamic>?> verifyOtpCode(String phoneNumber, String otpCode, {String? countryCode}) async {
+    _setLoading(true);
+    try {
+      Logger.info('Verifying OTP code for: $phoneNumber', 'UserController');
+
+      final response = await _authService.verifyOtpCode(phoneNumber, otpCode, countryCode ?? '');
+      if (response != null) {
+        Logger.info('OTP verification successful', 'UserController');
+        return response;
+      } else {
+        Logger.warning('OTP verification failed', 'UserController');
+        return null;
+      }
+    } catch (e) {
+      Logger.error('OTP verification error: $e', 'UserController');
+      return null;
     } finally {
       _setLoading(false);
     }

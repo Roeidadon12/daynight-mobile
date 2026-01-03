@@ -32,7 +32,7 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
   @override
   void initState() {
     super.initState();
-    _sendSMSCode();
+    _sendOtpCode();
   }
 
   @override
@@ -41,7 +41,7 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
     super.dispose();
   }
 
-  Future<void> _sendSMSCode() async {
+  Future<void> _sendOtpCode() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -50,17 +50,17 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
 
     final userController = Provider.of<UserController>(context, listen: false);
     final fullPhoneNumber = '${widget.countryCode}${widget.phoneNumber}';
-    final success = await userController.sendSMSCode(fullPhoneNumber);
+    final response = await userController.sendOtpCode(fullPhoneNumber);
 
     setState(() {
       _isLoading = false;
     });
 
-    if (success) {
+    if (response != null && response['status'] == 'success') {
       _startResendCooldown();
     } else {
       setState(() {
-        _errorMessage = AppLocalizations.of(context).get('sms-send-failed');
+        _errorMessage = response?['message'] ?? AppLocalizations.of(context).get('sms-send-failed');
       });
     }
   }
@@ -86,54 +86,78 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
 
     final userController = Provider.of<UserController>(context, listen: false);
     final fullPhoneNumber = '${widget.countryCode}${widget.phoneNumber}';
+    final otpCode = _smsCodeController.text.trim();
 
-    if (widget.isRegistration) {
-      // For registration, complete the registration process with SMS verification
-      final success = await userController.register(
-        fullName: widget.registrationData['fullName'],
-        email: widget.registrationData['email'],
-        phoneNumber: fullPhoneNumber,
-        sex: widget.registrationData['sex'],
-        dob: widget.registrationData['dob'],
-        smsCode: _smsCodeController.text.trim(),
+    try {
+      // First verify the OTP code
+      final otpResponse = await userController.verifyOtpCode(
+        widget.phoneNumber,
+        otpCode,
+        countryCode: widget.countryCode,
       );
 
-      setState(() {
-        _isLoading = false;
-      });
+      if (otpResponse == null || otpResponse['status'] != 'success') {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = otpResponse?['message'] ?? AppLocalizations.of(context).get('sms-verification-failed');
+        });
+        return;
+      }
 
-      if (success) {
-        if (mounted) {
-          Navigator.of(context).pop(); // Close SMS screen
-          Navigator.of(context).pop(); // Close registration screen
-          Navigator.of(context).pop(); // Close login screen
+      // OTP verification successful, proceed with registration or login
+      if (widget.isRegistration) {
+        // For registration, complete the registration process with SMS verification
+        final success = await userController.register(
+          fullName: widget.registrationData['fullName'],
+          email: widget.registrationData['email'],
+          phoneNumber: fullPhoneNumber,
+          sex: widget.registrationData['sex'],
+          dob: widget.registrationData['dob'],
+          smsCode: otpCode,
+        );
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (success) {
+          if (mounted) {
+            Navigator.of(context).pop(); // Close SMS screen
+            Navigator.of(context).pop(); // Close registration screen
+            Navigator.of(context).pop(); // Close login screen
+          }
+        } else {
+          setState(() {
+            _errorMessage = AppLocalizations.of(context).get('registration-failed');
+          });
         }
       } else {
-        setState(() {
-          _errorMessage = AppLocalizations.of(context).get('registration-failed');
-        });
-      }
-    } else {
-      // For login
-      final success = await userController.loginWithSMS(
-        fullPhoneNumber,
-        _smsCodeController.text.trim(),
-      );
+        // For login
+        final success = await userController.loginWithSMS(
+          fullPhoneNumber,
+          otpCode,
+        );
 
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (success) {
+          if (mounted) {
+            Navigator.of(context).pop(); // Close SMS screen
+            Navigator.of(context).pop(); // Close login screen
+          }
+        } else {
+          setState(() {
+            _errorMessage = AppLocalizations.of(context).get('sms-verification-failed');
+          });
+        }
+      }
+    } catch (e) {
       setState(() {
         _isLoading = false;
+        _errorMessage = AppLocalizations.of(context).get('sms-verification-failed');
       });
-
-      if (success) {
-        if (mounted) {
-          Navigator.of(context).pop(); // Close SMS screen
-          Navigator.of(context).pop(); // Close login screen
-        }
-      } else {
-        setState(() {
-          _errorMessage = AppLocalizations.of(context).get('sms-verification-failed');
-        });
-      }
     }
   }
 
@@ -326,7 +350,7 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
                 
                 // Resend code button
                 TextButton(
-                  onPressed: _resendCooldown > 0 ? null : _sendSMSCode,
+                  onPressed: _resendCooldown > 0 ? null : _sendOtpCode,
                   child: Text(
                     _resendCooldown > 0
                         ? '${AppLocalizations.of(context).get('resend-code')} ($_resendCooldown)'

@@ -24,6 +24,11 @@ class LanguageService {
           Logger.info('Retrying language fetch attempt ${currentTry + 1}/$maxRetries', 'LanguageService');
         }
         
+        // Print the full endpoint URL before making the request
+        final fullUrl = '${api.baseUrl}${ApiCommands.getLanguages.value}';
+        Logger.info('Requesting languages from URL: $fullUrl', 'LanguageService');
+        print('🌍 GET Languages URL: $fullUrl');
+        
         final response = await api.request(
           endpoint: ApiCommands.getLanguages.value,
           method: 'GET',
