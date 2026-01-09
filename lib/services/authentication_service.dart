@@ -488,6 +488,11 @@ class AuthenticationService {
     ]);
   }
 
+  /// Store authentication token for future API calls
+  Future<void> storeToken(String token) async {
+    await _storeToken(token);
+  }
+
   // Private helper methods
 
   Future<void> _storeToken(String token) async {

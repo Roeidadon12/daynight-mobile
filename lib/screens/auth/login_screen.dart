@@ -6,6 +6,7 @@ import '../../controllers/shared/labeled_text_form_field.dart';
 import '../../constants.dart';
 import '../../app_localizations.dart';
 import 'sms_verification_screen.dart';
+import 'login_register_with_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -665,6 +666,31 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: Colors.white,
                             ),
                           ),
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Login with password link
+                Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const LoginRegisterWithPasswordScreen(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      AppLocalizations.of(context).get('Login-with-Password'),
+                      style: TextStyle(
+                        color: kBrandPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        decoration: TextDecoration.underline,
+                        decorationColor: kBrandPrimary,
+                      ),
+                    ),
                   ),
                 ),
                 

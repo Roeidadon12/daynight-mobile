@@ -220,6 +220,17 @@ class UserController with ChangeNotifier {
     }
   }
 
+  /// Store authentication token for future API calls
+  Future<void> storeAuthToken(String token) async {
+    try {
+      // Store token using the authentication service
+      await _authService.storeToken(token);
+      Logger.info('Authentication token stored successfully', 'UserController');
+    } catch (e) {
+      Logger.error('Failed to store authentication token: $e', 'UserController');
+    }
+  }
+
   /// Login with SMS verification code
   Future<bool> loginWithSMS(String phoneNumber, String verificationCode) async {
     _setLoading(true);

@@ -156,6 +156,13 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> with Code
         return;
       }
 
+      // Store the token from OTP verification response
+      if (otpResponse['token'] != null) {
+        final token = otpResponse['token'] as String;
+        // Store the token using the user controller for future API calls
+        await userController.storeAuthToken(token);
+      }
+
       // OTP verification successful, proceed with registration or login
       if (widget.isRegistration) {
         // For registration, complete the registration process with SMS verification
@@ -326,79 +333,78 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> with Code
                     const SizedBox(height: 16),
                     Directionality(
                       textDirection: TextDirection.ltr,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(6, (index) {
-                        return SizedBox(
-                          width: 60,
-                          height: 70,
-                          child: TextFormField(
-                            controller: _otpControllers[index],
-                            focusNode: _otpFocusNodes[index],
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                            maxLength: 1,
-                            autofillHints: index == 0 ? [AutofillHints.oneTimeCode] : null,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            decoration: InputDecoration(
-                              counterText: '',
-                              filled: true,
-                              fillColor: Colors.black.withAlpha(77),
-                              contentPadding: const EdgeInsets.all(0),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Colors.grey[800]!,
-                                  width: 2,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          // Calculate responsive sizing
+                          final screenWidth = MediaQuery.of(context).size.width;
+                          final padding = 24.0; // Total horizontal padding
+                          final availableWidth = screenWidth - (padding * 2);
+                          final spacing = 8.0;
+                          final totalSpacing = spacing * 5; // 5 spaces between 6 fields
+                          final fieldWidth = (availableWidth - totalSpacing) / 6;
+                          final fieldSize = fieldWidth.clamp(45.0, 55.0); // Min 45, Max 55
+                          
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: List.generate(6, (index) {
+                            return Container(
+                              width: fieldSize,
+                              height: fieldSize,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withAlpha(77),
+                                borderRadius: BorderRadius.circular(12), // Square with rounded corners
+                                border: Border.all(
+                                  color: _otpControllers[index].text.isEmpty 
+                                    ? Colors.grey[800]! 
+                                    : kBrandPrimary,
+                                  width: 1.5,
                                 ),
                               ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Colors.grey[800]!,
-                                  width: 2,
+                              child: TextFormField(
+                                controller: _otpControllers[index],
+                                focusNode: _otpFocusNodes[index],
+                                textAlign: TextAlign.center,
+                                keyboardType: TextInputType.number,
+                                maxLength: 1,
+                                autofillHints: index == 0 ? [AutofillHints.oneTimeCode] : null,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: fieldSize * 0.4, // Responsive font size
+                                  fontWeight: FontWeight.w600,
                                 ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: kBrandPrimary,
-                                  width: 2,
+                                decoration: InputDecoration(
+                                  counterText: '',
+                                  filled: false,
+                                  contentPadding: EdgeInsets.zero,
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  errorBorder: InputBorder.none,
                                 ),
+                                onChanged: (value) {
+                                  setState(() {}); // Trigger rebuild to update border color
+                                  if (value.length == 1) {
+                                    _onOtpChanged(value, index);
+                                  }
+                                },
+                                onTap: () {
+                                  // Clear error when user taps on field
+                                  if (_errorMessage != null) {
+                                    setState(() {
+                                      _errorMessage = null;
+                                    });
+                                  }
+                                },
+                                inputFormatters: [
+                                  // Only allow single digit
+                                  LengthLimitingTextInputFormatter(1),
+                                ],
                               ),
-                              errorBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Colors.red,
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                            onChanged: (value) {
-                              if (value.length == 1) {
-                                _onOtpChanged(value, index);
-                              }
-                            },
-                            onTap: () {
-                              // Clear error when user taps on field
-                              if (_errorMessage != null) {
-                                setState(() {
-                                  _errorMessage = null;
-                                });
-                              }
-                            },
-                            inputFormatters: [
-                              // Only allow single digit
-                              LengthLimitingTextInputFormatter(1),
-                            ],
-                          ),
+                            );
+                          }),
                         );
-                      }),
-                    ),
+                        }
+                      ),
                     ),
                   ],
                 ),
