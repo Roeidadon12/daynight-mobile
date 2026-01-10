@@ -11,6 +11,7 @@ class SmsVerificationScreen extends StatefulWidget {
   final String countryCode;
   final Map<String, dynamic> registrationData;
   final bool isRegistration;
+  final VoidCallback? onSuccess; // Optional callback for successful verification
 
   const SmsVerificationScreen({
     super.key,
@@ -18,6 +19,7 @@ class SmsVerificationScreen extends StatefulWidget {
     required this.countryCode,
     required this.registrationData,
     this.isRegistration = true,
+    this.onSuccess,
   });
 
   @override
@@ -29,6 +31,7 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> with Code
   final List<TextEditingController> _otpControllers = List.generate(6, (index) => TextEditingController());
   final List<FocusNode> _otpFocusNodes = List.generate(6, (index) => FocusNode());
   bool _isLoading = false;
+  bool _isVerifying = false; // Add this flag to prevent multiple verification attempts
   String? _errorMessage;
   int _resendCooldown = 0;
 
@@ -80,8 +83,8 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> with Code
       }
     });
     
-    // Auto-verify if all fields are filled
-    if (otpCode.length == 6) {
+    // Auto-verify if all fields are filled and not already verifying
+    if (otpCode.length == 6 && !_isVerifying) {
       _handleSMSVerification();
     }
   }
@@ -92,6 +95,14 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> with Code
       _errorMessage = null;
       _resendCooldown = 60;
     });
+
+    // Clear all OTP input fields when resending
+    for (int i = 0; i < _otpControllers.length; i++) {
+      _otpControllers[i].clear();
+    }
+    
+    // Focus on first field after clearing
+    _otpFocusNodes[0].requestFocus();
 
     final userController = Provider.of<UserController>(context, listen: false);
     final fullPhoneNumber = '${widget.countryCode}${widget.phoneNumber}';
@@ -122,6 +133,11 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> with Code
   }
 
   Future<void> _handleSMSVerification() async {
+    // Prevent multiple concurrent verification attempts
+    if (_isVerifying) {
+      return;
+    }
+    
     // Combine all OTP digits
     final otpCode = _otpControllers.map((controller) => controller.text).join();
     
@@ -134,6 +150,7 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> with Code
 
     setState(() {
       _isLoading = true;
+      _isVerifying = true;
       _errorMessage = null;
     });
 
@@ -141,80 +158,88 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> with Code
     final fullPhoneNumber = '${widget.countryCode}${widget.phoneNumber}';
 
     try {
-      // First verify the OTP code
-      final otpResponse = await userController.verifyOtpCode(
-        widget.phoneNumber,
-        otpCode,
-        countryCode: widget.countryCode,
-      );
-
-      if (otpResponse == null || otpResponse['status'] != 'success') {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = otpResponse?['message'] ?? AppLocalizations.of(context).get('sms-verification-failed');
-        });
-        return;
-      }
-
-      // Store the token from OTP verification response
-      if (otpResponse['token'] != null) {
-        final token = otpResponse['token'] as String;
-        // Store the token using the user controller for future API calls
-        await userController.storeAuthToken(token);
-      }
-
       // OTP verification successful, proceed with registration or login
       if (widget.isRegistration) {
-        // For registration, complete the registration process with SMS verification
-        final success = await userController.register(
-          fullName: widget.registrationData['fullName'],
-          email: widget.registrationData['email'],
-          phoneNumber: fullPhoneNumber,
-          sex: widget.registrationData['sex'],
-          dob: widget.registrationData['dob'],
-          smsCode: otpCode,
-        );
-
-        setState(() {
-          _isLoading = false;
-        });
+        // For login - use loginWithSMS to properly authenticate the user
+        final success = await userController.loginWithSMS(fullPhoneNumber, otpCode);
 
         if (success) {
+          setState(() {
+            _isLoading = false;
+            _isVerifying = false;
+          });
+
           if (mounted) {
-            Navigator.of(context).pop(); // Close SMS screen
-            Navigator.of(context).pop(); // Close registration screen
-            Navigator.of(context).pop(); // Close login screen
+            if (widget.onSuccess != null) {
+              // Use provided callback
+              widget.onSuccess!();
+            } else {
+              // Default: pop back to the screen that opened login (2 screens: SMS + Login)
+              Navigator.of(context).pop(); // Close SMS screen
+              Navigator.of(context).pop(); // Close login screen
+            }
           }
         } else {
           setState(() {
-            _errorMessage = AppLocalizations.of(context).get('registration-failed');
+            _isLoading = false;
+            _isVerifying = false;
+            _errorMessage = AppLocalizations.of(context).get('sms-verification-failed');
           });
         }
       } else {
-        // For login
-        final success = await userController.loginWithSMS(
-          fullPhoneNumber,
+        // For registration, first verify the OTP code
+        final otpResponse = await userController.verifyOtpCode(
+          widget.phoneNumber,
           otpCode,
+          countryCode: widget.countryCode,
         );
 
+        if (otpResponse == null || otpResponse['status'] != 'success') {
+          setState(() {
+            _isLoading = false;
+            _isVerifying = false;
+            _errorMessage = otpResponse?['message'] ?? AppLocalizations.of(context).get('sms-verification-failed');
+          });
+          return;
+        }
+
+        // Store the token from OTP verification response
+        if (otpResponse['token'] != null) {
+          final token = otpResponse['token'] as String;
+          // Store the token using the user controller for future API calls
+          await userController.storeAuthToken(token);
+        }
+
+        // After successful OTP verification for registration, update user status
+        // Create a minimal user object and set status to connected
+        await userController.setUserFromRegistration(
+          phoneNumber: '${widget.countryCode}${widget.phoneNumber}',
+          registrationData: widget.registrationData,
+        );
+
+        // For registration, complete the registration process with SMS verification
+        // Skipping registration call for now - proceed directly after OTP verification
         setState(() {
           _isLoading = false;
+          _isVerifying = false;
         });
 
-        if (success) {
-          if (mounted) {
+        if (mounted) {
+          if (widget.onSuccess != null) {
+            // Use provided callback
+            widget.onSuccess!();
+          } else {
+            // Default: pop back through registration flow (3 screens: SMS + Registration + Login)
             Navigator.of(context).pop(); // Close SMS screen
+            Navigator.of(context).pop(); // Close registration screen  
             Navigator.of(context).pop(); // Close login screen
           }
-        } else {
-          setState(() {
-            _errorMessage = AppLocalizations.of(context).get('sms-verification-failed');
-          });
         }
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
+        _isVerifying = false;
         _errorMessage = AppLocalizations.of(context).get('sms-verification-failed');
       });
     }
@@ -415,14 +440,14 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> with Code
                 SizedBox(
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleSMSVerification,
+                    onPressed: (_isLoading || _isVerifying) ? null : _handleSMSVerification,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: kBrandPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32),
                       ),
                     ),
-                    child: _isLoading
+                    child: (_isLoading || _isVerifying)
                         ? const CircularProgressIndicator(color: Colors.white)
                         : Text(
                             AppLocalizations.of(context).get('verify'),

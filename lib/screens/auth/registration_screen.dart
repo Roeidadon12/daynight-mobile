@@ -118,6 +118,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           countryCode: _selectedCountryCode,
           registrationData: registrationData,
           isRegistration: true,
+          onSuccess: () {
+            // For registration flow, we might want to go back to where user started registration
+            // Pop SMS, registration, and potentially the login screen if they exist
+            Navigator.of(context).pop(); // Close SMS screen
+            Navigator.of(context).pop(); // Close registration screen
+            // Check if there's a login screen to close as well
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop(); // Close login screen if it exists
+            }
+          },
         ),
       ),
     );

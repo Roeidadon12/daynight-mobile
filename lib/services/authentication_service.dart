@@ -6,6 +6,7 @@ import '../constants.dart';
 import '../models/user.dart';
 import '../models/user_status.dart';
 import '../utils/logger.dart';
+import '../utils/api_headers.dart';
 
 /// Service responsible for managing user authentication, including login,
 /// registration, logout, and token management with persistent storage.
@@ -31,6 +32,7 @@ class AuthenticationService {
         endpoint: '/auth/login',
         method: 'POST',
         body: {'email': email, 'password': password},
+        headers: await ApiHeaders.buildHeader(null, false),
       );
 
       if (response['status'] == 'success' &&
@@ -91,6 +93,7 @@ class AuthenticationService {
         endpoint: '/auth/register',
         method: 'POST',
         body: requestBody,
+        headers: await ApiHeaders.buildHeader(null, false),
       );
 
       if (response['status'] == 'success' &&
@@ -146,6 +149,7 @@ class AuthenticationService {
           'display_name': displayName,
           if (photoUrl != null) 'photo_url': photoUrl,
         },
+        headers: await ApiHeaders.buildHeader(null, false),
       );
 
       if (response['status'] == 'success' &&
@@ -201,6 +205,7 @@ class AuthenticationService {
           'full_name': fullName,
           'user_identifier': userIdentifier,
         },
+        headers: await ApiHeaders.buildHeader(null, false),
       );
 
       if (response['status'] == 'success' &&
@@ -256,11 +261,7 @@ class AuthenticationService {
         endpoint: ApiCommands.getSendOtp.value,
         method: 'POST',
         body: requestBody,
-        headers: {
-          'Accept': 'application/json',
-          'x-api-key': kAppToken,
-          'Content-Type': 'application/json',
-        },
+        headers: await ApiHeaders.buildHeader(null, false),
       );
 
       if (response['status'] == 'success') {
@@ -284,7 +285,7 @@ class AuthenticationService {
 
   /// Verify OTP code for phone number
   /// Returns the response object on success, null on failure
-  Future<Map<String, dynamic>?> verifyOtpCode(String phoneNumber, String otpCode, String countryCode) async {
+  Future<Map<String, dynamic>?> verifyOtpCode(String phoneNumber, String otpCode, {String countryCode = ''}) async {
     try {
       Logger.info('Verifying OTP code for: $phoneNumber', 'AuthService');
 
@@ -305,11 +306,7 @@ class AuthenticationService {
         endpoint: ApiCommands.verifyOtp.value,
         method: 'POST',
         body: requestBody,
-        headers: {
-          'Accept': 'application/json',
-          'x-api-key': kAppToken,
-          'Content-Type': 'application/json',
-        },
+        headers: await ApiHeaders.buildHeader(null, false),
       );
 
       if (response['status'] == 'success') {
@@ -331,55 +328,6 @@ class AuthenticationService {
     }
   }
 
-  /// Authenticates a user with SMS verification code
-  /// Returns the authenticated user on success, null on failure
-  Future<User?> loginWithSMS({
-    required String phoneNumber,
-    required String verificationCode,
-  }) async {
-    try {
-      Logger.info('Attempting SMS login for: $phoneNumber', 'AuthService');
-
-      final response = await _api.request(
-        endpoint: '/auth/sms/verify',
-        method: 'POST',
-        body: {
-          'phone_number': phoneNumber,
-          'verification_code': verificationCode,
-        },
-      );
-
-      if (response['status'] == 'success' &&
-          response['token'] != null &&
-          response['user'] != null) {
-        final token = response['token'] as String;
-        final userData = response['user'] as Map<String, dynamic>;
-
-        // Store authentication data
-        await _storeToken(token);
-        await _storeUserStatus(UserStatus.connected);
-
-        final user = User.fromJson(userData);
-        await _storeUser(user);
-
-        Logger.info(
-          'SMS login successful for user: ${user.email}',
-          'AuthService',
-        );
-        return user;
-      } else {
-        Logger.warning(
-          'SMS login failed: Invalid response format',
-          'AuthService',
-        );
-        return null;
-      }
-    } catch (e) {
-      Logger.error('SMS login error: $e', 'AuthService');
-      return null;
-    }
-  }
-
   /// Logs out the current user and clears all stored authentication data
   Future<void> logout() async {
     try {
@@ -387,7 +335,11 @@ class AuthenticationService {
 
       // Try to notify the server about logout (optional, don't fail if it doesn't work)
       try {
-        await _api.request(endpoint: '/auth/logout', method: 'POST');
+        await _api.request(
+          endpoint: '/auth/logout', 
+          method: 'POST',
+          headers: await ApiHeaders.buildHeader(),
+        );
       } catch (e) {
         Logger.warning('Server logout notification failed: $e', 'AuthService');
       }
@@ -469,6 +421,7 @@ class AuthenticationService {
       final response = await _api.request(
         endpoint: '/auth/validate',
         method: 'GET',
+        headers: await ApiHeaders.buildHeader(),
       );
 
       return response['status'] == 'success';
@@ -518,5 +471,15 @@ class AuthenticationService {
   Future<void> _storeUserStatus(UserStatus status) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_statusKey, status.name);
+  }
+
+  /// Public method to store user data
+  Future<void> storeUser(User user) async {
+    await _storeUser(user);
+  }
+
+  /// Public method to store user status
+  Future<void> storeUserStatus(UserStatus status) async {
+    await _storeUserStatus(status);
   }
 }

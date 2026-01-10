@@ -204,7 +204,7 @@ class UserController with ChangeNotifier {
     try {
       Logger.info('Verifying OTP code for: $phoneNumber', 'UserController');
 
-      final response = await _authService.verifyOtpCode(phoneNumber, otpCode, countryCode ?? '');
+      final response = await _authService.verifyOtpCode(phoneNumber, otpCode, countryCode: countryCode ?? '');
       if (response != null) {
         Logger.info('OTP verification successful', 'UserController');
         return response;
@@ -237,14 +237,31 @@ class UserController with ChangeNotifier {
     try {
       Logger.info('Attempting SMS login for: $phoneNumber', 'UserController');
 
-      final user = await _authService.loginWithSMS(
-        phoneNumber: phoneNumber,
-        verificationCode: verificationCode,
-      );
+      final response = await _authService.verifyOtpCode(phoneNumber, verificationCode, countryCode: '');
 
-      if (user != null) {
-        _user = user;
+      if (response != null && response['status'] == 'success') {
+        // If the response contains user data, create User object and set status
+        if (response['user'] != null) {
+          final userData = response['user'] as Map<String, dynamic>;
+          _user = User.fromJson(userData);
+        } else {
+          // For now, create a minimal user object if no user data is returned
+          _user = User(
+            fullName: 'SMS User',
+            email: '',
+            phoneNumber: phoneNumber,
+            sex: 'unknown',
+            thumbnail: null,
+            address: null,
+          );
+        }
+        
         _status = UserStatus.connected;
+        
+        // Store the user data and status persistently  
+        await _authService.storeUser(_user!);
+        await _authService.storeUserStatus(_status);
+        
         notifyListeners();
         Logger.info('SMS login successful', 'UserController');
         return true;
@@ -303,6 +320,35 @@ class UserController with ChangeNotifier {
       return false;
     } finally {
       _setLoading(false);
+    }
+  }
+
+  /// Set user status after successful SMS registration/verification
+  Future<void> setUserFromRegistration({
+    required String phoneNumber,
+    required Map<String, dynamic> registrationData,
+  }) async {
+    try {
+      // Create user object from registration data
+      _user = User(
+        fullName: registrationData['fullName'] ?? 'SMS User',
+        email: registrationData['email'] ?? '',
+        phoneNumber: phoneNumber,
+        sex: registrationData['sex'] ?? 'unknown',
+        thumbnail: null,
+        address: registrationData['address'],
+      );
+      
+      _status = UserStatus.connected;
+      
+      // Store the user data and status persistently
+      await _authService.storeUser(_user!);
+      await _authService.storeUserStatus(_status);
+      
+      _safeNotifyListeners();
+      Logger.info('User status set to connected after registration', 'UserController');
+    } catch (e) {
+      Logger.error('Error setting user from registration: $e', 'UserController');
     }
   }
 
