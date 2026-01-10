@@ -237,7 +237,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     Navigator.pop(context);
                   },
                 );
-              }).toList(),
+              }),
               const SizedBox(height: 20),
             ],
           ),
@@ -412,7 +412,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                         ],
                                       ),
                                     );
-                                  });
+                                  }).toList(),
                                   onChanged: (String? newValue) {
                                     setState(() {
                                       _selectedCountryCode = newValue!;
