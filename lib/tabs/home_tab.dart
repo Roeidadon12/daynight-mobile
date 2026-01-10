@@ -236,7 +236,7 @@ class _HomeTabState extends State<HomeTab> {
                     } else if (userController.isGuest) {
                       return const GuestProfileSection();
                     } else {
-                      // Unknown status - show loading or nothing
+                      // Unknown status - show loading or guest section
                       return userController.isLoading 
                           ? const Center(child: CircularProgressIndicator())
                           : const GuestProfileSection();

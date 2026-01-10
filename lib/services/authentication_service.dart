@@ -371,7 +371,12 @@ class AuthenticationService {
   Future<String?> getStoredToken() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getString(_tokenKey);
+      final token = prefs.getString(_tokenKey);
+      Logger.info(
+        'Retrieved stored token: ${token != null ? "found" : "not found"}',
+        'AuthService',
+      );
+      return token;
     } catch (e) {
       Logger.error('Error retrieving stored token: $e', 'AuthService');
       return null;
@@ -385,8 +390,14 @@ class AuthenticationService {
       final userJson = prefs.getString(_userKey);
       if (userJson != null) {
         final userData = json.decode(userJson) as Map<String, dynamic>;
-        return User.fromJson(userData);
+        final user = User.fromJson(userData);
+        Logger.info(
+          'Retrieved stored user: ${user.email.isNotEmpty ? user.email : user.phoneNumber}',
+          'AuthService',
+        );
+        return user;
       }
+      Logger.info('No stored user data found', 'AuthService');
       return null;
     } catch (e) {
       Logger.error('Error retrieving stored user: $e', 'AuthService');
@@ -416,17 +427,27 @@ class AuthenticationService {
   Future<bool> validateToken() async {
     try {
       final token = await getStoredToken();
-      if (token == null) return false;
+      if (token == null) {
+        Logger.info('No token found for validation', 'AuthService');
+        return false;
+      }
 
+      Logger.info('Validating authentication token with server', 'AuthService');
+      
       final response = await _api.request(
         endpoint: '/auth/validate',
         method: 'GET',
         headers: await ApiHeaders.buildHeader(),
       );
 
-      return response['status'] == 'success';
+      final isValid = response['status'] == 'success';
+      Logger.info('Token validation result: ${isValid ? "valid" : "invalid"}', 'AuthService');
+      
+      return isValid;
     } catch (e) {
       Logger.error('Token validation failed: $e', 'AuthService');
+      // If validation fails due to network issues or server errors,
+      // we should treat the token as invalid to be safe
       return false;
     }
   }
@@ -439,6 +460,7 @@ class AuthenticationService {
       prefs.remove(_userKey),
       prefs.remove(_statusKey),
     ]);
+    Logger.info('All stored authentication data cleared', 'AuthService');
   }
 
   /// Store authentication token for future API calls
@@ -451,26 +473,38 @@ class AuthenticationService {
   Future<void> _storeToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_tokenKey, token);
+    Logger.info('Authentication token stored successfully', 'AuthService');
   }
 
   Future<void> _clearToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
+    Logger.info('Authentication token cleared', 'AuthService');
   }
 
   Future<void> _storeUser(User user) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_userKey, json.encode(user.toJson()));
+    Logger.info(
+      'User data stored successfully for: ${user.email.isNotEmpty ? user.email : user.phoneNumber}',
+      'AuthService',
+    );
   }
 
   Future<void> _clearUser() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_userKey);
+    Logger.info('User data cleared', 'AuthService');
   }
 
   Future<void> _storeUserStatus(UserStatus status) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_statusKey, status.name);
+    Logger.info('User status stored: ${status.displayName} with key: "$_statusKey" and value: "${status.name}"', 'AuthService');
+    
+    // Debug: Verify it was stored
+    final verification = prefs.getString(_statusKey);
+    Logger.info('Verification - stored status retrieved: "$verification"', 'AuthService');
   }
 
   /// Public method to store user data

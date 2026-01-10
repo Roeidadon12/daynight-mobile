@@ -36,20 +36,52 @@ class UserController with ChangeNotifier {
       _status = await _authService.getStoredUserStatus();
       _user = await _authService.getStoredUser();
 
-      // If we have a connected status but no user, validate the token
-      if (_status == UserStatus.connected && _user != null) {
-        final isValid = await _authService.validateToken();
-        if (!isValid) {
+      Logger.info(
+        'Loaded stored status: ${_status.displayName}, has user: ${_user != null}',
+        'UserController',
+      );
+
+      // If we have a connected status, validate the token
+      if (_status == UserStatus.connected) {
+        final token = await _authService.getStoredToken();
+        if (token != null) {
+          Logger.info('Validating stored authentication token', 'UserController');
+          final isValid = await _authService.validateToken();
+          if (!isValid) {
+            Logger.warning(
+              'Stored token is invalid, resetting to unknown status',
+              'UserController',
+            );
+            // Clear invalid authentication data
+            await _authService.clearStoredData();
+            _status = UserStatus.unknown;
+            _user = null;
+          } else {
+            Logger.info('Token validation successful', 'UserController');
+            // If we have a valid token but no user data, something went wrong
+            if (_user == null) {
+              Logger.warning(
+                'Valid token but no user data found, resetting authentication',
+                'UserController',
+              );
+              await _authService.clearStoredData();
+              _status = UserStatus.unknown;
+            }
+          }
+        } else {
+          // No token but connected status - inconsistent state
           Logger.warning(
-            'Stored token is invalid, logging out',
+            'Connected status but no token found, resetting authentication',
             'UserController',
           );
-          await logout();
+          await _authService.clearStoredData();
+          _status = UserStatus.unknown;
+          _user = null;
         }
       }
 
       Logger.info(
-        'UserController initialized with status: ${_status.displayName}',
+        'UserController initialized with final status: ${_status.displayName}',
         'UserController',
       );
     } catch (e) {
@@ -258,11 +290,14 @@ class UserController with ChangeNotifier {
         
         _status = UserStatus.connected;
         
-        // Store the user data and status persistently  
+        // Store the authentication data persistently
+        if (response['token'] != null) {
+          await _authService.storeToken(response['token'] as String);
+        }
         await _authService.storeUser(_user!);
         await _authService.storeUserStatus(_status);
         
-        notifyListeners();
+        _safeNotifyListeners();
         Logger.info('SMS login successful', 'UserController');
         return true;
       } else {
