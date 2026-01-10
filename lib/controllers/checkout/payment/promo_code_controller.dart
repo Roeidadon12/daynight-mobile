@@ -88,7 +88,7 @@ class _PromoCodeFieldState extends State<PromoCodeField> {
           height: 56,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28), // Full circle edges
-            color: Colors.black.withOpacity(0.3), // Darker, more transparent background
+            color: Colors.black.withValues(alpha: 0.3), // Darker, more transparent background
             border: Border.all(
               color: hasError 
                   ? kBrandNegativePrimary

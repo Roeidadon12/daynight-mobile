@@ -7,6 +7,7 @@ final config = ConfigManager.get();
 // API URLs
 String get kBaseUrl => config.baseUrl;
 String get kApiBaseUrl => config.apiBaseUrl;
+String get kApiStorePath => config.apiStorePath;
 String get kLoginBaseUrl => config.loginBaseUrl;
 String get kCoverImageBaseUrl => config.coverImageBaseUrl;
 String get kOrganizerImageBaseUrl => config.organizerImageBaseUrl;
@@ -14,6 +15,9 @@ int kAppLanguageId = config.defaultLanguageId; // Can be updated at runtime
 
 // Authentication
 String get kAppToken => config.appToken; // Bearer token for API requests
+
+// Debug Settings
+bool get kEnableDebugCurlOutput => config.enableDebugCurlOutput;
 
 // Colors
 Color get kMainBackgroundColor => config.mainBackgroundColor;

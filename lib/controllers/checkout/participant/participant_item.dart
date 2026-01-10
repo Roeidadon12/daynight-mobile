@@ -10,6 +10,7 @@ import 'package:day_night/models/gender.dart' as gender_model;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../utils/logger.dart';
 
 class _PhoneNumberFormatter extends TextInputFormatter {
   @override
@@ -447,7 +448,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
     if (source == null) return;
 
     try {
-      print('Attempting to pick image from: ${source.name}');
+      Logger.debug('Attempting to pick image from: ${source.name}', 'ParticipantItem');
       
       final XFile? pickedFile = await _picker.pickImage(
         source: source,
@@ -458,7 +459,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
       );
       
       if (pickedFile != null) {
-        print('Image picked successfully: ${pickedFile.path}');
+        Logger.debug('Image picked successfully: ${pickedFile.path}', 'ParticipantItem');
         setState(() {
           _idCardImage = pickedFile;
           _participantData.idCardImagePath = pickedFile.path;
@@ -478,12 +479,12 @@ class _ParticipantItemState extends State<ParticipantItem> {
           );
         }
       } else {
-        print('No image was selected');
+        Logger.debug('No image was selected', 'ParticipantItem');
       }
     } on PlatformException catch (e) {
-      print('PlatformException: $e');
-      print('Error code: ${e.code}');
-      print('Error message: ${e.message}');
+      Logger.error('PlatformException: $e', 'ParticipantItem');
+      Logger.error('Error code: ${e.code}', 'ParticipantItem');
+      Logger.error('Error message: ${e.message}', 'ParticipantItem');
       
       if (mounted) {
         String errorMessage = 'Failed to access ${source == ImageSource.camera ? 'camera' : 'gallery'}';
@@ -522,8 +523,8 @@ class _ParticipantItemState extends State<ParticipantItem> {
         );
       }
     } catch (e) {
-      print('General error picking image: $e');
-      print('Error type: ${e.runtimeType}');
+      Logger.error('General error picking image: $e', 'ParticipantItem');
+      Logger.error('Error type: ${e.runtimeType}', 'ParticipantItem');
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -657,7 +658,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withValues(alpha: 0.5),
                         blurRadius: 10,
                         spreadRadius: 2,
                       ),
@@ -699,7 +700,7 @@ class _ParticipantItemState extends State<ParticipantItem> {
                 right: 20,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
+                    color: Colors.black.withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: IconButton(

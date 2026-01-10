@@ -1,5 +1,6 @@
 import 'package:day_night/models/purchase/purchase_models.dart';
 import 'package:day_night/models/event_details.dart';
+import '../../utils/logger.dart';
 
 class CheckoutTickets {
   final EventDetails eventDetails;
@@ -29,7 +30,7 @@ class CheckoutTickets {
       currentBasket.clear();
       basket.clear();
     } catch (e) {
-      print('Error resetting basket: $e');
+      Logger.error('Error resetting basket: $e', 'CheckoutTickets');
       // Ignore if purchaser info was not set
     }
   }

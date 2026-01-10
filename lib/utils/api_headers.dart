@@ -56,6 +56,44 @@ class ApiHeaders {
     return headers;
   }
 
+  /// Builds headers for media uploads (multipart/form-data)
+  /// 
+  /// Returns headers with:
+  /// - Accept: application/json
+  /// - x-api-key: App token from constants
+  /// - Authorization: Bearer {token} (if token exists in storage and useBearer is true)
+  /// - Content-Type is NOT set (let http package handle multipart boundary)
+  /// - Any custom headers (will override defaults if same key)
+  /// 
+  /// Note: Content-Type is intentionally omitted for multipart uploads
+  /// as the http package will automatically set it with proper boundary
+  /// 
+  /// [useBearer] - Whether to include Bearer token in headers (default: true)
+  /// [customHeaders] - Optional custom headers to add/override defaults
+  static Future<Map<String, String>> buildMediaHeaders([Map<String, String>? customHeaders, bool useBearer = true]) async {
+    final headers = <String, String>{
+      'Accept': 'application/json',
+      'x-api-key': kAppToken,
+      // Note: Content-Type is NOT set for multipart uploads
+      // The http package will set it automatically with boundary
+    };
+
+    // Add Bearer token if available and useBearer is true
+    if (useBearer) {
+      final token = await _getStoredToken();
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+    }
+
+    // Add any custom headers (will override defaults if same key)
+    if (customHeaders != null) {
+      headers.addAll(customHeaders);
+    }
+
+    return headers;
+  }
+
   /// Retrieves the stored authentication token
   static Future<String?> _getStoredToken() async {
     try {

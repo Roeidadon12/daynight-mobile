@@ -13,6 +13,9 @@ class DevConfig implements AppConfig {
   String get apiBaseUrl => '$baseUrl/api';
 
   @override
+  String get apiStorePath => '$baseUrl/api/dashboard';
+
+  @override
   String get loginBaseUrl => '$primaryDomain/api';
   
   @override
@@ -47,6 +50,9 @@ class DevConfig implements AppConfig {
   
   @override
   bool get enableCrashReporting => false;
+  
+  @override
+  bool get enableDebugCurlOutput => true; // Enable curl debug output in dev
   
   @override
   Duration get apiTimeout => const Duration(seconds: 30);

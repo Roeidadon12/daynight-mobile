@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'api_service.dart';
 import '../constants.dart';
 import '../utils/logger.dart';
+import '../utils/api_headers.dart';
 import '../models/enums.dart';
 import '../models/events.dart';
 import '../models/event_details.dart';
@@ -91,7 +95,7 @@ class EventService {
   Future<List<Event>> getEventsByPrice(
     double minPrice,
     double maxPrice, {
-    ValidCurrency currency = ValidCurrency.ILS,
+    ValidCurrency currency = ValidCurrency.ils,
   }) async {
     final response = await api.request(
       endpoint: ApiCommands.getEvents.value,
@@ -229,6 +233,176 @@ class EventService {
       Logger.error('Error parsing event details: $e', 'EventService');
       return null;
     }
+  }
+
+  /// Creates a new event by submitting event data to the backend API.
+  ///
+  /// [eventData] contains all the event information to be submitted
+  /// [additionalFormData] contains extra fields from the create event form
+  ///
+  /// Returns the created event's ID if successful, null if failed.
+  ///
+  /// Throws [ServerException] if the request fails with a server error.
+  Future<int?> createEvent(Map<String, dynamic> eventData, Map<String, dynamic> additionalFormData) async {
+    try {
+      Logger.info('Creating event with data: ${eventData.keys.join(', ')}', 'EventService');
+      
+      // Check if there's an image file to upload
+      String? imagePath = eventData['cover_image'] as String?;
+      File? imageFile;
+      
+      if (imagePath != null && imagePath.isNotEmpty && imagePath != '') {
+        imageFile = File(imagePath);
+        if (!await imageFile.exists()) {
+          Logger.warning('Image file does not exist: $imagePath', 'EventService');
+          imageFile = null;
+        }
+      }
+      
+      Map<String, dynamic> response;
+      
+      if (imageFile != null) {
+        // Use multipart request for image upload
+        response = await _createEventWithImage(eventData, imageFile);
+      } else {
+        // Use regular JSON request if no image
+        final dataWithoutImage = Map<String, dynamic>.from(eventData);
+        dataWithoutImage.remove('cover_image'); // Remove image path from JSON data
+        
+        response = await api.request(
+          endpoint: ApiCommands.createEvent.value,
+          method: 'POST',
+          body: dataWithoutImage,
+          headers: await ApiHeaders.buildHeader(null, true),
+        );
+      }
+
+      if (response.containsKey('status') && response['status'] == 'success') {
+        final eventId = response['event_id'] as int?;
+        if (eventId != null) {
+          Logger.info('Successfully created event with ID: $eventId', 'EventService');
+          return eventId;
+        }
+      }
+      
+      Logger.error('Failed to create event: Invalid response format', 'EventService');
+      return null;
+    } catch (e) {
+      Logger.error('Error creating event: $e', 'EventService');
+      return null;
+    }
+  }
+  
+  /// Helper method to create event with image using multipart/form-data
+  Future<Map<String, dynamic>> _createEventWithImage(Map<String, dynamic> eventData, File imageFile) async {
+    try {
+      final cleanEndpoint = ApiCommands.createEvent.value.startsWith('/') 
+          ? ApiCommands.createEvent.value.substring(1) 
+          : ApiCommands.createEvent.value;
+      final cleanBaseUrl = kApiStorePath.endsWith('/') 
+          ? kApiStorePath.substring(0, kApiStorePath.length - 1) 
+          : kApiStorePath;
+      final url = '$cleanBaseUrl/$cleanEndpoint';
+      final uri = Uri.parse(url);
+      
+      Logger.info('Creating multipart request to: $uri', 'EventService');
+      
+      // Create multipart request
+      final request = http.MultipartRequest('POST', uri);
+      
+      // Add headers
+      final headers = await ApiHeaders.buildMediaHeaders(null, true);
+      request.headers.addAll(headers);
+      
+      // Add all text fields
+      eventData.forEach((key, value) {
+        if (key != 'cover_image' && value != null) {
+          request.fields[key] = value.toString();
+        }
+      });
+      
+      // Add image file
+      final imageStream = http.ByteStream(imageFile.openRead());
+      final imageLength = await imageFile.length();
+      final multipartFile = http.MultipartFile(
+        'cover_image', // The field name expected by the server
+        imageStream,
+        imageLength,
+        filename: imageFile.path.split('/').last,
+      );
+      request.files.add(multipartFile);
+      
+      // Generate cURL command for debugging if enabled
+      if (kEnableDebugCurlOutput) {
+        final curlCommand = _generateMultipartCurlCommand(
+          uri: uri,
+          headers: request.headers,
+          fields: request.fields,
+          imageFile: imageFile,
+        );
+        // Output to stderr for clean copy-paste without Flutter prefixes
+        stderr.writeln('');
+        stderr.writeln('=== COPY THIS MULTIPART CURL COMMAND ===');
+        stderr.writeln(curlCommand);
+        stderr.writeln('=== END CURL COMMAND ===');
+        stderr.writeln('');
+      }
+      
+      Logger.info('Sending multipart request with ${request.fields.length} fields and ${request.files.length} files', 'EventService');
+      
+      // Send request
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      
+      Logger.info('Multipart request completed with status: ${response.statusCode}', 'EventService');
+      
+      if (response.statusCode == 200) {
+        return Map<String, dynamic>.from(
+          const JsonDecoder().convert(response.body) as Map
+        );
+      } else {
+        throw Exception('Request failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      Logger.error('Error in multipart request: $e', 'EventService');
+      rethrow;
+    }
+  }
+
+  /// Generates a curl command equivalent to the multipart HTTP request for debugging.
+  String _generateMultipartCurlCommand({
+    required Uri uri,
+    required Map<String, String> headers,
+    required Map<String, String> fields,
+    required File imageFile,
+  }) {
+    final buffer = StringBuffer();
+    
+    // Start with curl command and method
+    buffer.write('curl -X POST');
+    
+    // Add URL
+    buffer.write(' \\\n  "$uri"');
+    
+    // Add headers (excluding Content-Type for multipart as curl handles it)
+    headers.forEach((key, value) {
+      if (key.toLowerCase() != 'content-type') {
+        buffer.write(' \\\n  -H "$key: $value"');
+      }
+    });
+    
+    // Add form fields
+    fields.forEach((key, value) {
+      // Escape quotes and special characters
+      final escapedValue = value.replaceAll('"', '\\"').replaceAll('\$', '\\\$');
+      buffer.write(' \\\n  -F "$key=$escapedValue"');
+    });
+    
+    // Add image file
+    final filename = imageFile.path.split('/').last;
+    buffer.write(' \\\n  -F "cover_image=@${imageFile.path};filename=$filename"');
+    
+    return buffer.toString();
   }
 
 }

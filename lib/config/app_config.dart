@@ -4,6 +4,7 @@ abstract class AppConfig {
   // API Configuration
   String get baseUrl;
   String get apiBaseUrl;
+  String get apiStorePath;
   String get loginBaseUrl;
   String get coverImageBaseUrl;
   String get organizerImageBaseUrl;
@@ -24,6 +25,7 @@ abstract class AppConfig {
   // Feature Flags
   bool get enableAnalytics;
   bool get enableCrashReporting;
+  bool get enableDebugCurlOutput;
   
   // Timeouts
   Duration get apiTimeout;

@@ -246,4 +246,11 @@ const Map<String, String> heTexts = {
   'user-status-guest': 'אורח',
   'user-status-unknown': 'לא ידוע',
   'phone-number-required-for-identification': 'מספר טלפון נדרש לצורך זיהוי',
+  'upload-image': 'העלה תמונה',
+  'image-size-recommendation': 'גודל מומלץ: 1080x1080 פיקסלים, עד 5MB',
+  'take-photo': 'צלם תמונה',
+  'choose-from-gallery': 'בחר מהגלריה',
+  'cancel': 'בטל',
+  'image-selection-error': 'שגיאה בבחירת תמונה. אנא נסו שוב.',
+  'select-image': 'בחר תמונה',
 };

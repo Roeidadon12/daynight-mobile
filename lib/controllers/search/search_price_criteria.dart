@@ -16,7 +16,7 @@ class _PriceRangeDialogState extends State<PriceRangeDialog> {
   double? _rangeToPrice;
   final TextEditingController fromPriceController = TextEditingController();
   final TextEditingController toPriceController = TextEditingController();
-  ValidCurrency selectedCurrency = ValidCurrency.ILS;
+  ValidCurrency selectedCurrency = ValidCurrency.ils;
 
   @override
   Widget build(BuildContext context) {
@@ -114,10 +114,10 @@ class _PriceRangeDialogState extends State<PriceRangeDialog> {
                 value: currency,
                 child: Text(
                   switch (currency) {
-                    ValidCurrency.USD => AppLocalizations.of(context).get('USD'),
-                    ValidCurrency.ILS => AppLocalizations.of(context).get('ILS'),
-                    ValidCurrency.EUR => AppLocalizations.of(context).get('EUR'),
-                    ValidCurrency.GBP => AppLocalizations.of(context).get('GBP'),
+                    ValidCurrency.usd => AppLocalizations.of(context).get('USD'),
+                    ValidCurrency.ils => AppLocalizations.of(context).get('ILS'),
+                    ValidCurrency.eur => AppLocalizations.of(context).get('EUR'),
+                    ValidCurrency.gbp => AppLocalizations.of(context).get('GBP'),
                   }
                 ),
               );
@@ -150,7 +150,7 @@ class _PriceRangeDialogState extends State<PriceRangeDialog> {
                       _rangeToPrice = null;
                       fromPriceController.clear();
                       toPriceController.clear();
-                      selectedCurrency = ValidCurrency.ILS;
+                      selectedCurrency = ValidCurrency.ils;
                     });
                   },
                   child: Text(

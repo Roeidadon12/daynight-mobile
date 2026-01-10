@@ -87,7 +87,7 @@ class CountryCodes {
   static List<CountryCode> get enabled => 
       _allCountryCodes.where((country) => country.enabled).toList();
 
-  /// Get country codes as Map<String, String> format for compatibility
+  /// Get country codes as `Map<String, String>` format for compatibility
   /// Only returns enabled countries by default
   static List<Map<String, String>> get enabledAsMaps => 
       enabled.map((country) => {
@@ -96,7 +96,7 @@ class CountryCodes {
         'flag': country.flag,
       }).toList();
 
-  /// Get all country codes as Map<String, String> format
+  /// Get all country codes as `Map<String, String>` format
   static List<Map<String, String>> get allAsMaps => 
       all.map((country) => {
         'code': country.code,

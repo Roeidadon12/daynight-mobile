@@ -9,6 +9,9 @@ class ProdConfig implements AppConfig {
   String get apiBaseUrl => '$baseUrl/api';
   
   @override
+  String get apiStorePath => '$baseUrl/api/dashboard';
+  
+  @override
   String get loginBaseUrl => '$baseUrl/api';
 
   @override
@@ -43,6 +46,9 @@ class ProdConfig implements AppConfig {
   
   @override
   bool get enableCrashReporting => true;
+  
+  @override
+  bool get enableDebugCurlOutput => false; // Disable curl debug output in production
   
   @override
   Duration get apiTimeout => const Duration(seconds: 10);

@@ -1,3 +1,5 @@
+import 'logger.dart';
+
 /// A utility function to safely extract and convert values from JSON
 /// 
 /// Example usage:
@@ -56,7 +58,7 @@ T? getJsonField<T>(Map<String, dynamic> json, String field, {T? defaultValue}) {
     // For String and other types, return as is
     return value as T?;
   } catch (e) {
-    print('Error parsing field "$field" as ${T.toString()}: $e');
+    Logger.error('Error parsing field "$field" as ${T.toString()}: $e', 'JsonParser');
     return defaultValue;
   }
 }

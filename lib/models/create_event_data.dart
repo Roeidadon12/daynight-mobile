@@ -60,8 +60,9 @@ class CreateEventData {
   DateTime? startTime;
   DateTime? endTime;
 
-  // Step 2: Event Description & Settings  
+  // Step 2: Event Description & Settings
   int? capacity;
+  String? description; // Main event description
   String? additionalInfo;
   String? image; // Image URL or path
   bool isPublic;
@@ -85,6 +86,7 @@ class CreateEventData {
     this.startTime,
     this.endTime,
     this.capacity,
+    this.description,
     this.additionalInfo,
     this.image,
     this.isPublic = true,
@@ -100,10 +102,10 @@ class CreateEventData {
   /// Check if Step 1 (Basic Info) is valid
   bool get isStep1Valid {
     return eventName.isNotEmpty &&
-           location.isNotEmpty &&
-           category != null &&
-           startTime != null &&
-           endTime != null;
+        location.isNotEmpty &&
+        category != null &&
+        startTime != null &&
+        endTime != null;
   }
 
   /// Check if Step 2 (Description & Settings) is valid
@@ -114,11 +116,11 @@ class CreateEventData {
   /// Check if Step 3 (Tickets & Pricing) is valid
   bool get isStep3Valid {
     if (isFreeEvent) return true;
-    
-    return ticketTypes.isNotEmpty && 
-           ticketTypes.every((ticket) => 
-               ticket.name.isNotEmpty && 
-               ticket.quantity > 0);
+
+    return ticketTypes.isNotEmpty &&
+        ticketTypes.every(
+          (ticket) => ticket.name.isNotEmpty && ticket.quantity > 0,
+        );
   }
 
   /// Check if all steps are valid for event creation
@@ -144,7 +146,7 @@ class CreateEventData {
     return ticketTypes.map((t) => t.price).reduce((a, b) => a < b ? a : b);
   }
 
-  /// Get maximum ticket price (0 for free events)  
+  /// Get maximum ticket price (0 for free events)
   double get maxTicketPrice {
     if (isFreeEvent || ticketTypes.isEmpty) return 0.0;
     return ticketTypes.map((t) => t.price).reduce((a, b) => a > b ? a : b);
@@ -160,6 +162,7 @@ class CreateEventData {
       'startTime': startTime,
       'endTime': endTime,
       'capacity': capacity,
+      'description': description,
       'additionalInfo': additionalInfo,
       'image': image,
       'isPublic': isPublic,
@@ -174,6 +177,81 @@ class CreateEventData {
   }
 
   /// Convert to JSON for API submission
+  Map<String, dynamic> toApiJson(Map<String, dynamic> additionalData) {
+    // Format dates and times
+    String? startDateStr = startTime?.toIso8601String().split(
+      'T',
+    )[0]; // Format: 2024-05-13
+    String? startTimeStr = startTime != null
+        ? '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}'
+        : null; // Format: 21:00
+    String? endDateStr = endTime?.toIso8601String().split(
+      'T',
+    )[0]; // Format: 2024-11-29
+    String? endTimeStr = endTime != null
+        ? '${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}'
+        : null; // Format: 08:00
+
+    // Get additional fields from form data
+    String slug = additionalData['urlSuffix'] ?? '';
+    if (slug.isEmpty) {
+      // Generate slug from event name if urlSuffix is empty
+      slug = eventName
+          .toLowerCase()
+          .replaceAll(RegExp(r'[^a-z0-9\s-]'), '')
+          .replaceAll(RegExp(r'\s+'), '-')
+          .trim();
+    }
+
+    return {
+      // Required fields
+      'cover_image': image ?? '', // file - Event cover image
+      'min_age':
+          minimalAge ?? 0, // integer - Minimum age of participant, min value 0
+      'status': isPublic ? 1 : 0, // integer - 1=active, 0=deactive
+      'countdown_status':
+          1, // integer - Event start date countdown status 1=active, 0=deactive
+      'is_featured': 'no', // string - Values = yes/no
+      'date_type': 'single', // string - Values = single/multiple
+      // Single date fields (when date_type=single)
+      'start_date': startDateStr ?? '', // string - Format = 2024-05-13
+      'start_time': startTimeStr ?? '', // string - Format = 21:00
+      'end_date': endDateStr ?? '', // string - Format = 2024-11-29
+      'end_time': endTimeStr ?? '', // string - Format = 08:00
+      'end_date_time_status':
+          1, // integer - 1=show end date time, 0=hide end date time
+      // Multiple date fields (when date_type=multiple) - empty arrays for single events
+      'm_start_date': [], // array - Format = 2025-12-12
+      'm_start_time': [], // array - Format = 12:10
+      'm_end_date': [], // array - Format = 2026-01-03
+      'm_end_time': [], // array - Format = 12:11
+      // Map and address
+      'map_status': 1, // integer - 1=Enable, 0=Disable
+      'address': location, // string
+      'map_address': location, // string - same as address for now
+      // Language-specific fields (English as default)
+      'en_title': eventName, // string - required for default language
+      'en_category_id':
+          category?.id ?? 1, // integer - required for default language
+      'en_country': 'Israel', // string - required for default language
+      'en_description':
+          description ?? '', // string - required for default language
+      'en_refund_policy': '', // string - optional
+      'en_meta_keywords': '', // string - optional
+      'en_meta_description': '', // string - optional
+      // Tracking fields (optional)
+      'pixel_id':
+          additionalData['trackingField1'] ?? '', // string - Meta pixel id
+      'tiktok_pixel_id':
+          additionalData['trackingField2'] ?? '', // string - Tiktok pixel id
+      'measurement_id':
+          additionalData['trackingField3'] ?? '', // string - GA-4 Analytics
+      // Slug
+      'slug': slug, // string - unique slug for event
+    };
+  }
+
+  /// Convert to JSON for backward compatibility
   Map<String, dynamic> toJson() {
     return {
       'title': eventName,
@@ -196,6 +274,7 @@ class CreateEventData {
 
   /// Create from Map (for loading existing data)
   factory CreateEventData.fromMap(Map<String, dynamic> map) {
+    final description = map['description'] as String?;
     return CreateEventData(
       eventName: map['eventName'] ?? '',
       location: map['location'] ?? '',
@@ -204,19 +283,21 @@ class CreateEventData {
       startTime: map['startTime'] as DateTime?,
       endTime: map['endTime'] as DateTime?,
       capacity: map['capacity'] as int?,
+      description: description,
       additionalInfo: map['additionalInfo'] as String?,
       image: map['image'] as String?,
       isPublic: map['isPublic'] ?? true,
       allowRegistration: map['allowRegistration'] ?? true,
       sendReminders: map['sendReminders'] ?? true,
       isFreeEvent: map['isFreeEvent'] ?? false,
-      ticketTypes: (map['ticketTypes'] as List?)
-          ?.map((item) {
+      ticketTypes:
+          (map['ticketTypes'] as List?)?.map((item) {
             if (item is CreateEventTicketType) return item;
-            if (item is Map<String, dynamic>) return CreateEventTicketType.fromJson(item);
+            if (item is Map<String, dynamic>)
+              return CreateEventTicketType.fromJson(item);
             return CreateEventTicketType(name: '', price: 0, quantity: 1);
-          })
-          .toList() ?? [],
+          }).toList() ??
+          [],
       createdAt: map['createdAt'] as DateTime?,
       updatedAt: map['updatedAt'] as DateTime?,
       status: map['status'] ?? 'draft',
@@ -232,6 +313,7 @@ class CreateEventData {
     DateTime? startTime,
     DateTime? endTime,
     int? capacity,
+    String? description,
     String? additionalInfo,
     String? image,
     bool? isPublic,
@@ -251,6 +333,7 @@ class CreateEventData {
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
       capacity: capacity ?? this.capacity,
+      description: description ?? this.description,
       additionalInfo: additionalInfo ?? this.additionalInfo,
       image: image ?? this.image,
       isPublic: isPublic ?? this.isPublic,
@@ -308,6 +391,9 @@ class CreateEventData {
         break;
       case 'capacity':
         capacity = value as int?;
+        break;
+      case 'description':
+        description = value as String?;
         break;
       case 'additionalInfo':
         additionalInfo = value as String?;

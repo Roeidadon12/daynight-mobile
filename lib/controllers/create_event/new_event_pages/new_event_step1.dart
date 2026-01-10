@@ -178,6 +178,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
     );
     
     if (pickedDate != null) {
+      if (!mounted) return;
       final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(initialDateTime),
@@ -235,6 +236,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
     );
     
     if (pickedDate != null) {
+      if (!mounted) return;
       final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(initialDateTime),
@@ -263,6 +265,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
         // Ensure end time is after start time
         if (_startTime != null && newEndTime.isBefore(_startTime!)) {
           // Show error or adjust automatically
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppLocalizations.of(context).get('end-time-must-be-after-start-time')),

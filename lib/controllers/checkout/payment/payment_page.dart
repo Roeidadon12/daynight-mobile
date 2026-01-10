@@ -12,6 +12,7 @@ import 'package:day_night/controllers/shared/loading_overlay_controller.dart';
 import 'package:day_night/models/ticket_item.dart';
 import 'package:day_night/models/ticket_payment.dart';
 import 'package:day_night/models/purchase/participant.dart';
+import 'package:day_night/utils/logger.dart';
   
 class PaymentPage extends StatefulWidget {
   final CheckoutTickets orderInfo;
@@ -130,7 +131,7 @@ class _PaymentPageState extends State<PaymentPage> {
       final configString = await rootBundle.loadString(configPath);
       return PaymentConfiguration.fromJsonString(configString);
     } catch (e) {
-      print('Failed to load payment configuration: $e');
+      Logger.error('Failed to load payment configuration: $e', 'PaymentPage');
       return null;
     }
   }
@@ -177,7 +178,7 @@ class _PaymentPageState extends State<PaymentPage> {
   Future<void> _processPaymentResult(Map<String, dynamic> paymentResult) async {
     try {
       // Here you would typically send the payment result to your backend
-      print('Payment Result: $paymentResult');
+      Logger.debug('Payment Result: $paymentResult', 'PaymentPage');
       
       // Extract payment token
       final token = paymentResult['paymentData'] ?? paymentResult['token'];
@@ -204,10 +205,10 @@ class _PaymentPageState extends State<PaymentPage> {
     // - User information
     // - Event details
     
-    print('Sending payment to backend...');
-    print('Payment Token: $paymentToken');
-    print('Tickets: ${_ticketPayments.map((t) => t.toString()).join(', ')}');
-    print('Total Amount: \$$finalAmount');
+    Logger.debug('Sending payment to backend...', 'PaymentPage');
+    Logger.debug('Payment Token: $paymentToken', 'PaymentPage');
+    Logger.debug('Tickets: ${_ticketPayments.map((t) => t.toString()).join(', ')}', 'PaymentPage');
+    Logger.debug('Total Amount: \$$finalAmount', 'PaymentPage');
     
     // Simulate API call
     await Future.delayed(const Duration(seconds: 1));
@@ -365,7 +366,7 @@ class _PaymentPageState extends State<PaymentPage> {
       _ticketPayments.add(ticketPayment);
       
       // Debug print to verify the structure
-      print('Created TicketPayment: $ticketPayment');
+      Logger.debug('Created TicketPayment: $ticketPayment', 'PaymentPage');
     });
   }
 
@@ -385,17 +386,17 @@ class _PaymentPageState extends State<PaymentPage> {
     });
 
     try {
-      print('Processing payment for ${_ticketPayments.length} ticket types:');
+      Logger.debug('Processing payment for ${_ticketPayments.length} ticket types:', 'PaymentPage');
       
       for (final ticketPayment in _ticketPayments) {
-        print('- Ticket ID: ${ticketPayment.ticketId}');
-        print('  Price per ticket: \$${ticketPayment.ticketPrice}');
-        print('  Participants: ${ticketPayment.participantCount}');
-        print('  Total for this ticket: \$${ticketPayment.totalAmount}');
-        print('  Participants: ${ticketPayment.participants.map((p) => p.fullName).join(', ')}');
+        Logger.debug('- Ticket ID: ${ticketPayment.ticketId}', 'PaymentPage');
+        Logger.debug('  Price per ticket: \$${ticketPayment.ticketPrice}', 'PaymentPage');
+        Logger.debug('  Participants: ${ticketPayment.participantCount}', 'PaymentPage');
+        Logger.debug('  Total for this ticket: \$${ticketPayment.totalAmount}', 'PaymentPage');
+        Logger.debug('  Participants: ${ticketPayment.participants.map((p) => p.fullName).join(', ')}', 'PaymentPage');
       }
       
-      print('Grand total: \$$finalAmount');
+      Logger.debug('Grand total: \$$finalAmount', 'PaymentPage');
 
       // Create payment request with all ticket and participant information
       final paymentRequest = {

@@ -23,16 +23,17 @@ enum SearchCriteriaType {
 }
 
 enum ValidCurrency {
-  ILS, // Israeli Shekel
-  USD, // US Dollar
-  EUR, // Euro
-  GBP, // British Pound
+  ils, // Israeli Shekel
+  usd, // US Dollar
+  eur, // Euro
+  gbp, // British Pound
 }
 
 enum ApiCommands {
   getCategories('/categories'),
   getEvents('/events'),
   getEventDetails('/event/details'),
+  createEvent('/event-management/store'),
   updateEvent('/events'),
   deleteEvent('/events'),
   getLanguages('/languages'),

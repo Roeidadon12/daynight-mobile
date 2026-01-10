@@ -9,6 +9,7 @@ import 'package:day_night/models/participant_data.dart';
 import 'package:day_night/models/ticket_item.dart';
 import 'package:day_night/models/purchase/payment_service_request.dart';
 import 'package:flutter/material.dart';
+import '../../../utils/logger.dart';
 
 class ParticipantInfoPage extends StatefulWidget {
   final CheckoutTickets orderInfo;
@@ -415,8 +416,8 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
     
     // Debug: Print the raw participant data
     if (purchaserData != null) {
-      print('Raw purchaserData.firstName: "${purchaserData.firstName}"');
-      print('Raw purchaserData.lastName: "${purchaserData.lastName}"');
+      Logger.debug('Raw purchaserData.firstName: "${purchaserData.firstName}"', 'ParticipantInfoPage');
+      Logger.debug('Raw purchaserData.lastName: "${purchaserData.lastName}"', 'ParticipantInfoPage');
     }
     
     // Clean up the purchaser name by removing any leading numbers or indices
@@ -434,11 +435,11 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       
       // Construct the full name from both fields and parse it correctly
       final fullRawName = '$firstName $lastName'.trim();
-      print('Full raw name: "$fullRawName"');
+      Logger.debug('Full raw name: "$fullRawName"', 'ParticipantInfoPage');
       
       // Remove leading numbers and split properly
       final cleanedFullName = fullRawName.replaceFirst(RegExp(r'^\d+\s*'), '');
-      print('Cleaned full name: "$cleanedFullName"');
+      Logger.debug('Cleaned full name: "$cleanedFullName"', 'ParticipantInfoPage');
       
       // Split the cleaned name: expecting something like "Oren 1 Yahalom 1"
       final nameParts = cleanedFullName.split(' ');
@@ -462,9 +463,9 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       }
       
       cleanPurchaserName = '$cleanFirstName $cleanLastName'.trim();
-      print('Cleaned firstName: "$cleanFirstName"');
-      print('Cleaned lastName: "$cleanLastName"');
-      print('Constructed cleanPurchaserName: "$cleanPurchaserName"');
+      Logger.debug('Cleaned firstName: "$cleanFirstName"', 'ParticipantInfoPage');
+      Logger.debug('Cleaned lastName: "$cleanLastName"', 'ParticipantInfoPage');
+      Logger.debug('Constructed cleanPurchaserName: "$cleanPurchaserName"', 'ParticipantInfoPage');
     } else if (purchaserInfo?.fullName != null) {
       cleanPurchaserName = purchaserInfo!.fullName;
     }
@@ -527,7 +528,7 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       // await yourPaymentService.processPayment(paymentRequest);
       
       // For debugging, you can print the payment request form data:
-      print('Payment request: ${paymentRequest.toFormData()}');
+      Logger.debug('Payment request: ${paymentRequest.toFormData()}', 'ParticipantInfoPage');
       
       // Simulate service call for now
       await Future.delayed(const Duration(seconds: 1));

@@ -21,14 +21,14 @@ class EmptyEventsState extends StatelessWidget {
           Icon(
             icon,
             size: 64,
-            color: kBrandPrimary.withOpacity(0.5),
+            color: kBrandPrimary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
             message,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 16,
             ),
           ),

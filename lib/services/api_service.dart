@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../exceptions/api_exceptions.dart';
+import '../constants.dart';
+import '../utils/logger.dart';
 
 /// Service class for handling HTTP requests.
 class ApiService {
@@ -57,7 +59,23 @@ class ApiService {
       final url = '$cleanBaseUrl/$cleanEndpoint';
       
       final uri = Uri.parse(url).replace(queryParameters: queryParams);
-      print('Making request to: $uri');
+      Logger.debug('Making request to: $uri', 'ApiService');
+      
+      // Generate and print curl command if debug is enabled
+      if (kEnableDebugCurlOutput) {
+        final curlCommand = _generateCurlCommand(
+          uri: uri,
+          method: method,
+          headers: {...defaultHeaders, ...?headers},
+          body: body,
+        );
+        // Output to stderr for clean copy-paste without Flutter prefixes
+        stderr.writeln('');
+        stderr.writeln('=== COPY THIS CURL COMMAND ===');
+        stderr.writeln(curlCommand);
+        stderr.writeln('=== END CURL COMMAND ===');
+        stderr.writeln('');
+      }
 
       final response = await _executeRequest(
         uri: uri,
@@ -69,14 +87,14 @@ class ApiService {
       if (response.statusCode == HttpStatus.ok) {
         return json.decode(response.body) as Map<String, dynamic>;
       } else {
-        print('Request failed with status: ${response.statusCode}');
+        Logger.error('Request failed with status: ${response.statusCode}', 'ApiService');
         throw ServerException('Request failed with status: ${response.statusCode}');
       }
     } on SocketException catch (e) {
-      print('Socket error: $e');
+      Logger.error('Socket error: $e', 'ApiService');
       rethrow;
     } catch (e) {
-      print('Error making request: $e');
+      Logger.error('Error making request: $e', 'ApiService');
       rethrow;
     }
   }
@@ -108,5 +126,42 @@ class ApiService {
       default:
         throw BadRequestException('Unsupported HTTP method: $method');
     }
+  }
+
+  /// Generates a curl command equivalent to the HTTP request for debugging.
+  String _generateCurlCommand({
+    required Uri uri,
+    required String method,
+    required Map<String, String> headers,
+    dynamic body,
+  }) {
+    final buffer = StringBuffer();
+    
+    // Start with curl command and method
+    buffer.write('curl -X $method');
+    
+    // Add URL
+    buffer.write(' \\\n  "$uri"');
+    
+    // Add headers
+    headers.forEach((key, value) {
+      buffer.write(' \\\n  -H "$key: $value"');
+    });
+    
+    // Add body if present
+    if (body != null) {
+      String bodyString;
+      if (body is String) {
+        bodyString = body;
+      } else {
+        bodyString = json.encode(body);
+      }
+      
+      // Escape quotes and format JSON nicely
+      final escapedBody = bodyString.replaceAll('"', '\\"');
+      buffer.write(' \\\n  -d "$escapedBody"');
+    }
+    
+    return buffer.toString();
   }
 }

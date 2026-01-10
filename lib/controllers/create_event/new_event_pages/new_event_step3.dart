@@ -4,6 +4,8 @@ import '../../../app_localizations.dart';
 import '../../../constants.dart';
 import '../../../controllers/user/user_controller.dart';
 import '../../../screens/auth/login_screen.dart';
+import '../../../services/event_service.dart';
+import '../../../models/create_event_data.dart';
 import '../../shared/primary_button.dart';
 import '../../shared/labeled_text_form_field.dart';
 
@@ -36,6 +38,7 @@ class _NewEventStep3State extends State<NewEventStep3> {
   bool _isPrivateEvent = false;
   bool _termsAccepted = false;
   bool _isUserTrackingExpanded = false;
+  bool _isCreatingEvent = false;
   
   @override
   void initState() {
@@ -64,7 +67,7 @@ class _NewEventStep3State extends State<NewEventStep3> {
   }
 
   bool _isFormValid() {
-    return _organizerNameController.text.trim().isNotEmpty && _termsAccepted;
+    return _organizerNameController.text.trim().isNotEmpty && _termsAccepted && !_isCreatingEvent;
   }
 
 
@@ -96,26 +99,101 @@ class _NewEventStep3State extends State<NewEventStep3> {
     }
   }
   
-  void _proceedWithEventCreation() {
-    // Create final URL by combining domain with suffix
-    String finalUrl = 'Daynight.co.il/Event/';
-    if (_urlSuffixController.text.isNotEmpty) {
-      finalUrl += _urlSuffixController.text;
+  void _proceedWithEventCreation() async {
+    if (_isCreatingEvent) return; // Prevent multiple submissions
+    
+    setState(() {
+      _isCreatingEvent = true;
+    });
+
+    try {
+      // Create final URL by combining domain with suffix
+      String finalUrl = 'Daynight.co.il/Event/';
+      if (_urlSuffixController.text.isNotEmpty) {
+        finalUrl += _urlSuffixController.text;
+      }
+      
+      // Save form data
+      widget.onDataChanged('organizerName', _organizerNameController.text);
+      widget.onDataChanged('urlSuffix', _urlSuffixController.text);
+      widget.onDataChanged('finalUrl', finalUrl);
+      widget.onDataChanged('isPrivateEvent', _isPrivateEvent);
+      widget.onDataChanged('termsAccepted', _termsAccepted);
+      widget.onDataChanged('trackingField1', _trackingField1Controller.text);
+      widget.onDataChanged('trackingField2', _trackingField2Controller.text);
+      widget.onDataChanged('trackingField3', _trackingField3Controller.text);
+      widget.onDataChanged('trackingField4', _trackingField4Controller.text);
+      widget.onDataChanged('isUserTrackingExpanded', _isUserTrackingExpanded);
+      
+      // Create the event data object
+      final createEventData = CreateEventData.fromMap(widget.eventData);
+      
+      // Prepare additional form data
+      final additionalData = {
+        'urlSuffix': _urlSuffixController.text,
+        'organizerName': _organizerNameController.text,
+        'isPrivateEvent': _isPrivateEvent,
+        'trackingField1': _trackingField1Controller.text,
+        'trackingField2': _trackingField2Controller.text,
+        'trackingField3': _trackingField3Controller.text,
+        'trackingField4': _trackingField4Controller.text,
+      };
+      
+      // Convert to API format
+      final apiData = createEventData.toApiJson(additionalData);
+      
+      // Create the event via API
+      final eventService = EventService();
+      final eventId = await eventService.createEvent(apiData, additionalData);
+      
+      if (mounted) {
+        setState(() {
+          _isCreatingEvent = false;
+        });
+        
+        if (eventId != null) {
+          // Success - save the event ID and proceed to success page
+          widget.onDataChanged('eventId', eventId);
+          widget.onComplete();
+        } else {
+          // Failed to create event
+          _showErrorDialog('Failed to create event. Please try again.');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isCreatingEvent = false;
+        });
+        _showErrorDialog('An error occurred while creating the event. Please check your connection and try again.');
+      }
     }
-    
-    // Save form data
-    widget.onDataChanged('organizerName', _organizerNameController.text);
-    widget.onDataChanged('urlSuffix', _urlSuffixController.text);
-    widget.onDataChanged('finalUrl', finalUrl);
-    widget.onDataChanged('isPrivateEvent', _isPrivateEvent);
-    widget.onDataChanged('termsAccepted', _termsAccepted);
-    widget.onDataChanged('trackingField1', _trackingField1Controller.text);
-    widget.onDataChanged('trackingField2', _trackingField2Controller.text);
-    widget.onDataChanged('trackingField3', _trackingField3Controller.text);
-    widget.onDataChanged('trackingField4', _trackingField4Controller.text);
-    widget.onDataChanged('isUserTrackingExpanded', _isUserTrackingExpanded);
-    
-    widget.onComplete();
+  }
+  
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Text(
+          AppLocalizations.of(context).get('error'),
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              AppLocalizations.of(context).get('ok'),
+              style: TextStyle(color: kBrandPrimary),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -389,13 +467,48 @@ class _NewEventStep3State extends State<NewEventStep3> {
             padding: const EdgeInsets.all(16), 
             child: SizedBox(
               width: double.infinity,
-              child: PrimaryButton(
-                onPressed: _saveAndComplete,
-                textKey: 'create-event',
-                disabled: !_isFormValid(),
-                trailingIcon: Icons.arrow_forward,
-                flexible: false,
-              ),
+              child: _isCreatingEvent
+                ? SizedBox(
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kBrandPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            AppLocalizations.of(context).get('creating-event'),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : PrimaryButton(
+                    onPressed: _saveAndComplete,
+                    textKey: 'create-event',
+                    disabled: !_isFormValid(),
+                    trailingIcon: Icons.arrow_forward,
+                    flexible: false,
+                  ),
             ),
           ),
         ],

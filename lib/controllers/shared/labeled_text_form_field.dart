@@ -100,7 +100,7 @@ class LabeledTextFormField extends StatelessWidget {
                 if (value == null || value.isEmpty) {
                   return errorTextKey != null 
                     ? AppLocalizations.of(context).get(errorTextKey!)
-                    : AppLocalizations.of(context).get('${titleKey}-required');
+                    : AppLocalizations.of(context).get('$titleKey-required');
                 }
                 return null;
               }

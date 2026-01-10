@@ -2,6 +2,7 @@ import 'api_service.dart';
 import '../constants.dart';
 import '../models/category.dart';
 import '../models/enums.dart';
+import '../utils/logger.dart';
 
 class CategoryService {
   final ApiService api;
@@ -24,7 +25,7 @@ class CategoryService {
           .map((json) => Category.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      print('Error parsing categories: $e');
+      Logger.error('Error parsing categories: $e', 'CategoryService');
       return [];
     }
   }
