@@ -271,12 +271,10 @@ Widget build(BuildContext context) {
           itemCount: widget.events.length,
           itemBuilder: (context, index) {
             final event = widget.events[index];
-            return Container(
-              child: Center(
-                child: GestureDetector(
-                  onTap: () => widget.onEventTap?.call(event),
-                  child: _buildEventCard(event, widget.size),
-                ),
+            return Center(
+              child: GestureDetector(
+                onTap: () => widget.onEventTap?.call(event),
+                child: _buildEventCard(event, widget.size),
               ),
             );
           },

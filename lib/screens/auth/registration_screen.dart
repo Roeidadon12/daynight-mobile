@@ -75,7 +75,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     {'code': '+213', 'name': 'Algeria', 'flag': '🇩🇿'},
   ];
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
   String? _errorMessage;
   gender_model.Gender? _selectedGender;
   late final ValueNotifier<gender_model.Gender?> _genderNotifier;

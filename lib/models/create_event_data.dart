@@ -293,8 +293,9 @@ class CreateEventData {
       ticketTypes:
           (map['ticketTypes'] as List?)?.map((item) {
             if (item is CreateEventTicketType) return item;
-            if (item is Map<String, dynamic>)
+            if (item is Map<String, dynamic>) {
               return CreateEventTicketType.fromJson(item);
+            }
             return CreateEventTicketType(name: '', price: 0, quantity: 1);
           }).toList() ??
           [],

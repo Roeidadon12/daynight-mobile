@@ -10,10 +10,9 @@ import '../models/user.dart';
 /// This provider should be placed at the root of the app widget tree
 /// to ensure all widgets can access user status information.
 class UserStatusProvider extends ChangeNotifierProvider<UserController> {
-  UserStatusProvider({super.key, Widget? child}) 
+  UserStatusProvider({super.key, super.child}) 
       : super(
           create: (context) => UserController(),
-          child: child,
         );
 
   /// Convenience method to get UserController from context
