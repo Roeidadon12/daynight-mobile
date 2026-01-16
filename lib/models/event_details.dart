@@ -45,6 +45,7 @@ class EventInformation {
   final int id;
   final String title;
   final String description;
+  final String? enDescription;
   final int eventCategoryId;
   final String name;
   final double? latitude;
@@ -83,6 +84,7 @@ class EventInformation {
     required this.id,
     required this.title,
     required this.description,
+    this.enDescription,
     required this.eventCategoryId,
     required this.name,
     this.latitude,
@@ -123,6 +125,7 @@ class EventInformation {
       id: json['id'],
       title: json['title'],
       description: json['description'],
+      enDescription: json['en_description'],
       eventCategoryId: json['event_category_id'],
       name: json['name'],
       latitude: json['latitude']?.toDouble(),

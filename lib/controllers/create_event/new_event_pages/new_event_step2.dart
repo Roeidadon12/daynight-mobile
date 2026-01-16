@@ -42,7 +42,12 @@ class _NewEventStep2State extends State<NewEventStep2> {
     super.initState();
     // Initialize with existing data if any
     _selectedImage = widget.eventData['image'];
-    _descriptionController.text = widget.eventData['description'] ?? '';
+    // Try to load description from descriptionRaw first (JSON format for editing), 
+    // then fallback to description, or start with empty string
+    String existingDescription = widget.eventData['descriptionRaw'] ?? 
+                                widget.eventData['description'] ?? 
+                                '';
+    _descriptionController.text = existingDescription;
     
     // Load existing image file if available
     if (_selectedImage != null && _selectedImage!.isNotEmpty) {
@@ -124,30 +129,41 @@ class _NewEventStep2State extends State<NewEventStep2> {
     return '';
   }
 
+  void _saveDescriptionData() {
+    // Extract both plain text and HTML from rich text editor
+    String description = _descriptionController.text;
+    String htmlDescription = '';
+    
+    try {
+      // If the text is in JSON format (Quill delta), extract both formats
+      final json = jsonDecode(_descriptionController.text);
+      description = _extractPlainTextFromQuill(json);
+      htmlDescription = _extractHtmlFromQuill(json);
+    } catch (e) {
+      // If it's not JSON, it's already plain text
+      description = _descriptionController.text;
+      htmlDescription = _descriptionController.text; // Fallback to plain text
+    }
+
+    // Save main description-related fields to eventData
+    widget.onDataChanged('description', description);
+    widget.onDataChanged('en_description', description);
+    
+    // Debug-only fields (not saved to model)
+    widget.onDataChanged('descriptionHtml', htmlDescription);
+    widget.onDataChanged('descriptionRaw', _descriptionController.text);
+    
+    // Debug log to verify all fields are being set
+    Logger.debug('Saving description data - description: $description, en_description: $description', 'NewEventStep2');
+  }
+
   void _saveAndNext() {
     if (_formKey.currentState!.validate() && _isFormValid()) {
       // Save all form data
       widget.onDataChanged('image', _selectedImage);
       
-      // Extract both plain text and HTML from rich text editor
-      String description = _descriptionController.text;
-      String htmlDescription = '';
-      
-      try {
-        // If the text is in JSON format (Quill delta), extract both formats
-        final json = jsonDecode(_descriptionController.text);
-        description = _extractPlainTextFromQuill(json);
-        htmlDescription = _extractHtmlFromQuill(json);
-      } catch (e) {
-        // If it's not JSON, it's already plain text
-        description = _descriptionController.text;
-        htmlDescription = _descriptionController.text; // Fallback to plain text
-      }
-
-      widget.onDataChanged('description', description);
-      widget.onDataChanged('descriptionHtml', htmlDescription); // Store HTML version
-      widget.onDataChanged('en_description', description);
-      widget.onDataChanged('descriptionRaw', _descriptionController.text); // Keep JSON version for editing
+      // Save description data using the helper method
+      _saveDescriptionData();
       
       widget.onNext();
     }
@@ -315,6 +331,8 @@ class _NewEventStep2State extends State<NewEventStep2> {
                       controller: _descriptionController,
                       hintText: AppLocalizations.of(context).get('create-event-description-instructions'),
                       onChanged: (value) {
+                        // Save description data in real-time as user types
+                        _saveDescriptionData();
                         setState(() {});
                       },
                     ),

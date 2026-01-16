@@ -62,7 +62,8 @@ class CreateEventData {
 
   // Step 2: Event Description & Settings
   int? capacity;
-  String? description; // Main event description
+  String? description; // Main event description (plain text)
+  String? enDescription; // English description (for multi-language support)
   String? additionalInfo;
   String? image; // Image URL or path
   bool isPublic;
@@ -87,6 +88,7 @@ class CreateEventData {
     this.endTime,
     this.capacity,
     this.description,
+    this.enDescription,
     this.additionalInfo,
     this.image,
     this.isPublic = true,
@@ -163,6 +165,7 @@ class CreateEventData {
       'endTime': endTime,
       'capacity': capacity,
       'description': description,
+      'en_description': enDescription,
       'additionalInfo': additionalInfo,
       'image': image,
       'isPublic': isPublic,
@@ -395,6 +398,9 @@ class CreateEventData {
         break;
       case 'description':
         description = value as String?;
+        break;
+      case 'en_description':
+        enDescription = value as String?;
         break;
       case 'additionalInfo':
         additionalInfo = value as String?;
