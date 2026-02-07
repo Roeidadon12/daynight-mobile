@@ -25,6 +25,10 @@ Future<void> setAppLanguageIdByDeviceLocale() async {
       return;
     }
     
+    // Store languages globally for app-wide access
+    kAppLanguages = languages;
+    Logger.info('Stored ${kAppLanguages.length} languages globally', 'Main');
+    
     final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
     final deviceLangCode = deviceLocale.languageCode;
     final match = languages.firstWhere(
@@ -145,61 +149,107 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0; // Already exists
+  int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    const HomeTab(),
-    const SearchTab(),
-    const TicketTab(),
-    const EditingTab(),
-  ];
+  List<Widget> _getPages(bool isLoggedIn) {
+    if (isLoggedIn) {
+      return [
+        const HomeTab(),
+        const SearchTab(),
+        const TicketTab(),
+        const EditingTab(),
+      ];
+    } else {
+      // Guest users don't see the TicketTab
+      return [
+        const HomeTab(),
+        const SearchTab(),
+        const EditingTab(),
+      ];
+    }
+  }
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(int index, bool isLoggedIn) {
     setState(() {
-      _selectedIndex = index;
+      if (!isLoggedIn && index >= 2) {
+        // For guest users, adjust index since TicketTab is not present
+        // Index 2 becomes EditingTab instead of TicketTab
+        _selectedIndex = index;
+      } else {
+        _selectedIndex = index;
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: Container(
-        color: Colors.black, // Set your desired background color here
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.transparent, // Keep transparent, use parent Container color
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          items: [
-            _buildBarItem(
-              'assets/images/home_icon.svg',
-              0,
-              context,
+    return Consumer<UserController>(
+      builder: (context, userController, _) {
+        final isLoggedIn = userController.isLoggedIn;
+        final pages = _getPages(isLoggedIn);
+        
+        // Ensure selected index doesn't exceed available pages
+        if (_selectedIndex >= pages.length) {
+          _selectedIndex = 0;
+        }
+        
+        return Scaffold(
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: pages,
+          ),
+          bottomNavigationBar: Container(
+            color: Colors.black,
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.transparent,
+              currentIndex: _selectedIndex,
+              onTap: (index) => _onItemTapped(index, isLoggedIn),
+              items: _buildBottomNavItems(isLoggedIn, context),
             ),
-            _buildBarItem(
-              'assets/images/search_icon.svg',
-              1,
-              context,
-            ),
-            _buildBarItem(
-              'assets/images/events_icon.svg',
-              2,
-              context,
-            ),
-            _buildBarItem(
-              'assets/images/create_icon.svg',
-              3,
-              context,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: null,
+          ),
+          floatingActionButton: null,
+        );
+      },
     );
+  }
+
+  List<BottomNavigationBarItem> _buildBottomNavItems(bool isLoggedIn, BuildContext context) {
+    final items = [
+      _buildBarItem(
+        'assets/images/home_icon.svg',
+        0,
+        context,
+      ),
+      _buildBarItem(
+        'assets/images/search_icon.svg',
+        1,
+        context,
+      ),
+    ];
+    
+    if (isLoggedIn) {
+      // Add My Tickets tab for logged in users
+      items.add(_buildBarItem(
+        'assets/images/events_icon.svg',
+        2,
+        context,
+      ));
+      items.add(_buildBarItem(
+        'assets/images/create_icon.svg',
+        3,
+        context,
+      ));
+    } else {
+      // For guest users, skip My Tickets and go straight to Create
+      items.add(_buildBarItem(
+        'assets/images/create_icon.svg',
+        2,
+        context,
+      ));
+    }
+    
+    return items;
   }
 
 

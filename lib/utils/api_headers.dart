@@ -70,12 +70,12 @@ class ApiHeaders {
   /// 
   /// [useBearer] - Whether to include Bearer token in headers (default: true)
   /// [customHeaders] - Optional custom headers to add/override defaults
-  static Future<Map<String, String>> buildMediaHeaders([Map<String, String>? customHeaders, bool useBearer = true]) async {
+  static Future<Map<String, String>> buildMultipartHeaders([Map<String, String>? customHeaders, bool useBearer = true]) async {
     final headers = <String, String>{
       'Accept': 'application/json',
       'x-api-key': kAppToken,
-      // Note: Content-Type is NOT set for multipart uploads
-      // The http package will set it automatically with boundary
+      // Note: Content-Type is intentionally omitted for multipart uploads
+      // The http package will set it automatically with proper boundary
     };
 
     // Add Bearer token if available and useBearer is true

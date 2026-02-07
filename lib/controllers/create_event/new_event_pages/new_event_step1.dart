@@ -87,13 +87,25 @@ class _NewEventStep1State extends State<NewEventStep1> {
     _categories = getCategoriesByLanguage();
     
     // Initialize with existing data if any
-    _eventNameController.text = widget.eventData['eventName'] ?? '';
-    _locationController.text = widget.eventData['location'] ?? '';
-    _minimalAgeController.text = widget.eventData['minimalAge']?.toString() ?? '';
+    _eventNameController.text = widget.eventData['title'] ?? '';
+    _locationController.text = widget.eventData['address'] ?? '';
+    _minimalAgeController.text = widget.eventData['min_age']?.toString() ?? '';
     
     // Handle existing category data - find category by ID or slug if it exists
     final existingCategory = widget.eventData['category'];
-    if (existingCategory != null && _categories.isNotEmpty) {
+    final existingCategoryId = widget.eventData['category_id'];
+    
+    if (existingCategoryId != null && _categories.isNotEmpty) {
+      // Prioritize category_id if available
+      try {
+        _selectedCategory = _categories.firstWhere(
+          (cat) => cat.id == existingCategoryId,
+        );
+      } catch (e) {
+        _selectedCategory = _categories.first;
+      }
+    } else if (existingCategory != null && _categories.isNotEmpty) {
+      // Fallback to old category format
       if (existingCategory is Category) {
         _selectedCategory = existingCategory;
       } else if (existingCategory is int) {
@@ -115,8 +127,53 @@ class _NewEventStep1State extends State<NewEventStep1> {
       }
     }
     
-    _startTime = widget.eventData['startTime'];
-    _endTime = widget.eventData['endTime'];
+    // Handle existing start date/time data
+    final existingStartDate = widget.eventData['start_date'];
+    final existingStartTime = widget.eventData['start_time'];
+    if (existingStartDate != null && existingStartTime != null) {
+      try {
+        // Parse date (YYYY-MM-DD) and time (HH:mm) to create DateTime
+        final dateParts = existingStartDate.toString().split('-');
+        final timeParts = existingStartTime.toString().split(':');
+        if (dateParts.length == 3 && timeParts.length >= 2) {
+          _startTime = DateTime(
+            int.parse(dateParts[0]), // year
+            int.parse(dateParts[1]), // month
+            int.parse(dateParts[2]), // day
+            int.parse(timeParts[0]), // hour
+            int.parse(timeParts[1]), // minute
+          );
+        }
+      } catch (e) {
+        _startTime = null;
+      }
+    } else {
+      _startTime = widget.eventData['startTime']; // fallback to old format
+    }
+    
+    // Handle existing end date/time data
+    final existingEndDate = widget.eventData['end_date'];
+    final existingEndTime = widget.eventData['end_time'];
+    if (existingEndDate != null && existingEndTime != null) {
+      try {
+        // Parse date (YYYY-MM-DD) and time (HH:mm) to create DateTime
+        final dateParts = existingEndDate.toString().split('-');
+        final timeParts = existingEndTime.toString().split(':');
+        if (dateParts.length == 3 && timeParts.length >= 2) {
+          _endTime = DateTime(
+            int.parse(dateParts[0]), // year
+            int.parse(dateParts[1]), // month
+            int.parse(dateParts[2]), // day
+            int.parse(timeParts[0]), // hour
+            int.parse(timeParts[1]), // minute
+          );
+        }
+      } catch (e) {
+        _endTime = null;
+      }
+    } else {
+      _endTime = widget.eventData['endTime']; // fallback to old format
+    }
     _selectedTimezone = widget.eventData['timezone'] ?? 'GMT+2 (Israel)';
     _selectedCurrency = widget.eventData['currency'] ?? 'ILS (Israeli Shekel)';
     _selectedLanguage = widget.eventData['language'] ?? 'Hebrew';
@@ -141,12 +198,28 @@ class _NewEventStep1State extends State<NewEventStep1> {
   void _saveAndNext() {
     if (_formKey.currentState!.validate() && _isFormValid()) {
       // Save all form data
-      widget.onDataChanged('eventName', _eventNameController.text);
-      widget.onDataChanged('location', _locationController.text);
-      widget.onDataChanged('category', _selectedCategory);
-      widget.onDataChanged('minimalAge', _minimalAgeController.text.isNotEmpty ? int.tryParse(_minimalAgeController.text) : null);
-      widget.onDataChanged('startTime', _startTime);
-      widget.onDataChanged('endTime', _endTime);
+      widget.onDataChanged('title', _eventNameController.text);
+      widget.onDataChanged('address', _locationController.text);
+      widget.onDataChanged('category_id', _selectedCategory?.id);
+      widget.onDataChanged('min_age', _minimalAgeController.text.isNotEmpty ? int.tryParse(_minimalAgeController.text) : 0);
+      
+      // Save start date and time separately
+      if (_startTime != null) {
+        widget.onDataChanged('start_date', '${_startTime!.year.toString().padLeft(4, '0')}-${_startTime!.month.toString().padLeft(2, '0')}-${_startTime!.day.toString().padLeft(2, '0')}');
+        widget.onDataChanged('start_time', '${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}');
+      } else {
+        widget.onDataChanged('start_date', null);
+        widget.onDataChanged('start_time', null);
+      }
+      
+      // Save end date and time separately
+      if (_endTime != null) {
+        widget.onDataChanged('end_date', '${_endTime!.year.toString().padLeft(4, '0')}-${_endTime!.month.toString().padLeft(2, '0')}-${_endTime!.day.toString().padLeft(2, '0')}');
+        widget.onDataChanged('end_time', '${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}');
+      } else {
+        widget.onDataChanged('end_date', null);
+        widget.onDataChanged('end_time', null);
+      }
       widget.onDataChanged('timezone', _selectedTimezone);
       widget.onDataChanged('currency', _selectedCurrency);
       widget.onDataChanged('language', _selectedLanguage);

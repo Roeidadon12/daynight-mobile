@@ -235,13 +235,16 @@ class UserController with ChangeNotifier {
     _setLoading(true);
     try {
       Logger.info('Verifying OTP code for: $phoneNumber', 'UserController');
+      Logger.debug('OTP Code: $otpCode, Country Code: $countryCode', 'UserController');
 
       final response = await _authService.verifyOtpCode(phoneNumber, otpCode, countryCode: countryCode ?? '');
+      
       if (response != null) {
         Logger.info('OTP verification successful', 'UserController');
+        Logger.debug('OTP Response: $response', 'UserController');
         return response;
       } else {
-        Logger.warning('OTP verification failed', 'UserController');
+        Logger.warning('OTP verification failed - null response', 'UserController');
         return null;
       }
     } catch (e) {
@@ -268,14 +271,20 @@ class UserController with ChangeNotifier {
     _setLoading(true);
     try {
       Logger.info('Attempting SMS login for: $phoneNumber', 'UserController');
+      Logger.debug('SMS Login - Phone: $phoneNumber, Code: $verificationCode', 'UserController');
 
       final response = await _authService.verifyOtpCode(phoneNumber, verificationCode, countryCode: '');
 
+      Logger.debug('SMS Login Response: $response', 'UserController');
+
       if (response != null && response['status'] == 'success') {
+        Logger.info('SMS login response successful, processing user data...', 'UserController');
+        
         // If the response contains user data, create User object and set status
         if (response['user'] != null) {
           final userData = response['user'] as Map<String, dynamic>;
           _user = User.fromJson(userData);
+          Logger.debug('Created user from response data: ${_user?.fullName}', 'UserController');
         } else {
           // For now, create a minimal user object if no user data is returned
           _user = User(
@@ -286,22 +295,30 @@ class UserController with ChangeNotifier {
             thumbnail: null,
             address: null,
           );
+          Logger.debug('Created minimal user object', 'UserController');
         }
         
         _status = UserStatus.connected;
+        Logger.info('Set user status to connected', 'UserController');
         
         // Store the authentication data persistently
         if (response['token'] != null) {
+          Logger.info('Storing authentication token...', 'UserController');
           await _authService.storeToken(response['token'] as String);
+        } else {
+          Logger.warning('No token in SMS login response', 'UserController');
         }
+        
+        Logger.info('Storing user data and status...', 'UserController');
         await _authService.storeUser(_user!);
         await _authService.storeUserStatus(_status);
         
         _safeNotifyListeners();
-        Logger.info('SMS login successful', 'UserController');
+        Logger.info('SMS login successful - authentication data stored', 'UserController');
         return true;
       } else {
-        Logger.warning('SMS login failed', 'UserController');
+        Logger.warning('SMS login failed - invalid response or status', 'UserController');
+        Logger.debug('Failed response details: $response', 'UserController');
         return false;
       }
     } catch (e) {

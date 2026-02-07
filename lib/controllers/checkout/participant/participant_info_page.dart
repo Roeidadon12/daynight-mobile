@@ -8,6 +8,7 @@ import 'package:day_night/controllers/checkout/payment/payment_page.dart';
 import 'package:day_night/models/participant_data.dart';
 import 'package:day_night/models/ticket_item.dart';
 import 'package:day_night/models/purchase/payment_service_request.dart';
+import 'package:day_night/services/payment_service.dart';
 import 'package:flutter/material.dart';
 import '../../../utils/logger.dart';
 
@@ -524,8 +525,22 @@ class _ParticipantInfoPageState extends State<ParticipantInfoPage> {
       // Create payment service request with all participant data
       final paymentRequest = _createPaymentServiceRequest();
       
-      // TODO: Call your payment service here
-      // await yourPaymentService.processPayment(paymentRequest);
+      // Process payment using the payment service
+      final paymentService = PaymentService();
+      
+      // Validate payment request first
+      if (!paymentService.validatePaymentRequest(paymentRequest)) {
+        throw Exception('Invalid payment request data');
+      }
+      
+      // Process the payment
+      final paymentResponse = await paymentService.processPayment(paymentRequest);
+      
+      if (paymentResponse == null) {
+        throw Exception('Payment processing failed');
+      }
+      
+      Logger.info('Payment processed successfully: ${paymentResponse['payment_id'] ?? 'Unknown ID'}', 'ParticipantInfoPage');
       
       // For debugging, you can print the payment request form data:
       Logger.debug('Payment request: ${paymentRequest.toFormData()}', 'ParticipantInfoPage');

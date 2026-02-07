@@ -125,7 +125,7 @@ class EventInformation {
       id: json['id'],
       title: json['title'],
       description: json['description'],
-      enDescription: json['en_description'],
+      enDescription: json['description'],
       eventCategoryId: json['event_category_id'],
       name: json['name'],
       latitude: json['latitude']?.toDouble(),

@@ -33,12 +33,13 @@ enum ApiCommands {
   getCategories('/categories'),
   getEvents('/events'),
   getEventDetails('/event/details'),
-  createEvent('/event-management/store'),
+  createEvent('/event-management/store/'),
   updateEvent('/events'),
   deleteEvent('/events'),
   getLanguages('/languages'),
   getSendOtp('/send-otp'),
-  verifyOtp('/verify-otp');
+  verifyOtp('/verify-otp'),
+  processPayment('/payment/process');
 
   final String value;
   const ApiCommands(this.value);

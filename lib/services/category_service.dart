@@ -2,6 +2,7 @@ import 'api_service.dart';
 import '../constants.dart';
 import '../models/category.dart';
 import '../models/enums.dart';
+import '../utils/api_headers.dart';
 import '../utils/logger.dart';
 
 class CategoryService {
@@ -14,6 +15,7 @@ class CategoryService {
       endpoint: ApiCommands.getCategories.value,
       method: 'GET',
       queryParams: languageId != null ? {'language_id': languageId.toString()} : null,
+      headers: await ApiHeaders.buildPublic(),
     );
     try {
       if (!response.containsKey('categories')) {

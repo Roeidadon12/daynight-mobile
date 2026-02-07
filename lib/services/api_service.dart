@@ -33,6 +33,81 @@ class ApiService {
     );
   }
 
+  /// Makes an HTTP POST request with multipart/form-data.
+  Future<Map<String, dynamic>> postMultipart(
+    String endpoint, {
+    Map<String, String>? fields,
+    Map<String, File>? files,
+    Map<String, String>? headers,
+  }) async {
+    try {
+      final cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+      final cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+      final url = '$cleanBaseUrl/$cleanEndpoint';
+      
+      final uri = Uri.parse(url);
+      Logger.debug('Making multipart request to: $uri', 'ApiService');
+      
+      // Create multipart request
+      final request = http.MultipartRequest('POST', uri);
+      
+      // Add headers (excluding Content-Type as it will be set automatically)
+      final allHeaders = {...defaultHeaders, ...?headers};
+      allHeaders.remove('Content-Type'); // Remove to let http package handle multipart boundary
+      request.headers.addAll(allHeaders);
+      
+      // Add form fields
+      if (fields != null) {
+        request.fields.addAll(fields);
+      }
+      
+      // Add files
+      if (files != null) {
+        for (final entry in files.entries) {
+          final file = entry.value;
+          final multipartFile = await http.MultipartFile.fromPath(
+            entry.key,
+            file.path,
+          );
+          request.files.add(multipartFile);
+        }
+      }
+      
+      // Generate curl command for debugging
+      if (kEnableDebugCurlOutput) {
+        final curlCommand = _generateMultipartCurlCommand(
+          uri: uri,
+          headers: allHeaders,
+          fields: fields ?? {},
+          files: files ?? {},
+        );
+        stderr.writeln('');
+        stderr.writeln('=== COPY THIS MULTIPART CURL COMMAND ===');
+        stderr.writeln(curlCommand);
+        stderr.writeln('=== END CURL COMMAND ===');
+        stderr.writeln('');
+      }
+      
+      // Send request
+      final streamedResponse = await request.send().timeout(timeout);
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == HttpStatus.ok) {
+        return json.decode(response.body) as Map<String, dynamic>;
+      } else {
+        Logger.error('Multipart request failed with status: ${response.statusCode}', 'ApiService');
+        Logger.error('Response body: ${response.body}', 'ApiService');
+        throw ServerException('Request failed with status: ${response.statusCode}');
+      }
+    } on SocketException catch (e) {
+      Logger.error('Socket error in multipart request: $e', 'ApiService');
+      rethrow;
+    } catch (e) {
+      Logger.error('Error making multipart request: $e', 'ApiService');
+      rethrow;
+    }
+  }
+
   /// Makes an HTTP POST request.
   Future<Map<String, dynamic>> post(
     String endpoint, {
@@ -126,6 +201,37 @@ class ApiService {
       default:
         throw BadRequestException('Unsupported HTTP method: $method');
     }
+  }
+
+  /// Generates a curl command for debugging multipart requests.
+  String _generateMultipartCurlCommand({
+    required Uri uri,
+    required Map<String, String> headers,
+    required Map<String, String> fields,
+    required Map<String, File> files,
+  }) {
+    final buffer = StringBuffer();
+    buffer.write('curl -X POST');
+    
+    // Add URL
+    buffer.write(' \\\n  "$uri"');
+    
+    // Add headers
+    for (final entry in headers.entries) {
+      buffer.write(' \\\n  -H "${entry.key}: ${entry.value}"');
+    }
+    
+    // Add form fields
+    for (final entry in fields.entries) {
+      buffer.write(' \\\n  -F "${entry.key}=${entry.value}"');
+    }
+    
+    // Add files
+    for (final entry in files.entries) {
+      buffer.write(' \\\n  -F "${entry.key}=@${entry.value.path}"');
+    }
+    
+    return buffer.toString();
   }
 
   /// Generates a curl command equivalent to the HTTP request for debugging.

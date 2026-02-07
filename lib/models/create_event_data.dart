@@ -165,7 +165,6 @@ class CreateEventData {
       'endTime': endTime,
       'capacity': capacity,
       'description': description,
-      'en_description': enDescription,
       'additionalInfo': additionalInfo,
       'image': image,
       'isPublic': isPublic,
@@ -221,8 +220,7 @@ class CreateEventData {
       'start_time': startTimeStr ?? '', // string - Format = 21:00
       'end_date': endDateStr ?? '', // string - Format = 2024-11-29
       'end_time': endTimeStr ?? '', // string - Format = 08:00
-      'end_date_time_status':
-          1, // integer - 1=show end date time, 0=hide end date time
+      'end_date_time_status': 1, // integer - 1=show end date time, 0=hide end date time
       // Multiple date fields (when date_type=multiple) - empty arrays for single events
       'm_start_date': [], // array - Format = 2025-12-12
       'm_start_time': [], // array - Format = 12:10
@@ -233,15 +231,15 @@ class CreateEventData {
       'address': location, // string
       'map_address': location, // string - same as address for now
       // Language-specific fields (English as default)
-      'en_title': eventName, // string - required for default language
-      'en_category_id':
+      'title': eventName, // string - required for default language
+      'category_id':
           category?.id ?? 1, // integer - required for default language
-      'en_country': 'Israel', // string - required for default language
-      'en_description':
+      'country': 'Israel', // string - required for default language
+      'description':
           description ?? '', // string - required for default language
-      'en_refund_policy': '', // string - optional
-      'en_meta_keywords': '', // string - optional
-      'en_meta_description': '', // string - optional
+      'refund_policy': '', // string - optional
+      'meta_keywords': '', // string - optional
+      'meta_description': '', // string - optional
       // Tracking fields (optional)
       'pixel_id':
           additionalData['trackingField1'] ?? '', // string - Meta pixel id
@@ -398,9 +396,6 @@ class CreateEventData {
         break;
       case 'description':
         description = value as String?;
-        break;
-      case 'en_description':
-        enDescription = value as String?;
         break;
       case 'additionalInfo':
         additionalInfo = value as String?;

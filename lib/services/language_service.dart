@@ -1,3 +1,5 @@
+import 'package:day_night/utils/api_headers.dart';
+
 import 'api_service.dart';
 import '../constants.dart';
 import '../models/language.dart';
@@ -31,6 +33,7 @@ class LanguageService {
         final response = await api.request(
           endpoint: ApiCommands.getLanguages.value,
           method: 'GET',
+          headers: await ApiHeaders.buildPublic(),
         );
 
         if (!response.containsKey('languages')) {

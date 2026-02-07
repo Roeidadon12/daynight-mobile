@@ -158,9 +158,9 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> with Code
     final fullPhoneNumber = '${widget.countryCode}${widget.phoneNumber}';
 
     try {
-      // OTP verification successful, proceed with registration or login
-      if (widget.isRegistration) {
-        // For login - use loginWithSMS to properly authenticate the user
+      // Handle login vs registration flows correctly
+      if (!widget.isRegistration) {
+        // For LOGIN - use loginWithSMS to properly authenticate the user
         final success = await userController.loginWithSMS(fullPhoneNumber, otpCode);
 
         if (success) {

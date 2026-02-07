@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'config/config_manager.dart';
+import 'models/language.dart';
 
 // Access configuration values through ConfigManager
 final config = ConfigManager.get();
@@ -12,6 +13,9 @@ String get kLoginBaseUrl => config.loginBaseUrl;
 String get kCoverImageBaseUrl => config.coverImageBaseUrl;
 String get kOrganizerImageBaseUrl => config.organizerImageBaseUrl;
 int kAppLanguageId = config.defaultLanguageId; // Can be updated at runtime
+
+// Global Languages List - accessible throughout the app
+List<Language> kAppLanguages = [];
 
 // Authentication
 String get kAppToken => config.appToken; // Bearer token for API requests

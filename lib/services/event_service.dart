@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
 import 'api_service.dart';
 import '../constants.dart';
 import '../utils/logger.dart';
@@ -18,10 +16,15 @@ class EventService {
   /// The API service instance used for making HTTP requests.
   final ApiService api;
 
+  /// The API service instance used for event management operations.
+  final ApiService dashboardApi;
+
   /// Creates a new [EventService] instance.
   ///
   /// Initializes the [ApiService] with the base URL from configuration.
-  EventService() : api = ApiService(baseUrl: kApiBaseUrl);
+  EventService()
+    : api = ApiService(baseUrl: kApiBaseUrl),
+      dashboardApi = ApiService(baseUrl: kApiStorePath);
 
   /// Fetches events filtered by date type.
   ///
@@ -69,7 +72,10 @@ class EventService {
     }
 
     final eventService = EventService();
-    final events = await eventService.getEventsByCriteria(kAppLanguageId, searchResult);
+    final events = await eventService.getEventsByCriteria(
+      kAppLanguageId,
+      searchResult,
+    );
 
     return events;
   }
@@ -87,6 +93,7 @@ class EventService {
     final response = await api.request(
       endpoint: ApiCommands.getEvents.value,
       method: 'GET',
+      headers: await ApiHeaders.buildPublic(),
     );
 
     return getEvents(response);
@@ -105,6 +112,7 @@ class EventService {
         'max_price': maxPrice.toString(),
         'currency': currency.toString().split('.').last,
       },
+      headers: await ApiHeaders.buildPublic(),
     );
 
     final events = getEvents(response);
@@ -143,6 +151,7 @@ class EventService {
         'end_price': rangeToPrice.toString(),
         'language_id': languageId.toString(),
       },
+      headers: await ApiHeaders.buildPublic(),
     );
 
     final events = getEvents(response);
@@ -172,13 +181,17 @@ class EventService {
         'end_date': endDateStr,
         'language_id': languageId.toString(),
       },
+      headers: await ApiHeaders.buildPublic(),
     );
 
     final events = getEvents(response);
     return events;
   }
 
-  Future<List<Event>> getEventsByCategory(int languageId, int categoryId) async {
+  Future<List<Event>> getEventsByCategory(
+    int languageId,
+    int categoryId,
+  ) async {
     final response = await api.request(
       endpoint: ApiCommands.getEvents.value,
       method: 'GET',
@@ -186,6 +199,7 @@ class EventService {
         'category_id': categoryId.toString(),
         'language_id': languageId.toString(),
       },
+      headers: await ApiHeaders.buildPublic(),
     );
 
     final events = getEvents(response);
@@ -204,6 +218,7 @@ class EventService {
       endpoint: ApiCommands.getEvents.value,
       method: 'GET',
       queryParams: cleanedCriteria,
+      headers: await ApiHeaders.buildPublic(),
     );
 
     final events = getEvents(response);
@@ -218,6 +233,7 @@ class EventService {
         'language_id': languageId.toString(),
         'event_id': eventId.toString(),
       },
+      headers: await ApiHeaders.buildPublic(),
     );
 
     try {
@@ -227,7 +243,10 @@ class EventService {
       }
 
       final eventDetails = EventDetails.fromJson(response);
-      Logger.info('Successfully fetched event details with ID $eventId', 'EventService');
+      Logger.info(
+        'Successfully fetched event details with ID $eventId',
+        'EventService',
+      );
       return eventDetails;
     } catch (e) {
       Logger.error('Error parsing event details: $e', 'EventService');
@@ -243,33 +262,44 @@ class EventService {
   /// Returns the created event's ID if successful, null if failed.
   ///
   /// Throws [ServerException] if the request fails with a server error.
-  Future<int?> createEvent(Map<String, dynamic> eventData, Map<String, dynamic> additionalFormData) async {
+  Future<int?> createEvent(
+    Map<String, dynamic> eventData,
+    Map<String, dynamic> additionalFormData,
+  ) async {
     try {
-      Logger.info('Creating event with data: ${eventData.keys.join(', ')}', 'EventService');
-      
+      Logger.info(
+        'Creating event with data: ${eventData.keys.join(', ')}',
+        'EventService',
+      );
+
       // Check if there's an image file to upload
       String? imagePath = eventData['cover_image'] as String?;
       File? imageFile;
-      
+
       if (imagePath != null && imagePath.isNotEmpty && imagePath != '') {
         imageFile = File(imagePath);
         if (!await imageFile.exists()) {
-          Logger.warning('Image file does not exist: $imagePath', 'EventService');
+          Logger.warning(
+            'Image file does not exist: $imagePath',
+            'EventService',
+          );
           imageFile = null;
         }
       }
-      
+
       Map<String, dynamic> response;
-      
+
       if (imageFile != null) {
         // Use multipart request for image upload
         response = await _createEventWithImage(eventData, imageFile);
       } else {
         // Use regular JSON request if no image
         final dataWithoutImage = Map<String, dynamic>.from(eventData);
-        dataWithoutImage.remove('cover_image'); // Remove image path from JSON data
-        
-        response = await api.request(
+        dataWithoutImage.remove(
+          'cover_image',
+        ); // Remove image path from JSON data
+
+        response = await dashboardApi.request(
           endpoint: ApiCommands.createEvent.value,
           method: 'POST',
           body: dataWithoutImage,
@@ -280,165 +310,93 @@ class EventService {
       if (response.containsKey('status') && response['status'] == 'success') {
         final eventId = response['event_id'] as int?;
         if (eventId != null) {
-          Logger.info('Successfully created event with ID: $eventId', 'EventService');
+          Logger.info(
+            'Successfully created event with ID: $eventId',
+            'EventService',
+          );
           return eventId;
         }
       }
-      
-      Logger.error('Failed to create event: Invalid response format', 'EventService');
+
+      Logger.error(
+        'Failed to create event: Invalid response format',
+        'EventService',
+      );
       return null;
     } catch (e) {
       Logger.error('Error creating event: $e', 'EventService');
       return null;
     }
   }
-  
+
   /// Helper method to create event with image using multipart/form-data
-  Future<Map<String, dynamic>> _createEventWithImage(Map<String, dynamic> eventData, File imageFile) async {
+  Future<Map<String, dynamic>> _createEventWithImage(
+    Map<String, dynamic> eventData,
+    File imageFile,
+  ) async {
     try {
-      final cleanEndpoint = ApiCommands.createEvent.value.startsWith('/') 
-          ? ApiCommands.createEvent.value.substring(1) 
-          : ApiCommands.createEvent.value;
-      final cleanBaseUrl = kApiStorePath.endsWith('/') 
-          ? kApiStorePath.substring(0, kApiStorePath.length - 1) 
-          : kApiStorePath;
-      final url = '$cleanBaseUrl/$cleanEndpoint';
-      final uri = Uri.parse(url);
-      
-      Logger.info('Creating multipart request to: $uri', 'EventService');
-      
-      // Create multipart request
-      final request = http.MultipartRequest('POST', uri);
-      
-      // Add headers
-      final headers = await ApiHeaders.buildMediaHeaders(null, true);
-      request.headers.addAll(headers);
-      
-      // Add all text fields
+      // Prepare form fields (exclude cover_image as it will be added as file)
+      final formFields = <String, String>{};
       eventData.forEach((key, value) {
         if (key != 'cover_image' && value != null) {
-          request.fields[key] = value.toString();
+          formFields[key] = value.toString();
         }
       });
-      
-      // Add image file
-      final imageStream = http.ByteStream(imageFile.openRead());
-      final imageLength = await imageFile.length();
-      final multipartFile = http.MultipartFile(
-        'cover_image', // The field name expected by the server
-        imageStream,
-        imageLength,
-        filename: imageFile.path.split('/').last,
+
+      Logger.info(
+        'Creating event with image using dashboardApi',
+        'EventService',
       );
-      request.files.add(multipartFile);
-      
-      // Generate cURL command for debugging if enabled
-      if (kEnableDebugCurlOutput) {
-        final curlCommand = _generateMultipartCurlCommand(
-          uri: uri,
-          headers: request.headers,
-          fields: request.fields,
-          imageFile: imageFile,
-        );
-        // Output to stderr for clean copy-paste without Flutter prefixes
-        stderr.writeln('');
-        stderr.writeln('=== COPY THIS MULTIPART CURL COMMAND ===');
-        stderr.writeln(curlCommand);
-        stderr.writeln('=== END CURL COMMAND ===');
-        stderr.writeln('');
-      }
-      
-      Logger.info('Sending multipart request with ${request.fields.length} fields and ${request.files.length} files', 'EventService');
-      
-      // Send request
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
-      
-      Logger.info('Multipart request completed with status: ${response.statusCode}', 'EventService');
-      
-      if (response.statusCode == 200) {
-        return Map<String, dynamic>.from(
-          const JsonDecoder().convert(response.body) as Map
-        );
-      } else {
-        throw Exception('Request failed with status: ${response.statusCode}');
-      }
+
+      final response = await dashboardApi.postMultipart(
+        ApiCommands.createEvent.value,
+        fields: formFields,
+        files: {'cover_image': imageFile},
+        headers: await ApiHeaders.buildMultipartHeaders(null, true),
+      );
+
+      Logger.info(
+        'Event creation request completed successfully',
+        'EventService',
+      );
+      return response;
     } catch (e) {
-      Logger.error('Error in multipart request: $e', 'EventService');
+      Logger.error('Error in event creation with image: $e', 'EventService');
       rethrow;
     }
   }
 
-  /// Generates a curl command equivalent to the multipart HTTP request for debugging.
-  String _generateMultipartCurlCommand({
-    required Uri uri,
-    required Map<String, String> headers,
-    required Map<String, String> fields,
-    required File imageFile,
-  }) {
-    final buffer = StringBuffer();
-    
-    // Start with curl command and method
-    buffer.write('curl -X POST');
-    
-    // Add URL
-    buffer.write(' \\\n  "$uri"');
-    
-    // Add headers (excluding Content-Type for multipart as curl handles it)
-    headers.forEach((key, value) {
-      if (key.toLowerCase() != 'content-type') {
-        buffer.write(' \\\n  -H "$key: $value"');
+  List<Event> getEvents(Map<String, dynamic>? response) {
+    try {
+      if (response == null) {
+        Logger.error('Response is null', 'EventService');
+        throw Exception('Response is null');
       }
-    });
-    
-    // Add form fields
-    fields.forEach((key, value) {
-      // Escape quotes and special characters
-      final escapedValue = value.replaceAll('"', '\\"').replaceAll('\$', '\\\$');
-      buffer.write(' \\\n  -F "$key=$escapedValue"');
-    });
-    
-    // Add image file
-    final filename = imageFile.path.split('/').last;
-    buffer.write(' \\\n  -F "cover_image=@${imageFile.path};filename=$filename"');
-    
-    return buffer.toString();
+
+      if (!response.containsKey('events')) {
+        Logger.error('Response missing events key', 'EventService');
+        throw Exception('Response missing events key');
+      }
+
+      // Parse the entire response into EventsResponse
+      final eventsResponse = EventsResponse.fromJson(response);
+
+      // Get the list of events from the data property
+      final events = eventsResponse.events.data;
+
+      if (events.isEmpty) {
+        Logger.warning('No events returned from API', 'EventService');
+      } else {
+        Logger.info(
+          'Successfully fetched ${events.length} events',
+          'EventService',
+        );
+      }
+      return events;
+    } catch (e) {
+      Logger.error('Error parsing events: $e', 'EventService');
+    }
+
+    return [];
   }
-
 }
-
-List<Event> getEvents(Map<String, dynamic>? response) {
-  try {
-
-    if (response == null) {
-      Logger.error('Response is null', 'EventService');
-      throw Exception('Response is null');
-    }
-
-    if (!response.containsKey('events')) {
-      Logger.error('Response missing events key', 'EventService');
-      throw Exception('Response missing events key');
-    }
-
-    // Parse the entire response into EventsResponse
-    final eventsResponse = EventsResponse.fromJson(response);
-
-    // Get the list of events from the data property
-    final events = eventsResponse.events.data;
-
-    if (events.isEmpty) {
-      Logger.warning('No events returned from API', 'EventService');
-    } else {
-      Logger.info(
-        'Successfully fetched ${events.length} events',
-        'EventService',
-      );
-    }
-    return events;
-  } catch (e) {
-    Logger.error('Error parsing events: $e', 'EventService');
-  }  
-  
-  return [];
-}
-

@@ -147,14 +147,14 @@ class _NewEventStep2State extends State<NewEventStep2> {
 
     // Save main description-related fields to eventData
     widget.onDataChanged('description', description);
-    widget.onDataChanged('en_description', description);
+    widget.onDataChanged('description', description);
     
     // Debug-only fields (not saved to model)
     widget.onDataChanged('descriptionHtml', htmlDescription);
     widget.onDataChanged('descriptionRaw', _descriptionController.text);
     
     // Debug log to verify all fields are being set
-    Logger.debug('Saving description data - description: $description, en_description: $description', 'NewEventStep2');
+    Logger.debug('Saving description data - description: $description, description: $description', 'NewEventStep2');
   }
 
   void _saveAndNext() {
