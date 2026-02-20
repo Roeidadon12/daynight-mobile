@@ -70,6 +70,66 @@ class _NewEventStep3State extends State<NewEventStep3> {
     return _organizerNameController.text.trim().isNotEmpty && _termsAccepted && !_isCreatingEvent;
   }
 
+  /// Populate empty non-default language fields with default language values
+  void _populateEmptyLanguageFields(CreateEventData eventData) {
+    // Determine default language (assume 'he' is default, can be made configurable)
+    const defaultLang = 'he';
+    final supportedLanguages = ['he', 'en']; // Add more languages as needed
+    
+    // For each non-default language
+    for (final lang in supportedLanguages) {
+      if (lang == defaultLang) continue; // Skip default language
+      
+      // Get field names based on language code
+      final isEnglish = lang == 'en';
+      
+      if (isEnglish) {
+        // Title
+        if (eventData.enTitle == null || eventData.enTitle!.isEmpty) {
+          eventData.enTitle = eventData.heTitle;
+        }
+        
+        // Category ID
+        if (eventData.enCategoryId == null) {
+          eventData.enCategoryId = eventData.heCategoryId;
+        }
+        
+        // Description (prioritize HTML, then text, then raw)
+        if ((eventData.enDescriptionHtml == null || eventData.enDescriptionHtml!.isEmpty) &&
+            (eventData.enDescriptionText == null || eventData.enDescriptionText!.isEmpty)) {
+          eventData.enDescriptionHtml = eventData.heDescriptionHtml;
+          eventData.enDescriptionText = eventData.heDescription;
+          eventData.enDescriptionRaw = eventData.heDescriptionRaw;
+        }
+        
+        // Country
+        if (eventData.enCountry == null || eventData.enCountry!.isEmpty) {
+          eventData.enCountry = eventData.heCountry;
+        }
+        
+        // Refund Policy
+        if (eventData.enRefundPolicy == null || eventData.enRefundPolicy!.isEmpty) {
+          eventData.enRefundPolicy = eventData.heRefundPolicy;
+        }
+        
+        // Meta Keywords
+        if (eventData.enMetaKeywords == null || eventData.enMetaKeywords!.isEmpty) {
+          eventData.enMetaKeywords = eventData.heMetaKeywords;
+        }
+        
+        // Meta Description
+        if (eventData.enMetaDescription == null || eventData.enMetaDescription!.isEmpty) {
+          eventData.enMetaDescription = eventData.heMetaDescription;
+        }
+      }
+    }
+    
+    print('\n===== After Populating Empty Fields =====');
+    print('EN Title: "${eventData.enTitle}" (from HE: "${eventData.heTitle}")');
+    print('EN Category ID: ${eventData.enCategoryId} (from HE: ${eventData.heCategoryId})');
+    print('EN Description HTML length: ${eventData.enDescriptionHtml?.length ?? 0} (from HE: ${eventData.heDescriptionHtml?.length ?? 0})');
+  }
+
 
 
   void _saveAndComplete() {
@@ -128,6 +188,18 @@ class _NewEventStep3State extends State<NewEventStep3> {
       // Create the event data object
       final createEventData = CreateEventData.fromMap(widget.eventData);
       
+      // Populate empty non-default language fields with default language values
+      _populateEmptyLanguageFields(createEventData);
+      
+      // Debug: Show the CreateEventData object with language fields
+      print('===== CreateEventData Object =====');
+      print(createEventData.toString());
+      print('\n===== Language-Specific Fields =====');
+      final langFields = createEventData.getLanguageFields();
+      langFields.forEach((key, value) {
+        print('  $key: $value');
+      });
+      
       // Prepare additional form data
       final additionalData = {
         'urlSuffix': _urlSuffixController.text,
@@ -139,21 +211,33 @@ class _NewEventStep3State extends State<NewEventStep3> {
         'trackingField4': _trackingField4Controller.text,
       };
       
-      // Convert to API format
+      // Convert to API format - pass the entire eventData map to ensure all fields are available
       final apiData = createEventData.toApiJson(additionalData);
+      
+      // Log the data being sent to help debug
+      print('\n===== API Data Being Sent =====');
+      print('Fields: ${apiData.keys.length} total');
+      print('Event titles: he="${apiData['he_title']}" / en="${apiData['en_title']}"');
+      print('Category IDs: he=${apiData['he_category_id']}, en=${apiData['en_category_id']}');
+      print('Descriptions: he=${(apiData['he_description'] as String?)?.length ?? 0} chars, en=${(apiData['en_description'] as String?)?.length ?? 0} chars');
+      print('Start date/time: ${apiData['start_date']} ${apiData['start_time']}');
+      print('End date/time: ${apiData['end_date']} ${apiData['end_time']}');
+      print('Address: ${apiData['address']}');
+      print('Image path: ${apiData['cover_image']}');
+      print('Min age: ${apiData['min_age']}');
+      print('Slug: ${apiData['slug']}');
       
       // Create the event via API
       final eventService = EventService();
-      final eventId = await eventService.createEvent(apiData, additionalData);
+      final success = await eventService.createEvent(apiData, additionalData);
       
       if (mounted) {
         setState(() {
           _isCreatingEvent = false;
         });
         
-        if (eventId != null) {
-          // Success - save the event ID and proceed to success page
-          widget.onDataChanged('eventId', eventId);
+        if (success) {
+          // Success - proceed to success page
           widget.onComplete();
         } else {
           // Failed to create event
@@ -161,6 +245,7 @@ class _NewEventStep3State extends State<NewEventStep3> {
         }
       }
     } catch (e) {
+      print('Error creating event: $e');
       if (mounted) {
         setState(() {
           _isCreatingEvent = false;

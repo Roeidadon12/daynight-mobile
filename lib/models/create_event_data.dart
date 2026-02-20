@@ -78,6 +78,48 @@ class CreateEventData {
   DateTime? createdAt;
   DateTime? updatedAt;
   String? status; // 'draft', 'published', etc.
+  
+  // Language-specific fields (Hebrew)
+  String? heTitle;
+  int? heCategoryId;
+  String? heDescription;
+  String? heDescriptionHtml;
+  String? heDescriptionRaw;
+  String? heCountry;
+  String? heRefundPolicy;
+  String? heMetaKeywords;
+  String? heMetaDescription;
+  
+  // Language-specific fields (English)
+  String? enTitle;
+  int? enCategoryId;
+  String? enDescriptionText;
+  String? enDescriptionHtml;
+  String? enDescriptionRaw;
+  String? enCountry;
+  String? enRefundPolicy;
+  String? enMetaKeywords;
+  String? enMetaDescription;
+  
+  // Date/Time string formats (for API)
+  String? startDateStr;
+  String? startTimeStr;
+  String? endDateStr;
+  String? endTimeStr;
+  
+  // Localization settings
+  String? timezone;
+  String? currency;
+  String? language;
+  
+  // Step 3 fields
+  bool? isPrivateEvent;
+  String? urlSuffix;
+  String? organizerName;
+  String? trackingField1;
+  String? trackingField2;
+  String? trackingField3;
+  String? trackingField4;
 
   CreateEventData({
     this.eventName = '',
@@ -99,6 +141,42 @@ class CreateEventData {
     this.createdAt,
     this.updatedAt,
     this.status = 'draft',
+    // Language-specific fields
+    this.heTitle,
+    this.heCategoryId,
+    this.heDescription,
+    this.heDescriptionHtml,
+    this.heDescriptionRaw,
+    this.heCountry,
+    this.heRefundPolicy,
+    this.heMetaKeywords,
+    this.heMetaDescription,
+    this.enTitle,
+    this.enCategoryId,
+    this.enDescriptionText,
+    this.enDescriptionHtml,
+    this.enDescriptionRaw,
+    this.enCountry,
+    this.enRefundPolicy,
+    this.enMetaKeywords,
+    this.enMetaDescription,
+    // Date/Time formats
+    this.startDateStr,
+    this.startTimeStr,
+    this.endDateStr,
+    this.endTimeStr,
+    // Localization
+    this.timezone,
+    this.currency,
+    this.language,
+    // Step 3 fields
+    this.isPrivateEvent,
+    this.urlSuffix,
+    this.organizerName,
+    this.trackingField1,
+    this.trackingField2,
+    this.trackingField3,
+    this.trackingField4,
   }) : ticketTypes = ticketTypes ?? [];
 
   /// Check if Step 1 (Basic Info) is valid
@@ -159,8 +237,10 @@ class CreateEventData {
     return {
       'eventName': eventName,
       'location': location,
+      'address': location, // Add alias for backward compatibility
       'category': category,
       'minimalAge': minimalAge,
+      'min_age': minimalAge, // Add alias for backward compatibility
       'startTime': startTime,
       'endTime': endTime,
       'capacity': capacity,
@@ -175,51 +255,87 @@ class CreateEventData {
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'status': status,
+      // Language-specific fields (Hebrew)
+      'he_title': heTitle,
+      'he_category_id': heCategoryId,
+      'he_description': heDescription,
+      'he_descriptionHtml': heDescriptionHtml,
+      'he_descriptionRaw': heDescriptionRaw,
+      'he_country': heCountry,
+      'he_refund_policy': heRefundPolicy,
+      'he_meta_keywords': heMetaKeywords,
+      'he_meta_description': heMetaDescription,
+      // Language-specific fields (English)
+      'en_title': enTitle,
+      'en_category_id': enCategoryId,
+      'en_description': enDescriptionText,
+      'en_descriptionHtml': enDescriptionHtml,
+      'en_descriptionRaw': enDescriptionRaw,
+      'en_country': enCountry,
+      'en_refund_policy': enRefundPolicy,
+      'en_meta_keywords': enMetaKeywords,
+      'en_meta_description': enMetaDescription,
+      // Date/Time string formats
+      'start_date': startDateStr,
+      'start_time': startTimeStr,
+      'end_date': endDateStr,
+      'end_time': endTimeStr,
+      // Localization
+      'timezone': timezone,
+      'currency': currency,
+      'language': language,
+      // Step 3 fields
+      'isPrivateEvent': isPrivateEvent,
+      'urlSuffix': urlSuffix,
+      'organizerName': organizerName,
+      'trackingField1': trackingField1,
+      'trackingField2': trackingField2,
+      'trackingField3': trackingField3,
+      'trackingField4': trackingField4,
     };
   }
 
   /// Convert to JSON for API submission
   Map<String, dynamic> toApiJson(Map<String, dynamic> additionalData) {
-    // Format dates and times
-    String? startDateStr = startTime?.toIso8601String().split(
-      'T',
-    )[0]; // Format: 2024-05-13
-    String? startTimeStr = startTime != null
-        ? '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}'
-        : null; // Format: 21:00
-    String? endDateStr = endTime?.toIso8601String().split(
-      'T',
-    )[0]; // Format: 2024-11-29
-    String? endTimeStr = endTime != null
-        ? '${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}'
-        : null; // Format: 08:00
+    // Use saved date/time strings if available, otherwise format from DateTime objects
+    final startDateStrFinal = startDateStr ?? 
+        startTime?.toIso8601String().split('T')[0]; // Format: 2024-05-13
+    final startTimeStrFinal = startTimeStr ?? 
+        (startTime != null
+            ? '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}'
+            : null); // Format: 21:00
+    final endDateStrFinal = endDateStr ?? 
+        endTime?.toIso8601String().split('T')[0]; // Format: 2024-11-29
+    final endTimeStrFinal = endTimeStr ?? 
+        (endTime != null
+            ? '${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}'
+            : null); // Format: 08:00
 
     // Get additional fields from form data
-    String slug = additionalData['urlSuffix'] ?? '';
+    String slug = urlSuffix ?? additionalData['urlSuffix'] ?? '';
     if (slug.isEmpty) {
       // Generate slug from event name if urlSuffix is empty
-      slug = eventName
+      slug = (heTitle ?? enTitle ?? eventName)
           .toLowerCase()
           .replaceAll(RegExp(r'[^a-z0-9\s-]'), '')
           .replaceAll(RegExp(r'\s+'), '-')
           .trim();
     }
 
-    return {
+    // Build base API data
+    final apiData = {
       // Required fields
+      'status': 1, // integer - Event status
       'cover_image': image ?? '', // file - Event cover image
-      'min_age':
-          minimalAge ?? 0, // integer - Minimum age of participant, min value 0
-      'status': isPublic ? 1 : 0, // integer - 1=active, 0=deactive
-      'countdown_status':
-          1, // integer - Event start date countdown status 1=active, 0=deactive
+      'min_age': minimalAge ?? 0, // integer - Minimum age of participant, min value 0
+      'countdown_status': 1, // integer - Event start date countdown status 1=active, 0=deactive
       'is_featured': 'no', // string - Values = yes/no
       'date_type': 'single', // string - Values = single/multiple
       // Single date fields (when date_type=single)
-      'start_date': startDateStr ?? '', // string - Format = 2024-05-13
-      'start_time': startTimeStr ?? '', // string - Format = 21:00
-      'end_date': endDateStr ?? '', // string - Format = 2024-11-29
-      'end_time': endTimeStr ?? '', // string - Format = 08:00
+      'start_date': startDateStrFinal ?? '', // string - Format = 2024-05-13
+      'start_time': startTimeStrFinal ?? '', // string - Format = 21:00
+      'end_date': endDateStrFinal ?? '', // string - Format = 2024-11-29
+      'end_time': endTimeStrFinal ?? '', // string - Format = 08:00
       'end_date_time_status': 1, // integer - 1=show end date time, 0=hide end date time
       // Multiple date fields (when date_type=multiple) - empty arrays for single events
       'm_start_date': [], // array - Format = 2025-12-12
@@ -230,26 +346,39 @@ class CreateEventData {
       'map_status': 1, // integer - 1=Enable, 0=Disable
       'address': location, // string
       'map_address': location, // string - same as address for now
-      // Language-specific fields (English as default)
-      'title': eventName, // string - required for default language
-      'category_id':
-          category?.id ?? 1, // integer - required for default language
-      'country': 'Israel', // string - required for default language
-      'description':
-          description ?? '', // string - required for default language
-      'refund_policy': '', // string - optional
-      'meta_keywords': '', // string - optional
-      'meta_description': '', // string - optional
       // Tracking fields (optional)
-      'pixel_id':
-          additionalData['trackingField1'] ?? '', // string - Meta pixel id
-      'tiktok_pixel_id':
-          additionalData['trackingField2'] ?? '', // string - Tiktok pixel id
-      'measurement_id':
-          additionalData['trackingField3'] ?? '', // string - GA-4 Analytics
+      'pixel_id': trackingField1 ?? additionalData['trackingField1'] ?? '', // string - Meta pixel id
+      'tiktok_pixel_id': trackingField2 ?? additionalData['trackingField2'] ?? '', // string - Tiktok pixel id
+      'measurement_id': trackingField3 ?? additionalData['trackingField3'] ?? '', // string - GA-4 Analytics
       // Slug
       'slug': slug, // string - unique slug for event
+      // Language-specific fields (Hebrew)
+      'he_title': heTitle ?? '',
+      'he_category_id': heCategoryId ?? '',
+      'he_description': heDescriptionHtml ?? heDescription ?? '',
+      'he_country': heCountry ?? '',
+      'he_refund_policy': heRefundPolicy ?? '',
+      'he_meta_keywords': heMetaKeywords ?? '',
+      'he_meta_description': heMetaDescription ?? '',
+      // Language-specific fields (English)
+      'en_title': enTitle ?? '',
+      'en_category_id': enCategoryId ?? '',
+      'en_description': enDescriptionHtml ?? enDescriptionText ?? '',
+      'en_country': enCountry ?? '',
+      'en_refund_policy': enRefundPolicy ?? '',
+      'en_meta_keywords': enMetaKeywords ?? '',
+      'en_meta_description': enMetaDescription ?? '',
     };
+
+    // Remove all null and empty string values from the API data
+    apiData.removeWhere((key, value) {
+      if (value == null) return true;
+      if (value is String && value.isEmpty) return true;
+      if (value is List && value.isEmpty) return true;
+      return false;
+    });
+
+    return apiData;
   }
 
   /// Convert to JSON for backward compatibility
@@ -275,14 +404,80 @@ class CreateEventData {
 
   /// Create from Map (for loading existing data)
   factory CreateEventData.fromMap(Map<String, dynamic> map) {
-    final description = map['description'] as String?;
+    // Extract eventName from language-specific title fields (he_title or en_title)
+    String extractedEventName = map['eventName'] as String? ?? 
+                                map['he_title'] as String? ?? 
+                                map['en_title'] as String? ?? '';
+    
+    // Extract location from address field
+    String extractedLocation = map['location'] as String? ?? 
+                               map['address'] as String? ?? '';
+    
+    // Extract minimalAge
+    int? extractedMinAge = map['minimalAge'] as int? ?? 
+                           map['min_age'] as int?;
+    
+    // Reconstruct DateTime from date/time strings if available
+    DateTime? extractedStartTime = map['startTime'] as DateTime?;
+    DateTime? extractedEndTime = map['endTime'] as DateTime?;
+    
+    // If DateTime objects not found, try to reconstruct from date/time strings
+    if (extractedStartTime == null) {
+      final startDate = map['start_date'] as String?;
+      final startTime = map['start_time'] as String?;
+      if (startDate != null && startTime != null) {
+        try {
+          final dateParts = startDate.split('-');
+          final timeParts = startTime.split(':');
+          if (dateParts.length == 3 && timeParts.length == 2) {
+            extractedStartTime = DateTime(
+              int.parse(dateParts[0]), // year
+              int.parse(dateParts[1]), // month
+              int.parse(dateParts[2]), // day
+              int.parse(timeParts[0]), // hour
+              int.parse(timeParts[1]), // minute
+            );
+          }
+        } catch (e) {
+          // Failed to parse, leave as null
+        }
+      }
+    }
+    
+    if (extractedEndTime == null) {
+      final endDate = map['end_date'] as String?;
+      final endTime = map['end_time'] as String?;
+      if (endDate != null && endTime != null) {
+        try {
+          final dateParts = endDate.split('-');
+          final timeParts = endTime.split(':');
+          if (dateParts.length == 3 && timeParts.length == 2) {
+            extractedEndTime = DateTime(
+              int.parse(dateParts[0]), // year
+              int.parse(dateParts[1]), // month
+              int.parse(dateParts[2]), // day
+              int.parse(timeParts[0]), // hour
+              int.parse(timeParts[1]), // minute
+            );
+          }
+        } catch (e) {
+          // Failed to parse, leave as null
+        }
+      }
+    }
+    
+    // Extract description (prefer language-specific descriptions)
+    final description = map['description'] as String? ?? 
+                       map['he_description'] as String? ?? 
+                       map['en_description'] as String?;
+    
     return CreateEventData(
-      eventName: map['eventName'] ?? '',
-      location: map['location'] ?? '',
+      eventName: extractedEventName,
+      location: extractedLocation,
       category: map['category'] as Category?,
-      minimalAge: map['minimalAge'] as int?,
-      startTime: map['startTime'] as DateTime?,
-      endTime: map['endTime'] as DateTime?,
+      minimalAge: extractedMinAge,
+      startTime: extractedStartTime,
+      endTime: extractedEndTime,
       capacity: map['capacity'] as int?,
       description: description,
       additionalInfo: map['additionalInfo'] as String?,
@@ -303,6 +498,43 @@ class CreateEventData {
       createdAt: map['createdAt'] as DateTime?,
       updatedAt: map['updatedAt'] as DateTime?,
       status: map['status'] ?? 'draft',
+      // Language-specific fields (Hebrew)
+      heTitle: map['he_title'] as String?,
+      heCategoryId: map['he_category_id'] as int?,
+      heDescription: map['he_description'] as String?,
+      heDescriptionHtml: map['he_descriptionHtml'] as String?,
+      heDescriptionRaw: map['he_descriptionRaw'] as String?,
+      heCountry: map['he_country'] as String?,
+      heRefundPolicy: map['he_refund_policy'] as String?,
+      heMetaKeywords: map['he_meta_keywords'] as String?,
+      heMetaDescription: map['he_meta_description'] as String?,
+      // Language-specific fields (English)
+      enTitle: map['en_title'] as String?,
+      enCategoryId: map['en_category_id'] as int?,
+      enDescriptionText: map['en_description'] as String?,
+      enDescriptionHtml: map['en_descriptionHtml'] as String?,
+      enDescriptionRaw: map['en_descriptionRaw'] as String?,
+      enCountry: map['en_country'] as String?,
+      enRefundPolicy: map['en_refund_policy'] as String?,
+      enMetaKeywords: map['en_meta_keywords'] as String?,
+      enMetaDescription: map['en_meta_description'] as String?,
+      // Date/Time string formats
+      startDateStr: map['start_date'] as String?,
+      startTimeStr: map['start_time'] as String?,
+      endDateStr: map['end_date'] as String?,
+      endTimeStr: map['end_time'] as String?,
+      // Localization
+      timezone: map['timezone'] as String?,
+      currency: map['currency'] as String?,
+      language: map['language'] as String?,
+      // Step 3 fields
+      isPrivateEvent: map['isPrivateEvent'] as bool?,
+      urlSuffix: map['urlSuffix'] as String?,
+      organizerName: map['organizerName'] as String?,
+      trackingField1: map['trackingField1'] as String?,
+      trackingField2: map['trackingField2'] as String?,
+      trackingField3: map['trackingField3'] as String?,
+      trackingField4: map['trackingField4'] as String?,
     );
   }
 
@@ -377,12 +609,14 @@ class CreateEventData {
         eventName = value ?? '';
         break;
       case 'location':
+      case 'address': // Also accept 'address' as an alias for 'location'
         location = value ?? '';
         break;
       case 'category':
         category = value as Category?;
         break;
       case 'minimalAge':
+      case 'min_age': // Also accept 'min_age' as an alias for 'minimalAge'
         minimalAge = value as int?;
         break;
       case 'startTime':
@@ -423,12 +657,153 @@ class CreateEventData {
       case 'status':
         status = value ?? 'draft';
         break;
+      // Language-specific fields (Hebrew)
+      case 'he_title':
+        heTitle = value as String?;
+        break;
+      case 'he_category_id':
+        heCategoryId = value as int?;
+        break;
+      case 'he_description':
+        heDescription = value as String?;
+        break;
+      case 'he_descriptionHtml':
+        heDescriptionHtml = value as String?;
+        break;
+      case 'he_descriptionRaw':
+        heDescriptionRaw = value as String?;
+        break;
+      case 'he_country':
+        heCountry = value as String?;
+        break;
+      case 'he_refund_policy':
+        heRefundPolicy = value as String?;
+        break;
+      case 'he_meta_keywords':
+        heMetaKeywords = value as String?;
+        break;
+      case 'he_meta_description':
+        heMetaDescription = value as String?;
+        break;
+      // Language-specific fields (English)
+      case 'en_title':
+        enTitle = value as String?;
+        break;
+      case 'en_category_id':
+        enCategoryId = value as int?;
+        break;
+      case 'en_description':
+        enDescriptionText = value as String?;
+        break;
+      case 'en_descriptionHtml':
+        enDescriptionHtml = value as String?;
+        break;
+      case 'en_descriptionRaw':
+        enDescriptionRaw = value as String?;
+        break;
+      case 'en_country':
+        enCountry = value as String?;
+        break;
+      case 'en_refund_policy':
+        enRefundPolicy = value as String?;
+        break;
+      case 'en_meta_keywords':
+        enMetaKeywords = value as String?;
+        break;
+      case 'en_meta_description':
+        enMetaDescription = value as String?;
+        break;
+      // Date/Time string formats
+      case 'start_date':
+        startDateStr = value as String?;
+        break;
+      case 'start_time':
+        startTimeStr = value as String?;
+        break;
+      case 'end_date':
+        endDateStr = value as String?;
+        break;
+      case 'end_time':
+        endTimeStr = value as String?;
+        break;
+      // Localization
+      case 'timezone':
+        timezone = value as String?;
+        break;
+      case 'currency':
+        currency = value as String?;
+        break;
+      case 'language':
+        language = value as String?;
+        break;
+      // Step 3 fields
+      case 'isPrivateEvent':
+        isPrivateEvent = value as bool?;
+        break;
+      case 'urlSuffix':
+        urlSuffix = value as String?;
+        break;
+      case 'organizerName':
+        organizerName = value as String?;
+        break;
+      case 'trackingField1':
+        trackingField1 = value as String?;
+        break;
+      case 'trackingField2':
+        trackingField2 = value as String?;
+        break;
+      case 'trackingField3':
+        trackingField3 = value as String?;
+        break;
+      case 'trackingField4':
+        trackingField4 = value as String?;
+        break;
+      default:
+        // Unknown field - ignore or log warning
+        break;
     }
     updatedAt = DateTime.now();
   }
 
+  /// Get all language-specific fields for debugging
+  Map<String, dynamic> getLanguageFields() {
+    return {
+      'he_title': heTitle,
+      'he_category_id': heCategoryId,
+      'he_description': heDescription,
+      'he_descriptionHtml': heDescriptionHtml,
+      'he_descriptionRaw': heDescriptionRaw,
+      'he_country': heCountry,
+      'he_refund_policy': heRefundPolicy,
+      'he_meta_keywords': heMetaKeywords,
+      'he_meta_description': heMetaDescription,
+      'en_title': enTitle,
+      'en_category_id': enCategoryId,
+      'en_description': enDescriptionText,
+      'en_descriptionHtml': enDescriptionHtml,
+      'en_descriptionRaw': enDescriptionRaw,
+      'en_country': enCountry,
+      'en_refund_policy': enRefundPolicy,
+      'en_meta_keywords': enMetaKeywords,
+      'en_meta_description': enMetaDescription,
+    };
+  }
+
   @override
   String toString() {
-    return 'CreateEventData(eventName: $eventName, location: $location, category: ${category?.name}, isValid: $isValid)';
+    return 'CreateEventData(\n'
+        '  eventName: $eventName (he: "${heTitle ?? ''}", en: "${enTitle ?? ''}"),\n'
+        '  location: $location,\n'
+        '  category: ${category?.name},\n'
+        '  he_category_id: $heCategoryId,\n'
+        '  en_category_id: $enCategoryId,\n'
+        '  startTime: $startTime,\n'
+        '  endTime: $endTime,\n'
+        '  minAge: $minimalAge,\n'
+        '  capacity: $capacity,\n'
+        '  timezone: $timezone,\n'
+        '  currency: $currency,\n'
+        '  isValid: $isValid\n'
+        ')';
   }
 }

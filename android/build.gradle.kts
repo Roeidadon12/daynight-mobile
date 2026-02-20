@@ -5,6 +5,13 @@ allprojects {
     }
 }
 
+// Suppress javac deprecation notes
+gradle.taskGraph.beforeTask {
+    if (this is JavaCompile) {
+        options.compilerArgs.addAll(listOf("-Xlint:none", "-nowarn"))
+    }
+}
+
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
@@ -16,7 +23,11 @@ subprojects {
     tasks.withType<JavaCompile>().configureEach {
         sourceCompatibility = "11"
         targetCompatibility = "11"
-        options.compilerArgs.add("-Xlint:-options")
+        options.compilerArgs.addAll(listOf(
+            "-Xlint:-options",
+            "-Xlint:-deprecation",
+            "-nowarn"
+        ))
     }
 }
 subprojects {

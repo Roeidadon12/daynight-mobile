@@ -4,8 +4,10 @@ import 'dart:io';
 import 'dart:convert';
 import '../../../app_localizations.dart';
 import '../../../constants.dart';
+import '../../../models/language.dart';
 import '../../shared/primary_button.dart';
 import '../../shared/rich_text_editor.dart';
+import '../../../utils/language_helper.dart';
 import '../../../utils/quill_to_html_converter.dart';
 import '../../../utils/logger.dart';
 
@@ -31,8 +33,24 @@ class _NewEventStep2State extends State<NewEventStep2> {
   final _formKey = GlobalKey<FormState>();
   final _capacityController = TextEditingController();
   final _additionalInfoController = TextEditingController();
-  final _descriptionController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
+  
+  // Supported languages for event creation
+  List<Language> get _supportedLanguages => LanguageHelper.getAllLanguages();
+  
+  // Get the default language
+  Language? get _defaultLanguage {
+    try {
+      return _supportedLanguages.firstWhere((lang) => lang.isDefault == 1);
+    } catch (e) {
+      return _supportedLanguages.isNotEmpty ? _supportedLanguages.first : null;
+    }
+  }
+  
+  // Map of description controllers for each language
+  final Map<String, TextEditingController> _descriptionControllers = {};
+  
+  late String _selectedLanguageTab; // Language tab for description
   
   String? _selectedImage;
   File? _selectedImageFile;
@@ -40,14 +58,32 @@ class _NewEventStep2State extends State<NewEventStep2> {
   @override
   void initState() {
     super.initState();
+    
+    // Initialize selected language tab with default language
+    _selectedLanguageTab = _defaultLanguage?.code ?? 'he';
+    
+    // Initialize controllers for all supported languages
+    for (final lang in _supportedLanguages) {
+      _descriptionControllers[lang.code] = TextEditingController();
+    }
+    
     // Initialize with existing data if any
     _selectedImage = widget.eventData['image'];
-    // Try to load description from descriptionRaw first (JSON format for editing), 
-    // then fallback to description, or start with empty string
-    String existingDescription = widget.eventData['descriptionRaw'] ?? 
-                                widget.eventData['description'] ?? 
-                                '';
-    _descriptionController.text = existingDescription;
+    
+    // Load description for each language
+    for (final lang in _supportedLanguages) {
+      // Try to load description from descriptionRaw first (JSON format for editing), 
+      // then fallback to description, or start with empty string
+      String existingDescription = widget.eventData['${lang.code}_descriptionRaw'] ?? 
+                                  widget.eventData['${lang.code}_description'] ?? 
+                                  '';
+      _descriptionControllers[lang.code]!.text = existingDescription;
+      
+      // Add listener to controller to see when it changes
+      _descriptionControllers[lang.code]!.addListener(() {
+        setState(() {});
+      });
+    }
     
     // Load existing image file if available
     if (_selectedImage != null && _selectedImage!.isNotEmpty) {
@@ -56,25 +92,72 @@ class _NewEventStep2State extends State<NewEventStep2> {
         _selectedImageFile = imageFile;
       }
     }
-    
-    // Add listener to controller to see when it changes
-    _descriptionController.addListener(() {
-      setState(() {});
-    });
   }
 
   @override
   void dispose() {
+    // Save current language description before disposing
+    _saveCurrentLanguageDescription();
+    
+    // Save image data
+    if (_selectedImage != null) {
+      widget.onDataChanged('image', _selectedImage);
+    }
+    if (_selectedImageFile != null) {
+      widget.onDataChanged('imageFile', _selectedImageFile);
+    }
+    
     _capacityController.dispose();
     _additionalInfoController.dispose();
-    _descriptionController.dispose();
+    // Dispose all language-specific controllers
+    for (final controller in _descriptionControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
+  }
+  
+  // Helper method to get current language description controller
+  TextEditingController get _currentDescriptionController {
+    return _descriptionControllers[_selectedLanguageTab]!;
+  }
+  
+  // Method to switch language tab
+  void _switchLanguageTab(String newLanguage) {
+    if (_selectedLanguageTab != newLanguage) {
+      // Save current description before switching
+      _saveCurrentLanguageDescription();
+      setState(() {
+        _selectedLanguageTab = newLanguage;
+      });
+    }
   }
 
   bool _isFormValid() {
-    final controllerText = _descriptionController.text;
-    final isValid = controllerText.trim().isNotEmpty;
-    return isValid;
+    // Only default language description is mandatory, others are optional
+    final defaultLangCode = _defaultLanguage?.code;
+    if (defaultLangCode != null) {
+      final controllerText = _descriptionControllers[defaultLangCode]?.text ?? '';
+      
+      // Check if there's actual text content (not just empty JSON formatting)
+      if (controllerText.isEmpty) {
+        return false;
+      }
+      
+      // Try to extract plain text from Quill JSON format
+      try {
+        final json = jsonDecode(controllerText);
+        final plainText = _extractPlainTextFromQuill(json);
+        // Check minimum 30 characters requirement
+        return plainText.trim().length >= 30;
+      } catch (e) {
+        // If not JSON, treat as plain text
+        // Check minimum 30 characters requirement
+        return controllerText.trim().length >= 30;
+      }
+    }
+    
+    // If no default language is set, allow form to be valid
+    return true;
   }
 
   /// Extract HTML from Quill delta JSON format using flexible converter
@@ -88,6 +171,24 @@ class _NewEventStep2State extends State<NewEventStep2> {
   }
 
   /// Extract plain text from Quill delta JSON format
+  // Get character count from current description controller
+  int _getCurrentCharacterCount() {
+    final controllerText = _currentDescriptionController.text;
+    
+    if (controllerText.isEmpty) {
+      return 0;
+    }
+    
+    try {
+      final json = jsonDecode(controllerText);
+      final plainText = _extractPlainTextFromQuill(json);
+      return plainText.trim().length;
+    } catch (e) {
+      // If not JSON, treat as plain text
+      return controllerText.trim().length;
+    }
+  }
+
   String _extractPlainTextFromQuill(dynamic deltaJson) {
     try {
       // The deltaJson could be a List directly (not wrapped in a Map with 'ops' key)
@@ -129,41 +230,71 @@ class _NewEventStep2State extends State<NewEventStep2> {
     return '';
   }
 
-  void _saveDescriptionData() {
-    // Extract both plain text and HTML from rich text editor
-    String description = _descriptionController.text;
+  // Method to save current language description values to eventData
+  void _saveCurrentLanguageDescription() {
+    String description = _currentDescriptionController.text;
     String htmlDescription = '';
     
     try {
       // If the text is in JSON format (Quill delta), extract both formats
-      final json = jsonDecode(_descriptionController.text);
+      final json = jsonDecode(_currentDescriptionController.text);
       description = _extractPlainTextFromQuill(json);
       htmlDescription = _extractHtmlFromQuill(json);
     } catch (e) {
       // If it's not JSON, it's already plain text
-      description = _descriptionController.text;
-      htmlDescription = _descriptionController.text; // Fallback to plain text
+      description = _currentDescriptionController.text;
+      htmlDescription = _currentDescriptionController.text; // Fallback to plain text
     }
 
-    // Save main description-related fields to eventData
-    widget.onDataChanged('description', description);
-    widget.onDataChanged('description', description);
-    
-    // Debug-only fields (not saved to model)
-    widget.onDataChanged('descriptionHtml', htmlDescription);
-    widget.onDataChanged('descriptionRaw', _descriptionController.text);
+    // Save current language-specific description fields
+    widget.onDataChanged('${_selectedLanguageTab}_description', description);
+    widget.onDataChanged('${_selectedLanguageTab}_descriptionHtml', htmlDescription);
+    widget.onDataChanged('${_selectedLanguageTab}_descriptionRaw', _currentDescriptionController.text);
+  }
+  
+  // Method to save all languages description data (for final submission)
+  void _saveAllLanguagesDescription() {
+    // Save description data for all languages
+    for (final lang in _supportedLanguages) {
+      String description = _descriptionControllers[lang.code]!.text;
+      String htmlDescription = '';
+      
+      try {
+        // If the text is in JSON format (Quill delta), extract both formats
+        final json = jsonDecode(_descriptionControllers[lang.code]!.text);
+        description = _extractPlainTextFromQuill(json);
+        htmlDescription = _extractHtmlFromQuill(json);
+      } catch (e) {
+        // If it's not JSON, it's already plain text
+        description = _descriptionControllers[lang.code]!.text;
+        htmlDescription = _descriptionControllers[lang.code]!.text; // Fallback to plain text
+      }
+
+      // Save language-specific description fields
+      widget.onDataChanged('${lang.code}_description', description);
+      widget.onDataChanged('${lang.code}_descriptionHtml', htmlDescription);
+      widget.onDataChanged('${lang.code}_descriptionRaw', _descriptionControllers[lang.code]!.text);
+      
+      print('${lang.code}_description: ${description.length} chars (plain text)');
+      print('${lang.code}_descriptionHtml: ${htmlDescription.length} chars (HTML)');
+    }
     
     // Debug log to verify all fields are being set
-    Logger.debug('Saving description data - description: $description, description: $description', 'NewEventStep2');
+    Logger.debug('Saving description data for ${_supportedLanguages.length} languages', 'NewEventStep2');
   }
 
   void _saveAndNext() {
     if (_formKey.currentState!.validate() && _isFormValid()) {
+      print('===== Step 2: Saving Form Data =====');
+      
       // Save all form data
       widget.onDataChanged('image', _selectedImage);
+      print('image: $_selectedImage');
       
-      // Save description data using the helper method
-      _saveDescriptionData();
+      // Save description data for all languages using the helper method
+      _saveAllLanguagesDescription();
+      
+      print('=====================================\n');
       
       widget.onNext();
     }
@@ -315,26 +446,184 @@ class _NewEventStep2State extends State<NewEventStep2> {
                     
                     const SizedBox(height: 24),
                     
-                    // Event Description
-                    Text(
-                      AppLocalizations.of(context).get('create-event-description'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                    // Language Tabs (outside the bordered container)
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(24),
+                          topRight: Radius.circular(24),
+                        ),
+                        border: Border.all(
+                          color: Colors.grey[700]!,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Hebrew Tab
+                          GestureDetector(
+                            onTap: () {
+                              _switchLanguageTab('he');
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: _selectedLanguageTab == 'he' 
+                                    ? kBrandPrimary
+                                    : Colors.transparent,
+                                borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(18),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '🇮🇱',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'עברית',
+                                    style: TextStyle(
+                                      color: _selectedLanguageTab == 'he'
+                                          ? Colors.white
+                                          : Colors.grey[400],
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          // English Tab
+                          GestureDetector(
+                            onTap: () {
+                              _switchLanguageTab('en');
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: _selectedLanguageTab == 'en'
+                                    ? kBrandPrimary
+                                    : Colors.transparent,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(18),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '🇬🇧',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'English',
+                                    style: TextStyle(
+                                      color: _selectedLanguageTab == 'en'
+                                          ? Colors.white
+                                          : Colors.grey[400],
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 8),
                     
-                    // Rich Text Editor
-                    RichTextEditor(
-                      controller: _descriptionController,
-                      hintText: AppLocalizations.of(context).get('create-event-description-instructions'),
-                      onChanged: (value) {
-                        // Save description data in real-time as user types
-                        _saveDescriptionData();
-                        setState(() {});
-                      },
+                    // Event Description Container
+                    Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          bottomLeft: Radius.circular(16),
+                          bottomRight: Radius.circular(16),
+                        ),
+                        border: Border.all(
+                          color: Colors.grey[700]!,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Event Description Title
+                          RichText(
+                            text: TextSpan(
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: AppLocalizations.of(context).get('create-event-description'),
+                                ),
+                                if (_selectedLanguageTab == _defaultLanguage?.code)
+                                  const TextSpan(
+                                    text: ' *',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          
+                          // Rich Text Editor
+                          RichTextEditor(
+                            key: ValueKey(_selectedLanguageTab),
+                            controller: _currentDescriptionController,
+                            hintText: AppLocalizations.of(context).get('create-event-description-instructions'),
+                            onChanged: (value) {
+                              // Save current language description in real-time as user types
+                              _saveCurrentLanguageDescription();
+                              setState(() {});
+                            },
+                          ),
+                          
+                          const SizedBox(height: 8),
+                          
+                          // Minimum characters note and character counter
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Minimum characters note (aligned to start)
+                              Text(
+                                AppLocalizations.of(context).get('description-minimum-characters'),
+                                textAlign: TextAlign.start,
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              
+                              // Character counter (aligned to end)
+                              Text(
+                                '${_getCurrentCharacterCount()} ${AppLocalizations.of(context).get('characters')}',
+                                textAlign: TextAlign.end,
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
 
                   ],

@@ -58,9 +58,9 @@ class _NewEventPageState extends State<NewEventPage> {
   }
 
   void _onStepDataChanged(String key, dynamic value) {
-    setState(() {
-      _eventData.updateField(key, value);
-    });
+    // Update data without setState to avoid calling setState during build phase
+    // The child widgets manage their own state, so parent doesn't need to rebuild
+    _eventData.updateField(key, value);
   }
 
   Widget _buildCurrentStep() {

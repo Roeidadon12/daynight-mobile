@@ -259,10 +259,10 @@ class EventService {
   /// [eventData] contains all the event information to be submitted
   /// [additionalFormData] contains extra fields from the create event form
   ///
-  /// Returns the created event's ID if successful, null if failed.
+  /// Returns true if successful, false if failed.
   ///
   /// Throws [ServerException] if the request fails with a server error.
-  Future<int?> createEvent(
+  Future<bool> createEvent(
     Map<String, dynamic> eventData,
     Map<String, dynamic> additionalFormData,
   ) async {
@@ -308,24 +308,21 @@ class EventService {
       }
 
       if (response.containsKey('status') && response['status'] == 'success') {
-        final eventId = response['event_id'] as int?;
-        if (eventId != null) {
-          Logger.info(
-            'Successfully created event with ID: $eventId',
-            'EventService',
-          );
-          return eventId;
-        }
+        Logger.info(
+          'Successfully created event',
+          'EventService',
+        );
+        return true;
       }
 
       Logger.error(
-        'Failed to create event: Invalid response format',
+        'Failed to create event: ${response['message'] ?? 'Unknown error'}',
         'EventService',
       );
-      return null;
+      return false;
     } catch (e) {
       Logger.error('Error creating event: $e', 'EventService');
-      return null;
+      return false;
     }
   }
 

@@ -1,0 +1,814 @@
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:compileKotlin UP-TO-DATE
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:pluginDescriptors UP-TO-DATE
+> Task :gradle:processResources UP-TO-DATE
+> Task :gradle:classes UP-TO-DATE
+> Task :gradle:jar UP-TO-DATE
+> Task :clean
+> Task :app:externalNativeBuildCleanDebug
+> Task :app:externalNativeBuildCleanProfile
+> Task :app:externalNativeBuildCleanRelease
+> Task :app:clean UP-TO-DATE
+> Task :flutter_keyboard_visibility_temp_fork:clean UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:clean UP-TO-DATE
+> Task :geocoding_android:clean UP-TO-DATE
+> Task :google_sign_in_android:clean UP-TO-DATE
+> Task :image_picker_android:clean UP-TO-DATE
+> Task :path_provider_android:clean UP-TO-DATE
+> Task :pay_android:clean UP-TO-DATE
+> Task :permission_handler_android:clean UP-TO-DATE
+> Task :quill_native_bridge_android:clean UP-TO-DATE
+> Task :shared_preferences_android:clean UP-TO-DATE
+> Task :sign_in_with_apple:clean UP-TO-DATE
+> Task :sms_autofill:clean UP-TO-DATE
+> Task :sqflite_android:clean UP-TO-DATE
+> Task :url_launcher_android:clean UP-TO-DATE
+> Task :app:ReleaseMinSdkCheck
+> Task :app:compileFlutterBuildRelease
+> Task :app:packJniLibsflutterBuildRelease
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:configureCMakeRelease[arm64-v8a]
+> Task :app:buildCMakeRelease[arm64-v8a]
+> Task :app:configureCMakeRelease[armeabi-v7a]
+> Task :app:buildCMakeRelease[armeabi-v7a]
+> Task :app:configureCMakeRelease[x86_64]
+> Task :app:buildCMakeRelease[x86_64]
+> Task :app:mergeReleaseJniLibFolders
+> Task :flutter_keyboard_visibility_temp_fork:preBuild UP-TO-DATE
+> Task :flutter_keyboard_visibility_temp_fork:preReleaseBuild UP-TO-DATE
+> Task :flutter_keyboard_visibility_temp_fork:mergeReleaseJniLibFolders
+> Task :flutter_keyboard_visibility_temp_fork:mergeReleaseNativeLibs NO-SOURCE
+> Task :flutter_plugin_android_lifecycle:preBuild UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:preReleaseBuild UP-TO-DATE
+> Task :flutter_keyboard_visibility_temp_fork:copyReleaseJniLibsProjectOnly
+> Task :flutter_plugin_android_lifecycle:mergeReleaseJniLibFolders
+> Task :flutter_plugin_android_lifecycle:mergeReleaseNativeLibs NO-SOURCE
+> Task :geocoding_android:preBuild UP-TO-DATE
+> Task :geocoding_android:preReleaseBuild UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:copyReleaseJniLibsProjectOnly
+> Task :geocoding_android:mergeReleaseJniLibFolders
+> Task :geocoding_android:mergeReleaseNativeLibs NO-SOURCE
+> Task :google_sign_in_android:preBuild UP-TO-DATE
+> Task :google_sign_in_android:preReleaseBuild UP-TO-DATE
+> Task :geocoding_android:copyReleaseJniLibsProjectOnly
+> Task :google_sign_in_android:mergeReleaseJniLibFolders
+> Task :google_sign_in_android:mergeReleaseNativeLibs NO-SOURCE
+> Task :image_picker_android:preBuild UP-TO-DATE
+> Task :google_sign_in_android:copyReleaseJniLibsProjectOnly
+> Task :image_picker_android:preReleaseBuild UP-TO-DATE
+> Task :image_picker_android:mergeReleaseJniLibFolders
+> Task :image_picker_android:mergeReleaseNativeLibs NO-SOURCE
+> Task :path_provider_android:preBuild UP-TO-DATE
+> Task :image_picker_android:copyReleaseJniLibsProjectOnly
+> Task :path_provider_android:preReleaseBuild UP-TO-DATE
+> Task :path_provider_android:mergeReleaseJniLibFolders
+> Task :path_provider_android:mergeReleaseNativeLibs NO-SOURCE
+> Task :path_provider_android:copyReleaseJniLibsProjectOnly
+> Task :pay_android:preBuild UP-TO-DATE
+> Task :pay_android:preReleaseBuild UP-TO-DATE
+> Task :pay_android:mergeReleaseJniLibFolders
+> Task :pay_android:mergeReleaseNativeLibs NO-SOURCE
+> Task :permission_handler_android:preBuild UP-TO-DATE
+> Task :permission_handler_android:preReleaseBuild UP-TO-DATE
+> Task :pay_android:copyReleaseJniLibsProjectOnly
+> Task :permission_handler_android:mergeReleaseJniLibFolders
+> Task :permission_handler_android:mergeReleaseNativeLibs NO-SOURCE
+> Task :quill_native_bridge_android:preBuild UP-TO-DATE
+> Task :permission_handler_android:copyReleaseJniLibsProjectOnly
+> Task :quill_native_bridge_android:preReleaseBuild UP-TO-DATE
+> Task :quill_native_bridge_android:mergeReleaseJniLibFolders
+> Task :quill_native_bridge_android:mergeReleaseNativeLibs NO-SOURCE
+> Task :shared_preferences_android:preBuild UP-TO-DATE
+> Task :shared_preferences_android:preReleaseBuild UP-TO-DATE
+> Task :quill_native_bridge_android:copyReleaseJniLibsProjectOnly
+> Task :shared_preferences_android:mergeReleaseJniLibFolders
+> Task :shared_preferences_android:mergeReleaseNativeLibs NO-SOURCE
+> Task :sign_in_with_apple:preBuild UP-TO-DATE
+> Task :sign_in_with_apple:preReleaseBuild UP-TO-DATE
+> Task :shared_preferences_android:copyReleaseJniLibsProjectOnly
+> Task :sign_in_with_apple:mergeReleaseJniLibFolders
+> Task :sign_in_with_apple:mergeReleaseNativeLibs NO-SOURCE
+> Task :sign_in_with_apple:copyReleaseJniLibsProjectOnly
+> Task :sms_autofill:preBuild UP-TO-DATE
+> Task :sms_autofill:preReleaseBuild UP-TO-DATE
+> Task :sms_autofill:mergeReleaseJniLibFolders
+> Task :sms_autofill:mergeReleaseNativeLibs NO-SOURCE
+> Task :sms_autofill:copyReleaseJniLibsProjectOnly
+> Task :sqflite_android:preBuild UP-TO-DATE
+> Task :sqflite_android:preReleaseBuild UP-TO-DATE
+> Task :sqflite_android:mergeReleaseJniLibFolders
+> Task :sqflite_android:mergeReleaseNativeLibs NO-SOURCE
+> Task :url_launcher_android:preBuild UP-TO-DATE
+> Task :sqflite_android:copyReleaseJniLibsProjectOnly
+> Task :url_launcher_android:preReleaseBuild UP-TO-DATE
+> Task :url_launcher_android:mergeReleaseJniLibFolders
+> Task :url_launcher_android:mergeReleaseNativeLibs NO-SOURCE
+> Task :url_launcher_android:copyReleaseJniLibsProjectOnly
+> Task :flutter_keyboard_visibility_temp_fork:generateReleaseResValues
+> Task :flutter_keyboard_visibility_temp_fork:generateReleaseResources
+> Task :flutter_keyboard_visibility_temp_fork:packageReleaseResources
+> Task :flutter_plugin_android_lifecycle:generateReleaseResValues
+> Task :flutter_plugin_android_lifecycle:generateReleaseResources
+> Task :flutter_keyboard_visibility_temp_fork:javaPreCompileRelease
+> Task :flutter_plugin_android_lifecycle:packageReleaseResources
+> Task :flutter_plugin_android_lifecycle:javaPreCompileRelease
+> Task :image_picker_android:generateReleaseResValues
+> Task :image_picker_android:generateReleaseResources
+> Task :flutter_plugin_android_lifecycle:parseReleaseLocalResources
+> Task :flutter_keyboard_visibility_temp_fork:parseReleaseLocalResources
+> Task :image_picker_android:packageReleaseResources
+> Task :geocoding_android:generateReleaseResValues
+> Task :image_picker_android:javaPreCompileRelease
+> Task :geocoding_android:generateReleaseResources
+> Task :geocoding_android:packageReleaseResources
+> Task :image_picker_android:parseReleaseLocalResources
+> Task :flutter_keyboard_visibility_temp_fork:generateReleaseRFile
+> Task :flutter_plugin_android_lifecycle:generateReleaseRFile
+> Task :geocoding_android:parseReleaseLocalResources
+> Task :flutter_keyboard_visibility_temp_fork:compileReleaseJavaWithJavac
+> Task :flutter_keyboard_visibility_temp_fork:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :flutter_keyboard_visibility_temp_fork:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :app:mergeReleaseNativeLibs
+> Task :flutter_plugin_android_lifecycle:compileReleaseJavaWithJavac
+> Task :flutter_plugin_android_lifecycle:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:bundleLibCompileToJarRelease
+> Task :flutter_plugin_android_lifecycle:exportReleaseConsumerProguardFiles
+> Task :image_picker_android:generateReleaseRFile
+> Task :geocoding_android:javaPreCompileRelease
+> Task :geocoding_android:generateReleaseRFile
+> Task :app:stripReleaseDebugSymbols
+> Task :image_picker_android:compileReleaseJavaWithJavac
+> Task :image_picker_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :image_picker_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :geocoding_android:compileReleaseJavaWithJavac
+> Task :geocoding_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :geocoding_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :google_sign_in_android:generateReleaseResValues
+> Task :app:extractReleaseNativeSymbolTables
+> Task :google_sign_in_android:generateReleaseResources
+> Task :google_sign_in_android:packageReleaseResources
+> Task :google_sign_in_android:parseReleaseLocalResources
+> Task :google_sign_in_android:javaPreCompileRelease
+> Task :path_provider_android:generateReleaseResValues
+> Task :path_provider_android:generateReleaseResources
+> Task :google_sign_in_android:generateReleaseRFile
+> Task :path_provider_android:packageReleaseResources
+> Task :google_sign_in_android:compileReleaseJavaWithJavac
+> Task :google_sign_in_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :google_sign_in_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :pay_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :path_provider_android:javaPreCompileRelease
+> Task :path_provider_android:parseReleaseLocalResources
+> Task :pay_android:generateReleaseResValues
+> Task :pay_android:generateReleaseResources
+> Task :path_provider_android:generateReleaseRFile
+> Task :pay_android:packageReleaseResources
+> Task :path_provider_android:compileReleaseJavaWithJavac
+> Task :path_provider_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :path_provider_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :pay_android:parseReleaseLocalResources
+> Task :pay_android:javaPreCompileRelease
+> Task :permission_handler_android:generateReleaseResValues
+> Task :pay_android:generateReleaseRFile
+> Task :permission_handler_android:generateReleaseResources
+> Task :permission_handler_android:packageReleaseResources
+> Task :permission_handler_android:parseReleaseLocalResources
+> Task :quill_native_bridge_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :permission_handler_android:javaPreCompileRelease
+> Task :quill_native_bridge_android:generateReleaseResValues
+> Task :quill_native_bridge_android:generateReleaseResources
+> Task :permission_handler_android:generateReleaseRFile
+
+> Task :pay_android:compileReleaseKotlin
+w: file:///Users/orenyahalom/.pub-cache/hosted/pub.dev/pay_android-2.0.0/android/src/main/kotlin/io/flutter/plugins/pay_android/view/PayButtonViewFactory.kt:27:69 Unchecked cast of 'kotlin.Any?' to 'kotlin.collections.Map<kotlin.String, kotlin.Any>'.
+
+> Task :app:mergeReleaseNativeDebugMetadata
+> Task :permission_handler_android:compileReleaseJavaWithJavac
+> Task :pay_android:compileReleaseJavaWithJavac NO-SOURCE
+> Task :pay_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :pay_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :permission_handler_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :permission_handler_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :quill_native_bridge_android:packageReleaseResources
+> Task :shared_preferences_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :quill_native_bridge_android:parseReleaseLocalResources
+> Task :quill_native_bridge_android:javaPreCompileRelease
+> Task :shared_preferences_android:generateReleaseResValues
+> Task :shared_preferences_android:generateReleaseResources
+> Task :quill_native_bridge_android:generateReleaseRFile
+> Task :shared_preferences_android:packageReleaseResources
+> Task :sign_in_with_apple:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared_preferences_android:parseReleaseLocalResources
+> Task :shared_preferences_android:javaPreCompileRelease
+> Task :sign_in_with_apple:generateReleaseResValues
+> Task :sign_in_with_apple:generateReleaseResources
+> Task :shared_preferences_android:generateReleaseRFile
+> Task :sign_in_with_apple:packageReleaseResources
+> Task :sign_in_with_apple:parseReleaseLocalResources
+> Task :sign_in_with_apple:javaPreCompileRelease
+> Task :sms_autofill:generateReleaseResValues
+> Task :sign_in_with_apple:generateReleaseRFile
+> Task :sms_autofill:generateReleaseResources
+> Task :sms_autofill:packageReleaseResources
+> Task :sms_autofill:parseReleaseLocalResources
+> Task :sqflite_android:generateReleaseResValues
+> Task :sms_autofill:javaPreCompileRelease
+> Task :sqflite_android:generateReleaseResources
+> Task :sms_autofill:generateReleaseRFile
+> Task :sqflite_android:packageReleaseResources
+
+> Task :sms_autofill:compileReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :sms_autofill:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :sms_autofill:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :sqflite_android:javaPreCompileRelease
+> Task :sqflite_android:parseReleaseLocalResources
+> Task :url_launcher_android:generateReleaseBuildConfig
+> Task :url_launcher_android:generateReleaseResValues
+> Task :url_launcher_android:generateReleaseResources
+> Task :sqflite_android:generateReleaseRFile
+> Task :sqflite_android:compileReleaseJavaWithJavac
+> Task :sqflite_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :sqflite_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :url_launcher_android:packageReleaseResources
+> Task :url_launcher_android:parseReleaseLocalResources
+> Task :url_launcher_android:javaPreCompileRelease
+> Task :sign_in_with_apple:compileReleaseKotlin
+> Task :app:buildKotlinToolingMetadata
+> Task :sign_in_with_apple:compileReleaseJavaWithJavac NO-SOURCE
+> Task :sign_in_with_apple:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :sign_in_with_apple:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :url_launcher_android:generateReleaseRFile
+> Task :app:checkReleaseDuplicateClasses
+> Task :quill_native_bridge_android:compileReleaseKotlin
+> Task :url_launcher_android:compileReleaseJavaWithJavac
+> Task :quill_native_bridge_android:compileReleaseJavaWithJavac NO-SOURCE
+> Task :quill_native_bridge_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :quill_native_bridge_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :url_launcher_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :url_launcher_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :flutter_keyboard_visibility_temp_fork:writeReleaseAarMetadata
+> Task :flutter_plugin_android_lifecycle:writeReleaseAarMetadata
+> Task :geocoding_android:writeReleaseAarMetadata
+> Task :google_sign_in_android:writeReleaseAarMetadata
+> Task :image_picker_android:writeReleaseAarMetadata
+> Task :path_provider_android:writeReleaseAarMetadata
+> Task :pay_android:writeReleaseAarMetadata
+> Task :permission_handler_android:writeReleaseAarMetadata
+> Task :quill_native_bridge_android:writeReleaseAarMetadata
+> Task :shared_preferences_android:writeReleaseAarMetadata
+> Task :sign_in_with_apple:writeReleaseAarMetadata
+> Task :sms_autofill:writeReleaseAarMetadata
+> Task :sqflite_android:writeReleaseAarMetadata
+> Task :app:cleanMergeReleaseAssets UP-TO-DATE
+> Task :url_launcher_android:writeReleaseAarMetadata
+> Task :app:mergeReleaseShaders
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :flutter_keyboard_visibility_temp_fork:mergeReleaseShaders
+> Task :flutter_keyboard_visibility_temp_fork:compileReleaseShaders NO-SOURCE
+> Task :flutter_keyboard_visibility_temp_fork:generateReleaseAssets UP-TO-DATE
+> Task :app:checkReleaseAarMetadata
+> Task :flutter_keyboard_visibility_temp_fork:mergeReleaseAssets
+> Task :flutter_plugin_android_lifecycle:mergeReleaseShaders
+> Task :flutter_plugin_android_lifecycle:compileReleaseShaders NO-SOURCE
+> Task :flutter_plugin_android_lifecycle:generateReleaseAssets UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:mergeReleaseAssets
+> Task :geocoding_android:mergeReleaseShaders
+> Task :geocoding_android:compileReleaseShaders NO-SOURCE
+> Task :geocoding_android:generateReleaseAssets UP-TO-DATE
+> Task :geocoding_android:mergeReleaseAssets
+> Task :google_sign_in_android:mergeReleaseShaders
+> Task :google_sign_in_android:compileReleaseShaders NO-SOURCE
+> Task :google_sign_in_android:generateReleaseAssets UP-TO-DATE
+> Task :google_sign_in_android:mergeReleaseAssets
+> Task :image_picker_android:mergeReleaseShaders
+> Task :image_picker_android:compileReleaseShaders NO-SOURCE
+> Task :image_picker_android:generateReleaseAssets UP-TO-DATE
+> Task :image_picker_android:mergeReleaseAssets
+> Task :path_provider_android:mergeReleaseShaders
+> Task :path_provider_android:compileReleaseShaders NO-SOURCE
+> Task :path_provider_android:generateReleaseAssets UP-TO-DATE
+> Task :path_provider_android:mergeReleaseAssets
+> Task :pay_android:mergeReleaseShaders
+> Task :pay_android:compileReleaseShaders NO-SOURCE
+> Task :pay_android:generateReleaseAssets UP-TO-DATE
+> Task :pay_android:mergeReleaseAssets
+> Task :permission_handler_android:mergeReleaseShaders
+> Task :permission_handler_android:compileReleaseShaders NO-SOURCE
+> Task :permission_handler_android:generateReleaseAssets UP-TO-DATE
+> Task :permission_handler_android:mergeReleaseAssets
+> Task :quill_native_bridge_android:mergeReleaseShaders
+> Task :quill_native_bridge_android:compileReleaseShaders NO-SOURCE
+> Task :quill_native_bridge_android:generateReleaseAssets UP-TO-DATE
+> Task :quill_native_bridge_android:mergeReleaseAssets
+> Task :shared_preferences_android:mergeReleaseShaders
+> Task :shared_preferences_android:compileReleaseShaders NO-SOURCE
+> Task :shared_preferences_android:generateReleaseAssets UP-TO-DATE
+> Task :shared_preferences_android:mergeReleaseAssets
+> Task :sign_in_with_apple:mergeReleaseShaders
+> Task :sign_in_with_apple:compileReleaseShaders NO-SOURCE
+> Task :sign_in_with_apple:generateReleaseAssets UP-TO-DATE
+> Task :sign_in_with_apple:mergeReleaseAssets
+> Task :sms_autofill:mergeReleaseShaders
+> Task :sms_autofill:compileReleaseShaders NO-SOURCE
+> Task :sms_autofill:generateReleaseAssets UP-TO-DATE
+> Task :sms_autofill:mergeReleaseAssets
+> Task :sqflite_android:mergeReleaseShaders
+> Task :sqflite_android:compileReleaseShaders NO-SOURCE
+> Task :sqflite_android:generateReleaseAssets UP-TO-DATE
+> Task :sqflite_android:mergeReleaseAssets
+> Task :url_launcher_android:mergeReleaseShaders
+> Task :url_launcher_android:compileReleaseShaders NO-SOURCE
+> Task :url_launcher_android:generateReleaseAssets UP-TO-DATE
+> Task :url_launcher_android:mergeReleaseAssets
+> Task :app:mergeReleaseAssets
+> Task :shared_preferences_android:compileReleaseKotlin
+> Task :app:copyFlutterAssetsRelease
+> Task :shared_preferences_android:compileReleaseJavaWithJavac
+> Task :shared_preferences_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :shared_preferences_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :app:generateReleaseResValues
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:generateReleaseResources
+> Task :app:packageReleaseResources
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease
+> Task :flutter_keyboard_visibility_temp_fork:extractDeepLinksRelease
+> Task :flutter_plugin_android_lifecycle:extractDeepLinksRelease
+> Task :geocoding_android:extractDeepLinksRelease
+> Task :google_sign_in_android:extractDeepLinksRelease
+> Task :image_picker_android:extractDeepLinksRelease
+> Task :app:parseReleaseLocalResources
+> Task :path_provider_android:extractDeepLinksRelease
+> Task :pay_android:extractDeepLinksRelease
+
+> Task :pay_android:processReleaseManifest
+package="io.flutter.plugins.pay_android" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/pay_android-2.0.0/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="io.flutter.plugins.pay_android" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/pay_android-2.0.0/android/src/main/AndroidManifest.xml.
+
+> Task :google_sign_in_android:processReleaseManifest
+package="io.flutter.plugins.googlesignin" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/google_sign_in_android-6.2.1/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="io.flutter.plugins.googlesignin" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/google_sign_in_android-6.2.1/android/src/main/AndroidManifest.xml.
+
+> Task :image_picker_android:processReleaseManifest
+package="io.flutter.plugins.imagepicker" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/image_picker_android-0.8.13+10/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="io.flutter.plugins.imagepicker" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/image_picker_android-0.8.13+10/android/src/main/AndroidManifest.xml.
+
+> Task :flutter_plugin_android_lifecycle:processReleaseManifest
+package="io.flutter.plugins.flutter_plugin_android_lifecycle" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.33/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="io.flutter.plugins.flutter_plugin_android_lifecycle" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.33/android/src/main/AndroidManifest.xml.
+
+> Task :flutter_keyboard_visibility_temp_fork:processReleaseManifest
+package="com.jrai.flutter_keyboard_visibility_temp_fork" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_temp_fork-0.1.5/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="com.jrai.flutter_keyboard_visibility_temp_fork" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_temp_fork-0.1.5/android/src/main/AndroidManifest.xml.
+
+> Task :path_provider_android:processReleaseManifest
+package="io.flutter.plugins.pathprovider" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/path_provider_android-2.2.22/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="io.flutter.plugins.pathprovider" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/path_provider_android-2.2.22/android/src/main/AndroidManifest.xml.
+
+> Task :geocoding_android:processReleaseManifest
+> Task :permission_handler_android:extractDeepLinksRelease
+> Task :quill_native_bridge_android:extractDeepLinksRelease
+
+> Task :permission_handler_android:processReleaseManifest
+package="com.baseflow.permissionhandler" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/permission_handler_android-13.0.1/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="com.baseflow.permissionhandler" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/permission_handler_android-13.0.1/android/src/main/AndroidManifest.xml.
+
+> Task :shared_preferences_android:extractDeepLinksRelease
+
+> Task :quill_native_bridge_android:processReleaseManifest
+package="dev.flutterquill.quill_native_bridge" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/quill_native_bridge_android-0.0.1+2/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="dev.flutterquill.quill_native_bridge" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/quill_native_bridge_android-0.0.1+2/android/src/main/AndroidManifest.xml.
+
+> Task :sign_in_with_apple:extractDeepLinksRelease
+
+> Task :shared_preferences_android:processReleaseManifest
+package="io.flutter.plugins.sharedpreferences" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.18/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="io.flutter.plugins.sharedpreferences" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.18/android/src/main/AndroidManifest.xml.
+
+> Task :sms_autofill:extractDeepLinksRelease
+
+> Task :sign_in_with_apple:processReleaseManifest
+package="com.aboutyou.dart_packages.sign_in_with_apple" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/sign_in_with_apple-6.1.4/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="com.aboutyou.dart_packages.sign_in_with_apple" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/sign_in_with_apple-6.1.4/android/src/main/AndroidManifest.xml.
+
+> Task :sqflite_android:extractDeepLinksRelease
+
+> Task :sms_autofill:processReleaseManifest
+package="com.jaumard.smsautofill" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/sms_autofill-2.4.1/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="com.jaumard.smsautofill" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/sms_autofill-2.4.1/android/src/main/AndroidManifest.xml.
+
+> Task :url_launcher_android:extractDeepLinksRelease
+
+> Task :sqflite_android:processReleaseManifest
+package="com.tekartik.sqflite" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/sqflite_android-2.4.2+2/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="com.tekartik.sqflite" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/sqflite_android-2.4.2+2/android/src/main/AndroidManifest.xml.
+
+> Task :flutter_keyboard_visibility_temp_fork:bundleLibCompileToJarRelease
+> Task :geocoding_android:bundleLibCompileToJarRelease
+
+> Task :url_launcher_android:processReleaseManifest
+package="io.flutter.plugins.urllauncher" found in source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.28/android/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="io.flutter.plugins.urllauncher" from the source AndroidManifest.xml: /Users/orenyahalom/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.28/android/src/main/AndroidManifest.xml.
+
+> Task :google_sign_in_android:bundleLibCompileToJarRelease
+> Task :image_picker_android:bundleLibCompileToJarRelease
+> Task :app:processReleaseMainManifest
+> Task :app:processReleaseManifest
+> Task :path_provider_android:bundleLibCompileToJarRelease
+> Task :app:processReleaseManifestForPackage
+> Task :pay_android:bundleLibCompileToJarRelease
+> Task :permission_handler_android:bundleLibCompileToJarRelease
+> Task :quill_native_bridge_android:bundleLibCompileToJarRelease
+> Task :app:mergeReleaseResources
+> Task :shared_preferences_android:bundleLibCompileToJarRelease
+> Task :sign_in_with_apple:bundleLibCompileToJarRelease
+> Task :sms_autofill:bundleLibCompileToJarRelease
+> Task :app:javaPreCompileRelease
+> Task :flutter_keyboard_visibility_temp_fork:prepareReleaseArtProfile UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:prepareReleaseArtProfile UP-TO-DATE
+> Task :geocoding_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :google_sign_in_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :image_picker_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :path_provider_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :pay_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :sqflite_android:bundleLibCompileToJarRelease
+> Task :permission_handler_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :url_launcher_android:bundleLibCompileToJarRelease
+> Task :quill_native_bridge_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :shared_preferences_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :sign_in_with_apple:prepareReleaseArtProfile UP-TO-DATE
+> Task :sms_autofill:prepareReleaseArtProfile UP-TO-DATE
+> Task :sqflite_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :url_launcher_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :flutter_keyboard_visibility_temp_fork:bundleLibRuntimeToJarRelease
+> Task :app:mergeReleaseArtProfile
+> Task :flutter_plugin_android_lifecycle:bundleLibRuntimeToJarRelease
+> Task :geocoding_android:bundleLibRuntimeToJarRelease
+> Task :google_sign_in_android:bundleLibRuntimeToJarRelease
+> Task :path_provider_android:bundleLibRuntimeToJarRelease
+> Task :image_picker_android:bundleLibRuntimeToJarRelease
+> Task :pay_android:bundleLibRuntimeToJarRelease
+> Task :permission_handler_android:bundleLibRuntimeToJarRelease
+> Task :quill_native_bridge_android:bundleLibRuntimeToJarRelease
+> Task :sign_in_with_apple:bundleLibRuntimeToJarRelease
+> Task :shared_preferences_android:bundleLibRuntimeToJarRelease
+> Task :sms_autofill:bundleLibRuntimeToJarRelease
+> Task :sqflite_android:bundleLibRuntimeToJarRelease
+> Task :url_launcher_android:bundleLibRuntimeToJarRelease
+> Task :app:extractProguardFiles
+> Task :flutter_keyboard_visibility_temp_fork:processReleaseJavaRes NO-SOURCE
+> Task :flutter_plugin_android_lifecycle:processReleaseJavaRes NO-SOURCE
+> Task :geocoding_android:processReleaseJavaRes NO-SOURCE
+> Task :google_sign_in_android:processReleaseJavaRes NO-SOURCE
+> Task :image_picker_android:processReleaseJavaRes NO-SOURCE
+> Task :path_provider_android:processReleaseJavaRes NO-SOURCE
+> Task :pay_android:processReleaseJavaRes
+> Task :permission_handler_android:processReleaseJavaRes NO-SOURCE
+> Task :quill_native_bridge_android:processReleaseJavaRes
+> Task :shared_preferences_android:processReleaseJavaRes
+> Task :sign_in_with_apple:processReleaseJavaRes
+> Task :sms_autofill:processReleaseJavaRes NO-SOURCE
+> Task :sqflite_android:processReleaseJavaRes NO-SOURCE
+> Task :url_launcher_android:processReleaseJavaRes NO-SOURCE
+> Task :app:mergeReleaseStartupProfile UP-TO-DATE
+> Task :app:compressReleaseAssets
+> Task :app:extractReleaseVersionControlInfo
+> Task :flutter_keyboard_visibility_temp_fork:createFullJarRelease
+> Task :flutter_keyboard_visibility_temp_fork:extractProguardFiles
+> Task :flutter_keyboard_visibility_temp_fork:generateReleaseLintModel
+> Task :flutter_keyboard_visibility_temp_fork:prepareLintJarForPublish UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:createFullJarRelease
+> Task :flutter_plugin_android_lifecycle:extractProguardFiles
+> Task :flutter_plugin_android_lifecycle:generateReleaseLintModel
+> Task :flutter_plugin_android_lifecycle:prepareLintJarForPublish UP-TO-DATE
+> Task :geocoding_android:createFullJarRelease
+> Task :geocoding_android:extractProguardFiles
+> Task :geocoding_android:generateReleaseLintModel
+> Task :geocoding_android:prepareLintJarForPublish UP-TO-DATE
+> Task :google_sign_in_android:createFullJarRelease
+> Task :google_sign_in_android:extractProguardFiles
+> Task :google_sign_in_android:generateReleaseLintModel
+> Task :google_sign_in_android:prepareLintJarForPublish UP-TO-DATE
+> Task :image_picker_android:createFullJarRelease
+> Task :image_picker_android:extractProguardFiles
+> Task :app:processReleaseResources
+> Task :image_picker_android:generateReleaseLintModel
+> Task :image_picker_android:prepareLintJarForPublish UP-TO-DATE
+> Task :path_provider_android:createFullJarRelease
+> Task :path_provider_android:extractProguardFiles
+> Task :path_provider_android:generateReleaseLintModel
+> Task :path_provider_android:prepareLintJarForPublish UP-TO-DATE
+> Task :pay_android:createFullJarRelease
+> Task :pay_android:extractProguardFiles
+> Task :pay_android:generateReleaseLintModel
+> Task :pay_android:prepareLintJarForPublish UP-TO-DATE
+> Task :permission_handler_android:createFullJarRelease
+> Task :permission_handler_android:extractProguardFiles
+> Task :permission_handler_android:generateReleaseLintModel
+> Task :permission_handler_android:prepareLintJarForPublish UP-TO-DATE
+> Task :quill_native_bridge_android:createFullJarRelease
+> Task :quill_native_bridge_android:extractProguardFiles
+> Task :quill_native_bridge_android:generateReleaseLintModel
+> Task :quill_native_bridge_android:prepareLintJarForPublish UP-TO-DATE
+> Task :shared_preferences_android:createFullJarRelease
+> Task :shared_preferences_android:extractProguardFiles
+> Task :shared_preferences_android:generateReleaseLintModel
+> Task :shared_preferences_android:prepareLintJarForPublish UP-TO-DATE
+> Task :sign_in_with_apple:createFullJarRelease
+> Task :sign_in_with_apple:extractProguardFiles
+> Task :sign_in_with_apple:generateReleaseLintModel
+> Task :sign_in_with_apple:prepareLintJarForPublish UP-TO-DATE
+> Task :sms_autofill:createFullJarRelease
+> Task :sms_autofill:extractProguardFiles
+> Task :sms_autofill:generateReleaseLintModel
+> Task :sms_autofill:prepareLintJarForPublish UP-TO-DATE
+> Task :sqflite_android:createFullJarRelease
+> Task :sqflite_android:extractProguardFiles
+> Task :sqflite_android:generateReleaseLintModel
+> Task :sqflite_android:prepareLintJarForPublish UP-TO-DATE
+> Task :url_launcher_android:createFullJarRelease
+> Task :url_launcher_android:extractProguardFiles
+> Task :app:compileReleaseKotlin
+> Task :url_launcher_android:generateReleaseLintModel
+> Task :app:compileReleaseJavaWithJavac
+> Task :app:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :app:processReleaseJavaRes
+> Task :url_launcher_android:prepareLintJarForPublish UP-TO-DATE
+> Task :app:generateReleaseLintVitalReportModel
+> Task :flutter_keyboard_visibility_temp_fork:stripReleaseDebugSymbols NO-SOURCE
+> Task :flutter_keyboard_visibility_temp_fork:copyReleaseJniLibsProjectAndLocalJars
+> Task :flutter_keyboard_visibility_temp_fork:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :flutter_keyboard_visibility_temp_fork:extractReleaseAnnotations
+> Task :flutter_keyboard_visibility_temp_fork:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :app:expandReleaseArtProfileWildcards
+> Task :image_picker_android:stripReleaseDebugSymbols NO-SOURCE
+> Task :image_picker_android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :image_picker_android:copyReleaseJniLibsProjectAndLocalJars
+> Task :flutter_keyboard_visibility_temp_fork:mergeReleaseJavaResource
+> Task :image_picker_android:extractReleaseAnnotations
+> Task :flutter_keyboard_visibility_temp_fork:syncReleaseLibJars
+> Task :flutter_keyboard_visibility_temp_fork:bundleReleaseLocalLintAar
+> Task :image_picker_android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:stripReleaseDebugSymbols NO-SOURCE
+> Task :image_picker_android:mergeReleaseJavaResource
+> Task :flutter_plugin_android_lifecycle:copyReleaseJniLibsProjectAndLocalJars
+> Task :image_picker_android:syncReleaseLibJars
+> Task :image_picker_android:bundleReleaseLocalLintAar
+> Task :flutter_plugin_android_lifecycle:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:extractReleaseAnnotations
+> Task :flutter_plugin_android_lifecycle:mergeReleaseConsumerProguardFiles
+> Task :geocoding_android:stripReleaseDebugSymbols NO-SOURCE
+> Task :geocoding_android:copyReleaseJniLibsProjectAndLocalJars
+> Task :flutter_plugin_android_lifecycle:mergeReleaseJavaResource
+> Task :geocoding_android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:syncReleaseLibJars
+> Task :flutter_plugin_android_lifecycle:bundleReleaseLocalLintAar
+> Task :geocoding_android:extractReleaseAnnotations
+> Task :geocoding_android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :google_sign_in_android:stripReleaseDebugSymbols NO-SOURCE
+> Task :geocoding_android:mergeReleaseJavaResource
+> Task :google_sign_in_android:copyReleaseJniLibsProjectAndLocalJars
+> Task :geocoding_android:syncReleaseLibJars
+> Task :geocoding_android:bundleReleaseLocalLintAar
+> Task :google_sign_in_android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :google_sign_in_android:extractReleaseAnnotations
+> Task :google_sign_in_android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :path_provider_android:stripReleaseDebugSymbols NO-SOURCE
+> Task :google_sign_in_android:mergeReleaseJavaResource
+> Task :path_provider_android:copyReleaseJniLibsProjectAndLocalJars
+> Task :google_sign_in_android:syncReleaseLibJars
+> Task :google_sign_in_android:bundleReleaseLocalLintAar
+> Task :path_provider_android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :path_provider_android:extractReleaseAnnotations
+> Task :path_provider_android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :pay_android:stripReleaseDebugSymbols NO-SOURCE
+> Task :path_provider_android:mergeReleaseJavaResource
+> Task :pay_android:copyReleaseJniLibsProjectAndLocalJars
+> Task :path_provider_android:syncReleaseLibJars
+> Task :path_provider_android:bundleReleaseLocalLintAar
+> Task :pay_android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :pay_android:extractReleaseAnnotations
+> Task :pay_android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :permission_handler_android:stripReleaseDebugSymbols NO-SOURCE
+> Task :permission_handler_android:copyReleaseJniLibsProjectAndLocalJars
+> Task :permission_handler_android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :pay_android:mergeReleaseJavaResource
+> Task :pay_android:syncReleaseLibJars
+> Task :pay_android:bundleReleaseLocalLintAar
+> Task :permission_handler_android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :quill_native_bridge_android:stripReleaseDebugSymbols NO-SOURCE
+> Task :quill_native_bridge_android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :quill_native_bridge_android:copyReleaseJniLibsProjectAndLocalJars
+> Task :quill_native_bridge_android:extractReleaseAnnotations
+> Task :permission_handler_android:mergeReleaseJavaResource
+> Task :quill_native_bridge_android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :shared_preferences_android:stripReleaseDebugSymbols NO-SOURCE
+> Task :quill_native_bridge_android:mergeReleaseJavaResource
+> Task :shared_preferences_android:copyReleaseJniLibsProjectAndLocalJars
+> Task :shared_preferences_android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :quill_native_bridge_android:syncReleaseLibJars
+> Task :quill_native_bridge_android:bundleReleaseLocalLintAar
+> Task :shared_preferences_android:extractReleaseAnnotations
+> Task :shared_preferences_android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :shared_preferences_android:mergeReleaseJavaResource
+> Task :sign_in_with_apple:stripReleaseDebugSymbols NO-SOURCE
+> Task :shared_preferences_android:syncReleaseLibJars
+> Task :shared_preferences_android:bundleReleaseLocalLintAar
+> Task :sign_in_with_apple:copyReleaseJniLibsProjectAndLocalJars
+> Task :sign_in_with_apple:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :sign_in_with_apple:extractReleaseAnnotations
+> Task :sign_in_with_apple:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :sms_autofill:stripReleaseDebugSymbols NO-SOURCE
+> Task :sign_in_with_apple:mergeReleaseJavaResource
+> Task :sms_autofill:copyReleaseJniLibsProjectAndLocalJars
+> Task :sign_in_with_apple:syncReleaseLibJars
+> Task :sign_in_with_apple:bundleReleaseLocalLintAar
+> Task :sms_autofill:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :sms_autofill:extractReleaseAnnotations
+> Task :sms_autofill:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :sqflite_android:stripReleaseDebugSymbols NO-SOURCE
+> Task :sms_autofill:mergeReleaseJavaResource
+> Task :sqflite_android:copyReleaseJniLibsProjectAndLocalJars
+> Task :sms_autofill:syncReleaseLibJars
+> Task :sms_autofill:bundleReleaseLocalLintAar
+> Task :sqflite_android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :sqflite_android:extractReleaseAnnotations
+> Task :sqflite_android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :url_launcher_android:stripReleaseDebugSymbols NO-SOURCE
+> Task :url_launcher_android:copyReleaseJniLibsProjectAndLocalJars
+> Task :sqflite_android:mergeReleaseJavaResource
+> Task :url_launcher_android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :sqflite_android:syncReleaseLibJars
+> Task :sqflite_android:bundleReleaseLocalLintAar
+> Task :url_launcher_android:extractReleaseAnnotations
+> Task :url_launcher_android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :url_launcher_android:mergeReleaseJavaResource
+> Task :url_launcher_android:syncReleaseLibJars
+> Task :url_launcher_android:bundleReleaseLocalLintAar
+> Task :flutter_keyboard_visibility_temp_fork:writeReleaseLintModelMetadata
+> Task :flutter_plugin_android_lifecycle:writeReleaseLintModelMetadata
+> Task :geocoding_android:writeReleaseLintModelMetadata
+> Task :google_sign_in_android:writeReleaseLintModelMetadata
+> Task :image_picker_android:writeReleaseLintModelMetadata
+> Task :app:mergeReleaseJavaResource
+> Task :permission_handler_android:extractReleaseAnnotations
+> Task :permission_handler_android:syncReleaseLibJars
+> Task :permission_handler_android:bundleReleaseLocalLintAar
+> Task :path_provider_android:writeReleaseLintModelMetadata
+
+> Task :app:minifyReleaseWithR8
+Supplied proguard configuration does not exist: /Users/orenyahalom/Documents/Projects/daynight-mobile/android/app/proguard-rules.pro
+
+> Task :geocoding_android:lintVitalAnalyzeRelease
+> Task :pay_android:writeReleaseLintModelMetadata
+> Task :flutter_keyboard_visibility_temp_fork:lintVitalAnalyzeRelease
+> Task :permission_handler_android:writeReleaseLintModelMetadata
+> Task :flutter_plugin_android_lifecycle:lintVitalAnalyzeRelease
+> Task :path_provider_android:lintVitalAnalyzeRelease
+> Task :quill_native_bridge_android:writeReleaseLintModelMetadata
+> Task :google_sign_in_android:lintVitalAnalyzeRelease
+> Task :shared_preferences_android:writeReleaseLintModelMetadata
+> Task :sign_in_with_apple:writeReleaseLintModelMetadata
+> Task :permission_handler_android:lintVitalAnalyzeRelease
+> Task :sms_autofill:writeReleaseLintModelMetadata
+> Task :image_picker_android:lintVitalAnalyzeRelease
+> Task :sqflite_android:writeReleaseLintModelMetadata
+> Task :sqflite_android:lintVitalAnalyzeRelease
+> Task :url_launcher_android:writeReleaseLintModelMetadata
+> Task :flutter_keyboard_visibility_temp_fork:generateReleaseLintVitalModel
+> Task :flutter_plugin_android_lifecycle:generateReleaseLintVitalModel
+> Task :geocoding_android:generateReleaseLintVitalModel
+> Task :google_sign_in_android:generateReleaseLintVitalModel
+> Task :image_picker_android:generateReleaseLintVitalModel
+> Task :path_provider_android:generateReleaseLintVitalModel
+> Task :pay_android:generateReleaseLintVitalModel
+> Task :permission_handler_android:generateReleaseLintVitalModel
+> Task :quill_native_bridge_android:generateReleaseLintVitalModel
+> Task :shared_preferences_android:generateReleaseLintVitalModel
+> Task :sign_in_with_apple:generateReleaseLintVitalModel
+> Task :sms_autofill:generateReleaseLintVitalModel
+> Task :sqflite_android:generateReleaseLintVitalModel
+> Task :url_launcher_android:generateReleaseLintVitalModel
+> Task :sms_autofill:lintVitalAnalyzeRelease
+> Task :app:collectReleaseDependencies
+> Task :app:sdkReleaseDependencyData
+> Task :app:validateSigningRelease
+> Task :app:writeReleaseAppMetadata
+> Task :app:writeReleaseSigningConfigVersions
+> Task :flutter_keyboard_visibility_temp_fork:bundleReleaseAar
+> Task :flutter_keyboard_visibility_temp_fork:mapReleaseSourceSetPaths
+> Task :flutter_keyboard_visibility_temp_fork:mergeReleaseResources
+> Task :flutter_plugin_android_lifecycle:bundleReleaseAar
+> Task :flutter_plugin_android_lifecycle:mapReleaseSourceSetPaths
+> Task :url_launcher_android:lintVitalAnalyzeRelease
+> Task :sign_in_with_apple:lintVitalAnalyzeRelease
+> Task :flutter_plugin_android_lifecycle:mergeReleaseResources
+> Task :geocoding_android:bundleReleaseAar
+> Task :geocoding_android:mapReleaseSourceSetPaths
+> Task :quill_native_bridge_android:lintVitalAnalyzeRelease
+> Task :flutter_keyboard_visibility_temp_fork:verifyReleaseResources
+> Task :flutter_plugin_android_lifecycle:verifyReleaseResources
+> Task :geocoding_android:mergeReleaseResources
+> Task :flutter_keyboard_visibility_temp_fork:assembleRelease
+> Task :flutter_plugin_android_lifecycle:assembleRelease
+> Task :google_sign_in_android:bundleReleaseAar
+> Task :google_sign_in_android:mapReleaseSourceSetPaths
+> Task :geocoding_android:verifyReleaseResources
+> Task :pay_android:lintVitalAnalyzeRelease
+> Task :google_sign_in_android:mergeReleaseResources
+> Task :geocoding_android:assembleRelease
+> Task :image_picker_android:bundleReleaseAar
+> Task :image_picker_android:mapReleaseSourceSetPaths
+> Task :flutter_plugin_android_lifecycle:compileReleaseLibraryResources
+> Task :google_sign_in_android:verifyReleaseResources
+> Task :image_picker_android:mergeReleaseResources
+> Task :google_sign_in_android:assembleRelease
+> Task :path_provider_android:bundleReleaseAar
+> Task :path_provider_android:mapReleaseSourceSetPaths
+> Task :image_picker_android:verifyReleaseResources
+> Task :path_provider_android:mergeReleaseResources
+> Task :image_picker_android:assembleRelease
+> Task :pay_android:bundleReleaseAar
+> Task :pay_android:mapReleaseSourceSetPaths
+> Task :path_provider_android:verifyReleaseResources
+> Task :pay_android:mergeReleaseResources
+> Task :path_provider_android:assembleRelease
+> Task :permission_handler_android:bundleReleaseAar
+> Task :permission_handler_android:mapReleaseSourceSetPaths
+> Task :permission_handler_android:mergeReleaseResources
+> Task :quill_native_bridge_android:bundleReleaseAar
+> Task :quill_native_bridge_android:mapReleaseSourceSetPaths
+> Task :shared_preferences_android:lintVitalAnalyzeRelease
+> Task :pay_android:verifyReleaseResources
+> Task :permission_handler_android:verifyReleaseResources
+> Task :quill_native_bridge_android:mergeReleaseResources
+> Task :pay_android:assembleRelease
+> Task :permission_handler_android:assembleRelease
+> Task :shared_preferences_android:bundleReleaseAar
+> Task :shared_preferences_android:mapReleaseSourceSetPaths
+> Task :quill_native_bridge_android:verifyReleaseResources
+> Task :shared_preferences_android:mergeReleaseResources
+> Task :quill_native_bridge_android:assembleRelease
+> Task :sign_in_with_apple:bundleReleaseAar
+> Task :sign_in_with_apple:mapReleaseSourceSetPaths
+> Task :sign_in_with_apple:mergeReleaseResources
+> Task :sms_autofill:bundleReleaseAar
+> Task :sms_autofill:mapReleaseSourceSetPaths
+> Task :app:lintVitalAnalyzeRelease
+> Task :sign_in_with_apple:verifyReleaseResources
+> Task :shared_preferences_android:verifyReleaseResources
+> Task :sms_autofill:mergeReleaseResources
+> Task :shared_preferences_android:assembleRelease
+> Task :sign_in_with_apple:assembleRelease
+> Task :sqflite_android:bundleReleaseAar
+> Task :sqflite_android:mapReleaseSourceSetPaths
+> Task :app:lintVitalReportRelease
+> Task :sms_autofill:verifyReleaseResources
+> Task :sqflite_android:mergeReleaseResources
+> Task :app:lintVitalRelease
+> Task :sms_autofill:assembleRelease
+> Task :url_launcher_android:bundleReleaseAar
+> Task :url_launcher_android:mapReleaseSourceSetPaths
+> Task :sqflite_android:verifyReleaseResources
+> Task :url_launcher_android:mergeReleaseResources
+> Task :sqflite_android:assembleRelease
+> Task :url_launcher_android:verifyReleaseResources
+> Task :url_launcher_android:assembleRelease
+> Task :app:convertShrunkResourcesToBinaryRelease
+> Task :app:compileReleaseArtProfile
+> Task :app:optimizeReleaseResources
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect
+> Task :app:assembleRelease
+
+[Incubating] Problems report is available at: file:///Users/orenyahalom/Documents/Projects/daynight-mobile/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.12/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 30s
+609 actionable tasks: 505 executed, 104 up-to-date

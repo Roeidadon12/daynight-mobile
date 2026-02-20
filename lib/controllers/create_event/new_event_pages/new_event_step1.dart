@@ -3,7 +3,9 @@ import '../../../app_localizations.dart';
 import '../../../constants.dart';
 import '../../shared/primary_button.dart';
 import '../../../models/category.dart';
+import '../../../models/language.dart';
 import '../../../utils/category_utils.dart';
+import '../../../utils/language_helper.dart';
 import '../../shared/labeled_text_form_field.dart';
 
 class NewEventStep1 extends StatefulWidget {
@@ -24,11 +26,29 @@ class NewEventStep1 extends StatefulWidget {
 
 class _NewEventStep1State extends State<NewEventStep1> {
   final _formKey = GlobalKey<FormState>();
-  final _eventNameController = TextEditingController();
+  
+  // Supported languages for event creation - derived from global language list
+  List<Language> get _supportedLanguages => LanguageHelper.getAllLanguages();
+  
+  // Get the default language
+  Language? get _defaultLanguage {
+    try {
+      return _supportedLanguages.firstWhere((lang) => lang.isDefault == 1);
+    } catch (e) {
+      return _supportedLanguages.isNotEmpty ? _supportedLanguages.first : null;
+    }
+  }
+  
+  // Map of controllers for each language
+  final Map<String, TextEditingController> _eventNameControllers = {};
+  
+  // Common fields (not language-specific)
   final _locationController = TextEditingController();
   final _minimalAgeController = TextEditingController();
   
-  Category? _selectedCategory;
+  // Map of category selection for each language
+  final Map<String, Category?> _selectedCategories = {};
+  
   DateTime? _startTime;
   DateTime? _endTime;
   bool _categoryExpanded = false;
@@ -38,6 +58,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
   bool _currencyExpanded = false;
   String _selectedLanguage = 'Hebrew';
   bool _languageExpanded = false;
+  late String _selectedLanguageTab; // Language tab for event name/category
 
   List<Category> _categories = [];
   
@@ -86,44 +107,108 @@ class _NewEventStep1State extends State<NewEventStep1> {
     // Load categories
     _categories = getCategoriesByLanguage();
     
+    // Initialize selected language tab with default language
+    _selectedLanguageTab = _defaultLanguage?.code ?? 'he';
+    
+    // Initialize controllers and categories for all supported languages
+    for (final lang in _supportedLanguages) {
+      _eventNameControllers[lang.code] = TextEditingController();
+      _selectedCategories[lang.code] = null;
+    }
+    
     // Initialize with existing data if any
-    _eventNameController.text = widget.eventData['title'] ?? '';
+    for (final lang in _supportedLanguages) {
+      _eventNameControllers[lang.code]!.text = widget.eventData['${lang.code}_title'] ?? '';
+      
+      // Add listener to save data when text changes
+      _eventNameControllers[lang.code]!.addListener(() {
+        widget.onDataChanged('${lang.code}_title', _eventNameControllers[lang.code]!.text);
+      });
+      
+      // Handle existing category data for this language
+      final existingCategory = widget.eventData['${lang.code}_category'];
+      final existingCategoryId = widget.eventData['${lang.code}_category_id'];
+      
+      if (existingCategoryId != null && _categories.isNotEmpty) {
+        try {
+          _selectedCategories[lang.code] = _categories.firstWhere(
+            (cat) => cat.id == existingCategoryId,
+          );
+        } catch (e) {
+          _selectedCategories[lang.code] = null;
+        }
+      } else if (existingCategory != null && _categories.isNotEmpty) {
+        if (existingCategory is Category) {
+          _selectedCategories[lang.code] = existingCategory;
+        } else if (existingCategory is int) {
+          try {
+            _selectedCategories[lang.code] = _categories.firstWhere(
+              (cat) => cat.id == existingCategory,
+            );
+          } catch (e) {
+            _selectedCategories[lang.code] = null;
+          }
+        } else if (existingCategory is String) {
+          try {
+            _selectedCategories[lang.code] = _categories.firstWhere(
+              (cat) => cat.slug == existingCategory || cat.name == existingCategory,
+            );
+          } catch (e) {
+            _selectedCategories[lang.code] = null;
+          }
+        }
+      }
+    }
+    
     _locationController.text = widget.eventData['address'] ?? '';
     _minimalAgeController.text = widget.eventData['min_age']?.toString() ?? '';
     
-    // Handle existing category data - find category by ID or slug if it exists
+    // Add listeners to common fields to save data when they change
+    _locationController.addListener(() {
+      widget.onDataChanged('address', _locationController.text);
+    });
+    
+    _minimalAgeController.addListener(() {
+      widget.onDataChanged('min_age', _minimalAgeController.text.isNotEmpty ? int.tryParse(_minimalAgeController.text) : 0);
+    });
+    
+    // Handle existing category data - find category by ID or slug if it exists (legacy support)
     final existingCategory = widget.eventData['category'];
     final existingCategoryId = widget.eventData['category_id'];
     
     if (existingCategoryId != null && _categories.isNotEmpty) {
-      // Prioritize category_id if available
+      // Prioritize category_id if available (legacy support - set for current language)
       try {
-        _selectedCategory = _categories.firstWhere(
+        _selectedCategories[_selectedLanguageTab] ??= _categories.firstWhere(
           (cat) => cat.id == existingCategoryId,
         );
       } catch (e) {
-        _selectedCategory = _categories.first;
+        // Ignore if not found
       }
     } else if (existingCategory != null && _categories.isNotEmpty) {
-      // Fallback to old category format
+      // Fallback to old category format (legacy support)
+      Category? legacyCategory;
       if (existingCategory is Category) {
-        _selectedCategory = existingCategory;
+        legacyCategory = existingCategory;
       } else if (existingCategory is int) {
         try {
-          _selectedCategory = _categories.firstWhere(
+          legacyCategory = _categories.firstWhere(
             (cat) => cat.id == existingCategory,
           );
         } catch (e) {
-          _selectedCategory = _categories.first;
+          // Ignore
         }
       } else if (existingCategory is String) {
         try {
-          _selectedCategory = _categories.firstWhere(
+          legacyCategory = _categories.firstWhere(
             (cat) => cat.slug == existingCategory || cat.name == existingCategory,
           );
         } catch (e) {
-          _selectedCategory = _categories.first;
+          // Ignore
         }
+      }
+      if (legacyCategory != null) {
+        _selectedCategories[_selectedLanguageTab] ??= legacyCategory;
       }
     }
     
@@ -177,36 +262,140 @@ class _NewEventStep1State extends State<NewEventStep1> {
     _selectedTimezone = widget.eventData['timezone'] ?? 'GMT+2 (Israel)';
     _selectedCurrency = widget.eventData['currency'] ?? 'ILS (Israeli Shekel)';
     _selectedLanguage = widget.eventData['language'] ?? 'Hebrew';
+    
+    // Initialize country from timezone
+    _updateCountryFromTimezone();
   }
 
   @override
   void dispose() {
-    _eventNameController.dispose();
+    // Save current language values before disposing
+    _saveCurrentLanguageValues();
+    
+    // Save common fields
+    widget.onDataChanged('address', _locationController.text);
+    widget.onDataChanged('min_age', _minimalAgeController.text.isNotEmpty ? int.tryParse(_minimalAgeController.text) : 0);
+    
+    // Save date/time fields
+    if (_startTime != null) {
+      widget.onDataChanged('start_date', '${_startTime!.year.toString().padLeft(4, '0')}-${_startTime!.month.toString().padLeft(2, '0')}-${_startTime!.day.toString().padLeft(2, '0')}');
+      widget.onDataChanged('start_time', '${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}');
+    }
+    if (_endTime != null) {
+      widget.onDataChanged('end_date', '${_endTime!.year.toString().padLeft(4, '0')}-${_endTime!.month.toString().padLeft(2, '0')}-${_endTime!.day.toString().padLeft(2, '0')}');
+      widget.onDataChanged('end_time', '${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}');
+    }
+    widget.onDataChanged('timezone', _selectedTimezone);
+    _updateCountryFromTimezone();
+    widget.onDataChanged('currency', _selectedCurrency);
+    widget.onDataChanged('language', _selectedLanguage);
+    
+    // Dispose all language-specific controllers
+    for (final controller in _eventNameControllers.values) {
+      controller.dispose();
+    }
     _locationController.dispose();
     _minimalAgeController.dispose();
     super.dispose();
   }
 
+  // Helper methods to get current language-specific values
+  TextEditingController get _currentEventNameController {
+    return _eventNameControllers[_selectedLanguageTab]!;
+  }
+
+  Category? get _currentSelectedCategory {
+    return _selectedCategories[_selectedLanguageTab];
+  }
+
+  set _currentSelectedCategory(Category? category) {
+    _selectedCategories[_selectedLanguageTab] = category;
+  }
+
+  // Method to save current language values to eventData
+  void _saveCurrentLanguageValues() {
+    widget.onDataChanged('${_selectedLanguageTab}_title', _currentEventNameController.text);
+    widget.onDataChanged('${_selectedLanguageTab}_category_id', _currentSelectedCategory?.id);
+  }
+
+  // Method to switch language tab
+  void _switchLanguageTab(String newLanguage) {
+    if (_selectedLanguageTab != newLanguage) {
+      // Save current language values before switching
+      _saveCurrentLanguageValues();
+      setState(() {
+        _selectedLanguageTab = newLanguage;
+      });
+    }
+  }
+
+  // Helper method to extract country from timezone string
+  String _extractCountryFromTimezone(String timezone) {
+    // Extract text between parentheses, e.g., "GMT+2 (Israel)" -> "Israel"
+    final regex = RegExp(r'\(([^)]+)\)');
+    final match = regex.firstMatch(timezone);
+    return match?.group(1) ?? '';
+  }
+
+  // Helper method to update country field based on timezone
+  void _updateCountryFromTimezone() {
+    final defaultLangCode = _defaultLanguage?.code ?? 'he';
+    final country = _extractCountryFromTimezone(_selectedTimezone);
+    widget.onDataChanged('${defaultLangCode}_country', country);
+  }
+
   bool _isFormValid() {
-    return _eventNameController.text.isNotEmpty &&
+    // Default language fields are mandatory
+    final defaultLangCode = _defaultLanguage?.code;
+    if (defaultLangCode != null) {
+      final defaultNameFilled = _eventNameControllers[defaultLangCode]?.text.isNotEmpty ?? false;
+      final defaultCategoryFilled = _selectedCategories[defaultLangCode] != null;
+      
+      if (!defaultNameFilled || !defaultCategoryFilled) {
+        return false;
+      }
+    }
+    
+    // Also check that at least one language (any) has both event name and category
+    final hasAtLeastOneLanguageFilled = _supportedLanguages.any(
+      (lang) => _eventNameControllers[lang.code]!.text.isNotEmpty && _selectedCategories[lang.code] != null,
+    );
+    
+    return hasAtLeastOneLanguageFilled &&
            _locationController.text.isNotEmpty &&
-           _selectedCategory != null &&
            _startTime != null &&
            _endTime != null;
   }
 
   void _saveAndNext() {
     if (_formKey.currentState!.validate() && _isFormValid()) {
-      // Save all form data
-      widget.onDataChanged('title', _eventNameController.text);
-      widget.onDataChanged('address', _locationController.text);
-      widget.onDataChanged('category_id', _selectedCategory?.id);
-      widget.onDataChanged('min_age', _minimalAgeController.text.isNotEmpty ? int.tryParse(_minimalAgeController.text) : 0);
+      print('===== Step 1: Saving Form Data =====');
+      
+      // Save all form data for all supported languages
+      for (final lang in _supportedLanguages) {
+        final title = _eventNameControllers[lang.code]!.text;
+        final categoryId = _selectedCategories[lang.code]?.id;
+        widget.onDataChanged('${lang.code}_title', title);
+        widget.onDataChanged('${lang.code}_category_id', categoryId);
+        print('${lang.code}_title: "$title"');
+        print('${lang.code}_category_id: $categoryId');
+      }
+      
+      final address = _locationController.text;
+      final minAge = _minimalAgeController.text.isNotEmpty ? int.tryParse(_minimalAgeController.text) : 0;
+      widget.onDataChanged('address', address);
+      widget.onDataChanged('min_age', minAge);
+      print('address: "$address"');
+      print('min_age: $minAge');
       
       // Save start date and time separately
       if (_startTime != null) {
-        widget.onDataChanged('start_date', '${_startTime!.year.toString().padLeft(4, '0')}-${_startTime!.month.toString().padLeft(2, '0')}-${_startTime!.day.toString().padLeft(2, '0')}');
-        widget.onDataChanged('start_time', '${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}');
+        final startDate = '${_startTime!.year.toString().padLeft(4, '0')}-${_startTime!.month.toString().padLeft(2, '0')}-${_startTime!.day.toString().padLeft(2, '0')}';
+        final startTime = '${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}';
+        widget.onDataChanged('start_date', startDate);
+        widget.onDataChanged('start_time', startTime);
+        print('start_date: $startDate');
+        print('start_time: $startTime');
       } else {
         widget.onDataChanged('start_date', null);
         widget.onDataChanged('start_time', null);
@@ -214,15 +403,24 @@ class _NewEventStep1State extends State<NewEventStep1> {
       
       // Save end date and time separately
       if (_endTime != null) {
-        widget.onDataChanged('end_date', '${_endTime!.year.toString().padLeft(4, '0')}-${_endTime!.month.toString().padLeft(2, '0')}-${_endTime!.day.toString().padLeft(2, '0')}');
-        widget.onDataChanged('end_time', '${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}');
+        final endDate = '${_endTime!.year.toString().padLeft(4, '0')}-${_endTime!.month.toString().padLeft(2, '0')}-${_endTime!.day.toString().padLeft(2, '0')}';
+        final endTime = '${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}';
+        widget.onDataChanged('end_date', endDate);
+        widget.onDataChanged('end_time', endTime);
+        print('end_date: $endDate');
+        print('end_time: $endTime');
       } else {
         widget.onDataChanged('end_date', null);
         widget.onDataChanged('end_time', null);
       }
       widget.onDataChanged('timezone', _selectedTimezone);
+      _updateCountryFromTimezone();
       widget.onDataChanged('currency', _selectedCurrency);
       widget.onDataChanged('language', _selectedLanguage);
+      print('timezone: $_selectedTimezone');
+      print('currency: $_selectedCurrency');
+      print('language: $_selectedLanguage');
+      print('=====================================\n');
       
       widget.onNext();
     }
@@ -282,6 +480,15 @@ class _NewEventStep1State extends State<NewEventStep1> {
             _endTime = _startTime!.add(const Duration(hours: 2));
           }
         });
+        // Save the updated times immediately
+        if (_startTime != null) {
+          widget.onDataChanged('start_date', '${_startTime!.year.toString().padLeft(4, '0')}-${_startTime!.month.toString().padLeft(2, '0')}-${_startTime!.day.toString().padLeft(2, '0')}');
+          widget.onDataChanged('start_time', '${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}');
+        }
+        if (_endTime != null) {
+          widget.onDataChanged('end_date', '${_endTime!.year.toString().padLeft(4, '0')}-${_endTime!.month.toString().padLeft(2, '0')}-${_endTime!.day.toString().padLeft(2, '0')}');
+          widget.onDataChanged('end_time', '${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}');
+        }
       }
     }
   }
@@ -351,6 +558,11 @@ class _NewEventStep1State extends State<NewEventStep1> {
         setState(() {
           _endTime = newEndTime;
         });
+        // Save the updated end time immediately
+        if (_endTime != null) {
+          widget.onDataChanged('end_date', '${_endTime!.year.toString().padLeft(4, '0')}-${_endTime!.month.toString().padLeft(2, '0')}-${_endTime!.day.toString().padLeft(2, '0')}');
+          widget.onDataChanged('end_time', '${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}');
+        }
       }
     }
   }
@@ -384,30 +596,137 @@ class _NewEventStep1State extends State<NewEventStep1> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Event Name
-                    LabeledTextFormField(
-                      controller: _eventNameController,
-                      titleKey: 'event-name',
-                      hintTextKey: 'enter-event-name',
-                      errorTextKey: 'event-name-required',
-                      isRequired: true,
-                      onChanged: (value) => setState(() {}),
+                    // Language Tabs (outside the bordered container)
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(24),
+                          topRight: Radius.circular(24),
+                        ),
+                        border: Border.all(
+                          color: Colors.grey[700]!,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Hebrew Tab
+                          GestureDetector(
+                            onTap: () {
+                              _switchLanguageTab('he');
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: _selectedLanguageTab == 'he' 
+                                    ? kBrandPrimary
+                                    : Colors.transparent,
+                                borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(18),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '🇮🇱',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'עברית',
+                                    style: TextStyle(
+                                      color: _selectedLanguageTab == 'he'
+                                          ? Colors.white
+                                          : Colors.grey[400],
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          // English Tab
+                          GestureDetector(
+                            onTap: () {
+                              _switchLanguageTab('en');
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: _selectedLanguageTab == 'en'
+                                    ? kBrandPrimary
+                                    : Colors.transparent,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(18),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '🇬🇧',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'English',
+                                    style: TextStyle(
+                                      color: _selectedLanguageTab == 'en'
+                                          ? Colors.white
+                                          : Colors.grey[400],
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     
-                    const SizedBox(height: 24),
-                    
-                    // Category and Minimal Age Layout
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Category and Minimal Age Input Row
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Category Field Label
-                            Expanded(
-                              flex: 1,
-                              child: Column(
+                    // Rectangle container around Event Name and Category
+                    Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          bottomLeft: Radius.circular(16),
+                          bottomRight: Radius.circular(16),
+                        ),
+                        border: Border.all(
+                          color: Colors.grey[700]!,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Event Name
+                          LabeledTextFormField(
+                            controller: _currentEventNameController,
+                            titleKey: 'event-name',
+                            hintTextKey: 'enter-event-name',
+                            errorTextKey: 'event-name-required',
+                            isRequired: _selectedLanguageTab == _defaultLanguage?.code,
+                            onChanged: (value) {
+                              _saveCurrentLanguageValues();
+                              setState(() {});
+                            },
+                          ),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Category Layout (Full Width)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Category Field
+                              Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   // Title with required asterisk
@@ -422,12 +741,13 @@ class _NewEventStep1State extends State<NewEventStep1> {
                                         TextSpan(
                                           text: AppLocalizations.of(context).get('category'),
                                         ),
-                                        const TextSpan(
-                                          text: ' *',
-                                          style: TextStyle(
-                                            color: Colors.red,
+                                        if (_selectedLanguageTab == _defaultLanguage?.code)
+                                          const TextSpan(
+                                            text: ' *',
+                                            style: TextStyle(
+                                              color: Colors.red,
+                                            ),
                                           ),
-                                        ),
                                       ],
                                     ),
                                   ),
@@ -455,9 +775,9 @@ class _NewEventStep1State extends State<NewEventStep1> {
                                         children: [
                                           Expanded(
                                             child: Text(
-                                              _selectedCategory?.name ?? 'Select Category',
+                                              _currentSelectedCategory?.name ?? 'Select Category',
                                               style: TextStyle(
-                                                color: _selectedCategory != null ? Colors.white : Colors.grey[500],
+                                                color: _currentSelectedCategory != null ? Colors.white : Colors.grey[500],
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w500,
                                               ),
@@ -479,121 +799,132 @@ class _NewEventStep1State extends State<NewEventStep1> {
                                   ),
                                 ],
                               ),
-                            ),
-                            
-                            const SizedBox(width: 16),
-                            
-                            // Minimal Age
-                            Expanded(
-                              flex: 1,
-                              child: LabeledTextFormField(
-                                controller: _minimalAgeController,
-                                titleKey: 'minimal-age',
-                                hintTextKey: 'enter-minimal-age',
-                                keyboardType: TextInputType.number,
-                                customValidator: (value) {
-                                  if (value != null && value.isNotEmpty) {
-                                    final age = int.tryParse(value);
-                                    if (age == null || age < 0 || age > 120) {
-                                      return AppLocalizations.of(context).get('invalid-age');
-                                    }
-                                  }
-                                  return null;
-                                },
-                                onChanged: (value) => setState(() {}),
-                              ),
-                            ),
-                          ],
-                        ),
-                        
-                        // Full-width Category Dropdown (appears below the row)
-                        if (_categoryExpanded) ...[
-                          const SizedBox(height: 8),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            decoration: BoxDecoration(
-                              color: kMainBackgroundColor,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: kBrandPrimary,
-                                width: 2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.45),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: _categories.map((category) {
-                                final isSelected = category == _selectedCategory;
-                                return InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedCategory = category;
-                                      _categoryExpanded = false;
-                                    });
-                                  },
-                                  borderRadius: BorderRadius.circular(14),
-                                  child: Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(14),
-                                      color: isSelected ? kBrandPrimary.withValues(alpha: 0.15) : Colors.transparent,
-                                      border: isSelected
-                                          ? Border.all(
-                                              color: kBrandPrimary.withValues(alpha: 0.30),
-                                              width: 1,
-                                            )
-                                          : null,
+                              
+                              // Full-width Category Dropdown (appears below)
+                              if (_categoryExpanded) ...[
+                                const SizedBox(height: 8),
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: kMainBackgroundColor,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: kBrandPrimary,
+                                      width: 2,
                                     ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            category.name,
-                                            style: TextStyle(
-                                              color: isSelected ? kBrandPrimary : Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.45),
+                                        blurRadius: 16,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: _categories.map((category) {
+                                      final isSelected = category == _currentSelectedCategory;
+                                      return InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            _currentSelectedCategory = category;
+                                            _categoryExpanded = false;
+                                          });
+                                          // Save category immediately
+                                          widget.onDataChanged('${_selectedLanguageTab}_category_id', category.id);
+                                        },
+                                        borderRadius: BorderRadius.circular(14),
+                                        child: Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(14),
+                                            color: isSelected ? kBrandPrimary.withValues(alpha: 0.15) : Colors.transparent,
+                                            border: isSelected
+                                                ? Border.all(
+                                                    color: kBrandPrimary.withValues(alpha: 0.30),
+                                                    width: 1,
+                                                  )
+                                                : null,
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  category.name,
+                                                  style: TextStyle(
+                                                    color: isSelected ? kBrandPrimary : Colors.white,
+                                                    fontSize: 16,
+                                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                                  ),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              if (isSelected)
+                                                Icon(
+                                                  Icons.check_circle_rounded,
+                                                  size: 18,
+                                                  color: kBrandPrimary,
+                                                ),
+                                            ],
                                           ),
                                         ),
-                                        if (isSelected)
-                                          Icon(
-                                            Icons.check_circle_rounded,
-                                            size: 18,
-                                            color: kBrandPrimary,
-                                          ),
-                                      ],
-                                    ),
+                                      );
+                                    }).toList(),
                                   ),
-                                );
-                              }).toList(),
-                            ),
+                                ),
+                              ],
+                            ],
                           ),
                         ],
-                      ],
+                      ),
                     ),
                     
                     const SizedBox(height: 24),
                     
-                    // Location
-                    LabeledTextFormField(
-                      controller: _locationController,
-                      titleKey: 'location',
-                      hintTextKey: 'enter-event-location',
-                      errorTextKey: 'location-required',
-                      isRequired: true,
-                      suffixIcon: const Icon(Icons.location_on, color: Colors.white54),
-                      onChanged: (value) => setState(() {}),
+                    // Location and Minimal Age Row
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Location
+                        Expanded(
+                          flex: 1,
+                          child: LabeledTextFormField(
+                            controller: _locationController,
+                            titleKey: 'location',
+                            hintTextKey: 'enter-event-location',
+                            errorTextKey: 'location-required',
+                            isRequired: true,
+                            suffixIcon: const Icon(Icons.location_on, color: Colors.white54),
+                            onChanged: (value) => setState(() {}),
+                          ),
+                        ),
+                        
+                        const SizedBox(width: 16),
+                        
+                        // Minimal Age
+                        Expanded(
+                          flex: 1,
+                          child: LabeledTextFormField(
+                            controller: _minimalAgeController,
+                            titleKey: 'minimal-age',
+                            hintTextKey: 'enter-minimal-age',
+                            keyboardType: TextInputType.number,
+                            customValidator: (value) {
+                              if (value != null && value.isNotEmpty) {
+                                final age = int.tryParse(value);
+                                if (age == null || age < 0 || age > 120) {
+                                  return AppLocalizations.of(context).get('invalid-age');
+                                }
+                              }
+                              return null;
+                            },
+                            onChanged: (value) => setState(() {}),
+                          ),
+                        ),
+                      ],
                     ),
                     
                     const SizedBox(height: 24),
@@ -808,6 +1139,8 @@ class _NewEventStep1State extends State<NewEventStep1> {
                                       _selectedTimezone = timezone;
                                       _timezoneExpanded = false;
                                     });
+                                    widget.onDataChanged('timezone', _selectedTimezone);
+                                    _updateCountryFromTimezone();
                                   },
                                   borderRadius: BorderRadius.circular(14),
                                   child: Container(
@@ -1036,6 +1369,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
                                   _selectedCurrency = currency;
                                   _currencyExpanded = false;
                                 });
+                                widget.onDataChanged('currency', currency);
                               },
                               borderRadius: BorderRadius.circular(14),
                               child: Container(
@@ -1111,6 +1445,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
                                   _selectedLanguage = language;
                                   _languageExpanded = false;
                                 });
+                                widget.onDataChanged('language', language);
                               },
                               borderRadius: BorderRadius.circular(14),
                               child: Container(

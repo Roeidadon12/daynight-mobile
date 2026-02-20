@@ -138,6 +138,8 @@ const Map<String, String> heTexts = {
   'create-event-main-image': 'תמונת ראשית של האירוע (ניתן לשנות בכל עת)',
   'create-event-description': 'תיאור האירוע',
   'create-event-description-instructions': 'כתוב תיאור שיגרום להם לרצות להגיע ומה יהיה באירוע',
+  'description-minimum-characters': '(נדרש מינימום 30 תווים)',
+  'characters': 'תווים',
   'create-event-continue-to-advanced-settings': 'המשך להגדרות מתקדמות',
   'organizer-name': 'שם המארגן',
   'enter-organizer-name': 'הזן שם המארגן',
