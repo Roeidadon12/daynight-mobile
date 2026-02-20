@@ -47,7 +47,7 @@ void main() async {
 
   // Your existing initialization
   await setAppLanguageIdByDeviceLocale();
-  await CategoryRepository().loadCategories(languageId: kAppLanguageId);
+  await CategoryRepository().loadAllCategories();
 
   // Wrap your app with ProviderScope for Riverpod
   runApp(

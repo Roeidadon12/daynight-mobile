@@ -61,4 +61,19 @@ class Category {
       isFeatured: json['is_featured'] as String,
     );
   }
+
+  /// Converts this [Category] instance to a JSON map.
+  ///
+  /// Returns a Map that can be serialized to JSON.
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'language_id': languageId,
+      'image': image,
+      'slug': slug,
+      'serial_number': serialNumber,
+      'is_featured': isFeatured,
+    };
+  }
 }

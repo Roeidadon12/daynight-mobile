@@ -60,7 +60,8 @@ class _NewEventStep1State extends State<NewEventStep1> {
   bool _languageExpanded = false;
   late String _selectedLanguageTab; // Language tab for event name/category
 
-  List<Category> _categories = [];
+  // Map of categories for each language
+  Map<String, List<Category>> _categoriesByLanguage = {};
   
   List<String> get _timezones => [
     'GMT+2 (Israel)',
@@ -104,8 +105,10 @@ class _NewEventStep1State extends State<NewEventStep1> {
   @override
   void initState() {
     super.initState();
-    // Load categories
-    _categories = getCategoriesByLanguage();
+    // Load categories for all supported languages
+    for (final lang in _supportedLanguages) {
+      _categoriesByLanguage[lang.code] = getCategoriesByLanguageId(lang.id);
+    }
     
     // Initialize selected language tab with default language
     _selectedLanguageTab = _defaultLanguage?.code ?? 'he';
@@ -128,21 +131,22 @@ class _NewEventStep1State extends State<NewEventStep1> {
       // Handle existing category data for this language
       final existingCategory = widget.eventData['${lang.code}_category'];
       final existingCategoryId = widget.eventData['${lang.code}_category_id'];
+      final langCategories = _categoriesByLanguage[lang.code] ?? [];
       
-      if (existingCategoryId != null && _categories.isNotEmpty) {
+      if (existingCategoryId != null && langCategories.isNotEmpty) {
         try {
-          _selectedCategories[lang.code] = _categories.firstWhere(
+          _selectedCategories[lang.code] = langCategories.firstWhere(
             (cat) => cat.id == existingCategoryId,
           );
         } catch (e) {
           _selectedCategories[lang.code] = null;
         }
-      } else if (existingCategory != null && _categories.isNotEmpty) {
+      } else if (existingCategory != null && langCategories.isNotEmpty) {
         if (existingCategory is Category) {
           _selectedCategories[lang.code] = existingCategory;
         } else if (existingCategory is int) {
           try {
-            _selectedCategories[lang.code] = _categories.firstWhere(
+            _selectedCategories[lang.code] = langCategories.firstWhere(
               (cat) => cat.id == existingCategory,
             );
           } catch (e) {
@@ -150,7 +154,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
           }
         } else if (existingCategory is String) {
           try {
-            _selectedCategories[lang.code] = _categories.firstWhere(
+            _selectedCategories[lang.code] = langCategories.firstWhere(
               (cat) => cat.slug == existingCategory || cat.name == existingCategory,
             );
           } catch (e) {
@@ -175,24 +179,25 @@ class _NewEventStep1State extends State<NewEventStep1> {
     // Handle existing category data - find category by ID or slug if it exists (legacy support)
     final existingCategory = widget.eventData['category'];
     final existingCategoryId = widget.eventData['category_id'];
+    final currentLangCategories = _categoriesByLanguage[_selectedLanguageTab] ?? [];
     
-    if (existingCategoryId != null && _categories.isNotEmpty) {
+    if (existingCategoryId != null && currentLangCategories.isNotEmpty) {
       // Prioritize category_id if available (legacy support - set for current language)
       try {
-        _selectedCategories[_selectedLanguageTab] ??= _categories.firstWhere(
+        _selectedCategories[_selectedLanguageTab] ??= currentLangCategories.firstWhere(
           (cat) => cat.id == existingCategoryId,
         );
       } catch (e) {
         // Ignore if not found
       }
-    } else if (existingCategory != null && _categories.isNotEmpty) {
+    } else if (existingCategory != null && currentLangCategories.isNotEmpty) {
       // Fallback to old category format (legacy support)
       Category? legacyCategory;
       if (existingCategory is Category) {
         legacyCategory = existingCategory;
       } else if (existingCategory is int) {
         try {
-          legacyCategory = _categories.firstWhere(
+          legacyCategory = currentLangCategories.firstWhere(
             (cat) => cat.id == existingCategory,
           );
         } catch (e) {
@@ -200,7 +205,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
         }
       } else if (existingCategory is String) {
         try {
-          legacyCategory = _categories.firstWhere(
+          legacyCategory = currentLangCategories.firstWhere(
             (cat) => cat.slug == existingCategory || cat.name == existingCategory,
           );
         } catch (e) {
@@ -310,6 +315,11 @@ class _NewEventStep1State extends State<NewEventStep1> {
 
   set _currentSelectedCategory(Category? category) {
     _selectedCategories[_selectedLanguageTab] = category;
+  }
+
+  // Get categories for the currently selected language tab
+  List<Category> get _currentCategories {
+    return _categoriesByLanguage[_selectedLanguageTab] ?? [];
   }
 
   // Method to save current language values to eventData
@@ -823,7 +833,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
                                   ),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    children: _categories.map((category) {
+                                    children: _currentCategories.map((category) {
                                       final isSelected = category == _currentSelectedCategory;
                                       return InkWell(
                                         onTap: () {

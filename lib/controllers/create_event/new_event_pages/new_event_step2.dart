@@ -6,10 +6,10 @@ import '../../../app_localizations.dart';
 import '../../../constants.dart';
 import '../../../models/language.dart';
 import '../../shared/primary_button.dart';
-import '../../shared/rich_text_editor.dart';
 import '../../../utils/language_helper.dart';
 import '../../../utils/quill_to_html_converter.dart';
 import '../../../utils/logger.dart';
+import '../full_page_description_editor.dart';
 
 class NewEventStep2 extends StatefulWidget {
   final Map<String, dynamic> eventData;
@@ -79,6 +79,11 @@ class _NewEventStep2State extends State<NewEventStep2> {
                                   '';
       _descriptionControllers[lang.code]!.text = existingDescription;
       
+      print('Loaded description for ${lang.code}: ${existingDescription.length} characters');
+      if (existingDescription.isNotEmpty) {
+        print('First 100 chars: ${existingDescription.substring(0, existingDescription.length > 100 ? 100 : existingDescription.length)}');
+      }
+      
       // Add listener to controller to see when it changes
       _descriptionControllers[lang.code]!.addListener(() {
         setState(() {});
@@ -132,6 +137,43 @@ class _NewEventStep2State extends State<NewEventStep2> {
     }
   }
 
+  // Method to open full-page description editor
+  Future<void> _openFullPageEditor() async {
+    // Save current description before opening editor
+    _saveCurrentLanguageDescription();
+    
+    // Get current language info
+    final currentLang = _supportedLanguages.firstWhere(
+      (lang) => lang.code == _selectedLanguageTab,
+      orElse: () => _supportedLanguages.first,
+    );
+
+    // Get the current content with formatting
+    final currentContent = _currentDescriptionController.text;
+    
+    print('Opening full-page editor with content length: ${currentContent.length}');
+    if (currentContent.isNotEmpty) {
+      print('Content preview: ${currentContent.substring(0, currentContent.length > 100 ? 100 : currentContent.length)}...');
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => FullPageDescriptionEditor(
+          initialContent: currentContent,
+          languageCode: currentLang.code,
+          languageName: currentLang.name,
+          onSave: (content) {
+            print('Saving content from full-page editor, length: ${content.length}');
+            setState(() {
+              _currentDescriptionController.text = content;
+              _saveCurrentLanguageDescription();
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   bool _isFormValid() {
     // Only default language description is mandatory, others are optional
     final defaultLangCode = _defaultLanguage?.code;
@@ -167,6 +209,28 @@ class _NewEventStep2State extends State<NewEventStep2> {
     } catch (e) {
       // Fallback to plain text if HTML conversion fails
       return _extractPlainTextFromQuill(deltaJson);
+    }
+  }
+
+  /// Get a preview of the description for the tappable field
+  String _getDescriptionPreview() {
+    final controllerText = _currentDescriptionController.text;
+    
+    if (controllerText.isEmpty) {
+      return AppLocalizations.of(context).get('create-event-description-instructions');
+    }
+    
+    try {
+      final json = jsonDecode(controllerText);
+      final plainText = _extractPlainTextFromQuill(json);
+      return plainText.trim().isNotEmpty 
+        ? plainText.trim() 
+        : AppLocalizations.of(context).get('create-event-description-instructions');
+    } catch (e) {
+      // If not JSON, treat as plain text
+      return controllerText.trim().isNotEmpty 
+        ? controllerText.trim() 
+        : AppLocalizations.of(context).get('create-event-description-instructions');
     }
   }
 
@@ -235,13 +299,18 @@ class _NewEventStep2State extends State<NewEventStep2> {
     String description = _currentDescriptionController.text;
     String htmlDescription = '';
     
+    print('Saving description for language: $_selectedLanguageTab');
+    print('Raw content length: ${_currentDescriptionController.text.length}');
+    
     try {
       // If the text is in JSON format (Quill delta), extract both formats
       final json = jsonDecode(_currentDescriptionController.text);
       description = _extractPlainTextFromQuill(json);
       htmlDescription = _extractHtmlFromQuill(json);
+      print('Successfully parsed as Quill JSON - Plain text length: ${description.length}, HTML length: ${htmlDescription.length}');
     } catch (e) {
       // If it's not JSON, it's already plain text
+      print('Content is not Quill JSON, treating as plain text: $e');
       description = _currentDescriptionController.text;
       htmlDescription = _currentDescriptionController.text; // Fallback to plain text
     }
@@ -250,6 +319,8 @@ class _NewEventStep2State extends State<NewEventStep2> {
     widget.onDataChanged('${_selectedLanguageTab}_description', description);
     widget.onDataChanged('${_selectedLanguageTab}_descriptionHtml', htmlDescription);
     widget.onDataChanged('${_selectedLanguageTab}_descriptionRaw', _currentDescriptionController.text);
+    
+    print('Saved description fields for ${_selectedLanguageTab}');
   }
   
   // Method to save all languages description data (for final submission)
@@ -580,16 +651,60 @@ class _NewEventStep2State extends State<NewEventStep2> {
                           ),
                           const SizedBox(height: 8),
                           
-                          // Rich Text Editor
-                          RichTextEditor(
-                            key: ValueKey(_selectedLanguageTab),
-                            controller: _currentDescriptionController,
-                            hintText: AppLocalizations.of(context).get('create-event-description-instructions'),
-                            onChanged: (value) {
-                              // Save current language description in real-time as user types
-                              _saveCurrentLanguageDescription();
-                              setState(() {});
-                            },
+                          // Tappable Description Field (opens full-page editor)
+                          GestureDetector(
+                            onTap: _openFullPageEditor,
+                            child: Container(
+                              width: double.infinity,
+                              constraints: const BoxConstraints(
+                                minHeight: 150,
+                              ),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withAlpha(77),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.grey[700]!,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.edit_note,
+                                        color: kBrandPrimary,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        AppLocalizations.of(context).get('tap-to-edit'),
+                                        style: TextStyle(
+                                          color: kBrandPrimary,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    _getDescriptionPreview(),
+                                    maxLines: 4,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: _currentDescriptionController.text.isEmpty 
+                                        ? Colors.grey[500] 
+                                        : Colors.white,
+                                      fontSize: 16,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                           
                           const SizedBox(height: 8),
