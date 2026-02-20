@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../app_localizations.dart';
 import '../../../constants.dart';
 import '../../shared/primary_button.dart';
@@ -165,7 +166,7 @@ class _NewEventStep1State extends State<NewEventStep1> {
     }
     
     _locationController.text = widget.eventData['address'] ?? '';
-    _minimalAgeController.text = widget.eventData['min_age']?.toString() ?? '';
+    _minimalAgeController.text = widget.eventData['min_age']?.toString() ?? '0';
     
     // Add listeners to common fields to save data when they change
     _locationController.addListener(() {
@@ -606,97 +607,146 @@ class _NewEventStep1State extends State<NewEventStep1> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Language Tabs (outside the bordered container)
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(24),
-                          topRight: Radius.circular(24),
-                        ),
-                        border: Border.all(
-                          color: Colors.grey[700]!,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Hebrew Tab
-                          GestureDetector(
-                            onTap: () {
-                              _switchLanguageTab('he');
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: _selectedLanguageTab == 'he' 
-                                    ? kBrandPrimary
-                                    : Colors.transparent,
-                                borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(18),
-                                ),
+                    // Language Tabs
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Hebrew Tab (Default Language - rendered first/underneath)
+                        GestureDetector(
+                          onTap: () {
+                            _switchLanguageTab('he');
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
+                            decoration: BoxDecoration(
+                              color: _selectedLanguageTab == 'he' 
+                                  ? const Color(0xFF1A1A1A)
+                                  : kMainBackgroundColor,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '🇮🇱',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'עברית',
-                                    style: TextStyle(
-                                      color: _selectedLanguageTab == 'he'
-                                          ? Colors.white
-                                          : Colors.grey[400],
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
+                              border: Border(
+                                top: BorderSide(
+                                  color: _selectedLanguageTab == 'he'
+                                      ? kBrandPrimary
+                                      : Colors.grey[700]!,
+                                  width: 1.5,
+                                ),
+                                left: BorderSide(
+                                  color: _selectedLanguageTab == 'he'
+                                      ? kBrandPrimary
+                                      : Colors.grey[700]!,
+                                  width: 1.5,
+                                ),
+                                right: BorderSide(
+                                  color: _selectedLanguageTab == 'he'
+                                      ? kBrandPrimary
+                                      : Colors.grey[700]!,
+                                  width: 1.5,
+                                ),
+                                bottom: _selectedLanguageTab == 'he'
+                                    ? BorderSide.none
+                                    : BorderSide(
+                                        color: Colors.grey[700]!,
+                                        width: 1.5,
+                                      ),
                               ),
                             ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '🇮🇱',
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'עברית',
+                                  style: TextStyle(
+                                    color: _selectedLanguageTab == 'he'
+                                        ? Colors.white
+                                        : Colors.grey[500],
+                                    fontSize: 16,
+                                    fontWeight: _selectedLanguageTab == 'he'
+                                        ? FontWeight.w600
+                                        : FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          // English Tab
-                          GestureDetector(
+                        ),
+                        // English Tab (rendered second/on top)
+                        Transform.translate(
+                          offset: const Offset(0, 0),
+                          child: GestureDetector(
                             onTap: () {
                               _switchLanguageTab('en');
                             },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: _selectedLanguageTab == 'en'
-                                    ? kBrandPrimary
-                                    : Colors.transparent,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(18),
-                                ),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
+                            decoration: BoxDecoration(
+                              color: _selectedLanguageTab == 'en'
+                                  ? const Color(0xFF1A1A1A)
+                                  : kMainBackgroundColor,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '🇬🇧',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'English',
-                                    style: TextStyle(
-                                      color: _selectedLanguageTab == 'en'
-                                          ? Colors.white
-                                          : Colors.grey[400],
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
+                              border: Border(
+                                top: BorderSide(
+                                  color: _selectedLanguageTab == 'en'
+                                      ? kBrandPrimary
+                                      : Colors.grey[700]!,
+                                  width: 1.5,
+                                ),
+                                left: BorderSide(
+                                  color: _selectedLanguageTab == 'en'
+                                      ? kBrandPrimary
+                                      : Colors.grey[700]!,
+                                  width: 1.5,
+                                ),
+                                right: BorderSide(
+                                  color: _selectedLanguageTab == 'en'
+                                      ? kBrandPrimary
+                                      : Colors.grey[700]!,
+                                  width: 1.5,
+                                ),
+                                bottom: _selectedLanguageTab == 'en'
+                                    ? BorderSide.none
+                                    : BorderSide(
+                                        color: Colors.grey[700]!,
+                                        width: 1.5,
+                                      ),
                               ),
                             ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '🇬🇧',
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'English',
+                                  style: TextStyle(
+                                    color: _selectedLanguageTab == 'en'
+                                        ? Colors.white
+                                        : Colors.grey[500],
+                                    fontSize: 16,
+                                    fontWeight: _selectedLanguageTab == 'en'
+                                        ? FontWeight.w600
+                                        : FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
+                        ),
                       ),
+                      ],
                     ),
                     
                     // Rectangle container around Event Name and Category
@@ -922,10 +972,16 @@ class _NewEventStep1State extends State<NewEventStep1> {
                             titleKey: 'minimal-age',
                             hintTextKey: 'enter-minimal-age',
                             keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                             customValidator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 final age = int.tryParse(value);
-                                if (age == null || age < 0 || age > 120) {
+                                if (age == null) {
+                                  return AppLocalizations.of(context).get('invalid-age');
+                                }
+                                if (age < 0 || age > 120) {
                                   return AppLocalizations.of(context).get('invalid-age');
                                 }
                               }

@@ -517,97 +517,146 @@ class _NewEventStep2State extends State<NewEventStep2> {
                     
                     const SizedBox(height: 24),
                     
-                    // Language Tabs (outside the bordered container)
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(24),
-                          topRight: Radius.circular(24),
-                        ),
-                        border: Border.all(
-                          color: Colors.grey[700]!,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Hebrew Tab
-                          GestureDetector(
-                            onTap: () {
-                              _switchLanguageTab('he');
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: _selectedLanguageTab == 'he' 
-                                    ? kBrandPrimary
-                                    : Colors.transparent,
-                                borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(18),
-                                ),
+                    // Language Tabs
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Hebrew Tab (Default Language - rendered first/underneath)
+                        GestureDetector(
+                          onTap: () {
+                            _switchLanguageTab('he');
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
+                            decoration: BoxDecoration(
+                              color: _selectedLanguageTab == 'he' 
+                                  ? const Color(0xFF1A1A1A)
+                                  : kMainBackgroundColor,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '🇮🇱',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'עברית',
-                                    style: TextStyle(
-                                      color: _selectedLanguageTab == 'he'
-                                          ? Colors.white
-                                          : Colors.grey[400],
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
+                              border: Border(
+                                top: BorderSide(
+                                  color: _selectedLanguageTab == 'he'
+                                      ? kBrandPrimary
+                                      : Colors.grey[700]!,
+                                  width: 1.5,
+                                ),
+                                left: BorderSide(
+                                  color: _selectedLanguageTab == 'he'
+                                      ? kBrandPrimary
+                                      : Colors.grey[700]!,
+                                  width: 1.5,
+                                ),
+                                right: BorderSide(
+                                  color: _selectedLanguageTab == 'he'
+                                      ? kBrandPrimary
+                                      : Colors.grey[700]!,
+                                  width: 1.5,
+                                ),
+                                bottom: _selectedLanguageTab == 'he'
+                                    ? BorderSide.none
+                                    : BorderSide(
+                                        color: Colors.grey[700]!,
+                                        width: 1.5,
+                                      ),
                               ),
                             ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '🇮🇱',
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'עברית',
+                                  style: TextStyle(
+                                    color: _selectedLanguageTab == 'he'
+                                        ? Colors.white
+                                        : Colors.grey[500],
+                                    fontSize: 16,
+                                    fontWeight: _selectedLanguageTab == 'he'
+                                        ? FontWeight.w600
+                                        : FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          // English Tab
-                          GestureDetector(
+                        ),
+                        // English Tab (rendered second/on top)
+                        Transform.translate(
+                          offset: const Offset(0, 0),
+                          child: GestureDetector(
                             onTap: () {
                               _switchLanguageTab('en');
                             },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: _selectedLanguageTab == 'en'
-                                    ? kBrandPrimary
-                                    : Colors.transparent,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(18),
-                                ),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
+                            decoration: BoxDecoration(
+                              color: _selectedLanguageTab == 'en'
+                                  ? const Color(0xFF1A1A1A)
+                                  : kMainBackgroundColor,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '🇬🇧',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'English',
-                                    style: TextStyle(
-                                      color: _selectedLanguageTab == 'en'
-                                          ? Colors.white
-                                          : Colors.grey[400],
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
+                              border: Border(
+                                top: BorderSide(
+                                  color: _selectedLanguageTab == 'en'
+                                      ? kBrandPrimary
+                                      : Colors.grey[700]!,
+                                  width: 1.5,
+                                ),
+                                left: BorderSide(
+                                  color: _selectedLanguageTab == 'en'
+                                      ? kBrandPrimary
+                                      : Colors.grey[700]!,
+                                  width: 1.5,
+                                ),
+                                right: BorderSide(
+                                  color: _selectedLanguageTab == 'en'
+                                      ? kBrandPrimary
+                                      : Colors.grey[700]!,
+                                  width: 1.5,
+                                ),
+                                bottom: _selectedLanguageTab == 'en'
+                                    ? BorderSide.none
+                                    : BorderSide(
+                                        color: Colors.grey[700]!,
+                                        width: 1.5,
+                                      ),
                               ),
                             ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '🇬🇧',
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'English',
+                                  style: TextStyle(
+                                    color: _selectedLanguageTab == 'en'
+                                        ? Colors.white
+                                        : Colors.grey[500],
+                                    fontSize: 16,
+                                    fontWeight: _selectedLanguageTab == 'en'
+                                        ? FontWeight.w600
+                                        : FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
+                        ),
                       ),
+                      ],
                     ),
                     
                     // Event Description Container
