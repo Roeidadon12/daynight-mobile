@@ -363,6 +363,63 @@ class EventService {
     }
   }
 
+  /// Fetches the current user's events from the dashboard.
+  ///
+  /// Requires authentication. If no login token is present, returns an empty list.
+  ///
+  /// Returns a list of [Event] objects belonging to the authenticated user.
+  /// Returns an empty list if:
+  /// - No authentication token is available
+  /// - The request fails
+  /// - There's an error parsing the response
+  ///
+  /// Throws nothing - errors are logged and an empty list is returned.
+  Future<List<OrganizerEvent>> getUserEvents() async {
+    try {
+      // Check if user has a token
+      final token = await ApiHeaders.getCurrentToken();
+      if (token == null || token.isEmpty) {
+        Logger.info(
+          'No authentication token found, returning empty list',
+          'EventService',
+        );
+        return [];
+      }
+
+      Logger.info('Fetching user events from dashboard', 'EventService');
+      Logger.debug('Endpoint: ${ApiCommands.getUserEvents.value}', 'EventService');
+      Logger.debug('Base URL: ${dashboardApi.baseUrl}', 'EventService');
+      Logger.debug('Token preview: ${token.substring(0, token.length > 10 ? 10 : token.length)}...', 'EventService');
+
+      final response = await dashboardApi.request(
+        endpoint: ApiCommands.getUserEvents.value,
+        method: 'GET',
+        headers: await ApiHeaders.buildHeader(null, true),
+      );
+
+      Logger.debug('Response received: $response', 'EventService');
+
+      // Parse the array of organizer events
+      if (response['events'] != null && response['events'] is List) {
+        final List<dynamic> eventsJson = response['events'] as List;
+        final events = eventsJson
+            .map((json) => OrganizerEvent.fromJson(json as Map<String, dynamic>))
+            .toList();
+        Logger.info(
+          'Successfully fetched ${events.length} user events',
+          'EventService',
+        );
+        return events;
+      }
+
+      Logger.warning('Response data is not a list', 'EventService');
+      return [];
+    } catch (e) {
+      Logger.error('Error fetching user events: $e', 'EventService');
+      return [];
+    }
+  }
+
   List<Event> getEvents(Map<String, dynamic>? response) {
     try {
       if (response == null) {

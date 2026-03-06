@@ -146,6 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
               countryCode: _selectedCountryCode,
               registrationData: {}, // Empty for login flow
               isRegistration: false, // This is a login flow
+              autoSendOtp: false, // OTP already sent, don't send again
               onSuccess: () {
                 // Pop SMS verification screen and login screen to return to calling screen
                 Navigator.of(context).pop(); // Close SMS screen

@@ -12,6 +12,7 @@ class SmsVerificationScreen extends StatefulWidget {
   final Map<String, dynamic> registrationData;
   final bool isRegistration;
   final VoidCallback? onSuccess; // Optional callback for successful verification
+  final bool autoSendOtp; // Whether to automatically send OTP on initialization
 
   const SmsVerificationScreen({
     super.key,
@@ -20,6 +21,7 @@ class SmsVerificationScreen extends StatefulWidget {
     required this.registrationData,
     this.isRegistration = true,
     this.onSuccess,
+    this.autoSendOtp = true, // Default to true for backward compatibility
   });
 
   @override
@@ -39,7 +41,16 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> with Code
   void initState() {
     super.initState();
     _initSmsListener();
-    _sendOtpCode();
+    // Only auto-send OTP if autoSendOtp is true
+    if (widget.autoSendOtp) {
+      _sendOtpCode();
+    } else {
+      // If OTP was already sent, just start the resend cooldown
+      setState(() {
+        _resendCooldown = 60;
+      });
+      _startResendCooldown();
+    }
   }
 
   @override

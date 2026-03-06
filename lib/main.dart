@@ -157,14 +157,14 @@ class _MyHomePageState extends State<MyHomePage> {
         const HomeTab(),
         const SearchTab(),
         const TicketTab(),
-        const EditingTab(),
+        EditingTab(isSelected: _selectedIndex == 3),
       ];
     } else {
       // Guest users don't see the TicketTab
       return [
         const HomeTab(),
         const SearchTab(),
-        const EditingTab(),
+        EditingTab(isSelected: _selectedIndex == 2),
       ];
     }
   }

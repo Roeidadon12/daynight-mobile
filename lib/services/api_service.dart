@@ -160,9 +160,16 @@ class ApiService {
       );
 
       if (response.statusCode == HttpStatus.ok) {
-        return json.decode(response.body) as Map<String, dynamic>;
+        try {
+          return json.decode(response.body) as Map<String, dynamic>;
+        } catch (e) {
+          Logger.error('Failed to parse JSON response', 'ApiService');
+          Logger.error('Response body: ${response.body.substring(0, response.body.length > 500 ? 500 : response.body.length)}', 'ApiService');
+          throw FormatException('Invalid JSON response: $e');
+        }
       } else {
         Logger.error('Request failed with status: ${response.statusCode}', 'ApiService');
+        Logger.error('Response body: ${response.body.substring(0, response.body.length > 500 ? 500 : response.body.length)}', 'ApiService');
         throw ServerException('Request failed with status: ${response.statusCode}');
       }
     } on SocketException catch (e) {

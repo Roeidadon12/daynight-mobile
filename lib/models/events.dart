@@ -205,3 +205,117 @@ class PaginationLink {
     );
   }
 }
+
+/// Represents a simplified event model for the organizer's dashboard
+/// Contains basic event info and permission flags for event management
+class OrganizerEvent {
+  final int id;
+  final String title;
+  final String category;
+  
+  // Permission flags
+  final bool canAccessBookings;
+  final bool canAccessReport;
+  final bool canAccessTeam;
+  final bool canAccessLinks;
+  final bool canAccessTicket;
+  final bool canAccessStatistics;
+  final bool canSendFreeTicket;
+  final bool canFeaturedEvent;
+  final bool canAccessCoupons;
+  final bool canEditEvent;
+  final bool canSendSms;
+
+  OrganizerEvent({
+    required this.id,
+    required this.title,
+    required this.category,
+    required this.canAccessBookings,
+    required this.canAccessReport,
+    required this.canAccessTeam,
+    required this.canAccessLinks,
+    required this.canAccessTicket,
+    required this.canAccessStatistics,
+    required this.canSendFreeTicket,
+    required this.canFeaturedEvent,
+    required this.canAccessCoupons,
+    required this.canEditEvent,
+    required this.canSendSms,
+  });
+
+  /// Creates an OrganizerEvent from JSON
+  factory OrganizerEvent.fromJson(Map<String, dynamic> json) {
+    return OrganizerEvent(
+      id: json['id'] as int,
+      title: json['title'] as String? ?? '',
+      category: json['category'] as String? ?? '',
+      canAccessBookings: _parseBooleanString(json['can_access_bookings']),
+      canAccessReport: _parseBooleanString(json['can_access_report']),
+      canAccessTeam: _parseBooleanString(json['can_access_team']),
+      canAccessLinks: _parseBooleanString(json['can_access_links']),
+      canAccessTicket: _parseBooleanString(json['can_access_ticket']),
+      canAccessStatistics: _parseBooleanString(json['can_access_statistics']),
+      canSendFreeTicket: _parseBooleanString(json['can_send_free_ticket']),
+      canFeaturedEvent: _parseBooleanString(json['can_featured_event']),
+      canAccessCoupons: _parseBooleanString(json['can_access_coupons']),
+      canEditEvent: _parseBooleanString(json['can_edit_event']),
+      canSendSms: _parseBooleanString(json['can_send_sms']),
+    );
+  }
+
+  /// Converts the OrganizerEvent to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'category': category,
+      'can_access_bookings': canAccessBookings ? 'yes' : 'no',
+      'can_access_report': canAccessReport ? 'yes' : 'no',
+      'can_access_team': canAccessTeam ? 'yes' : 'no',
+      'can_access_links': canAccessLinks ? 'yes' : 'no',
+      'can_access_ticket': canAccessTicket ? 'yes' : 'no',
+      'can_access_statistics': canAccessStatistics ? 'yes' : 'no',
+      'can_send_free_ticket': canSendFreeTicket ? 'yes' : 'no',
+      'can_featured_event': canFeaturedEvent ? 'yes' : 'no',
+      'can_access_coupons': canAccessCoupons ? 'yes' : 'no',
+      'can_edit_event': canEditEvent ? 'yes' : 'no',
+      'can_send_sms': canSendSms ? 'yes' : 'no',
+    };
+  }
+
+  /// Helper method to parse "yes"/"no" strings to boolean
+  static bool _parseBooleanString(dynamic value) {
+    if (value == null) return false;
+    if (value is bool) return value;
+    if (value is String) {
+      return value.toLowerCase() == 'yes';
+    }
+    return false;
+  }
+
+  /// Check if user has full access to the event
+  bool get hasFullAccess {
+    return canAccessBookings &&
+        canAccessReport &&
+        canAccessTeam &&
+        canAccessLinks &&
+        canAccessTicket &&
+        canAccessStatistics &&
+        canEditEvent;
+  }
+
+  /// Check if user can manage event content
+  bool get canManageContent {
+    return canEditEvent && canAccessLinks;
+  }
+
+  /// Check if user can manage marketing
+  bool get canManageMarketing {
+    return canSendFreeTicket && canAccessCoupons && canSendSms;
+  }
+
+  @override
+  String toString() {
+    return 'OrganizerEvent(id: $id, title: $title, category: $category)';
+  }
+}

@@ -26,11 +26,25 @@ class UserController with ChangeNotifier {
   bool get isGuest => _status == UserStatus.guest;
   bool get isUnknown => _status == UserStatus.unknown;
 
+  /// Get the stored phone number used for login
+  Future<String?> getStoredPhoneNumber() async {
+    return await _authService.getStoredPhoneNumber();
+  }
+
+  /// Debug method to show complete token in console (for Postman testing)
+  /// WARNING: Only use in development - shows full token!
+  Future<void> showFullTokenInConsole() async {
+    await _authService.debugShowFullToken();
+  }
+
   /// Initialize the controller by loading stored authentication data
   Future<void> initialize() async {
     _setLoading(true);
     try {
       Logger.info('Initializing UserController', 'UserController');
+
+      // Debug: Show what's stored in SharedPreferences
+      await _authService.debugShowStoredKeys();
 
       // Load stored status and user data
       _status = await _authService.getStoredUserStatus();
@@ -41,32 +55,22 @@ class UserController with ChangeNotifier {
         'UserController',
       );
 
-      // If we have a connected status, validate the token
+      // If we have a connected status, verify token exists
       if (_status == UserStatus.connected) {
         final token = await _authService.getStoredToken();
         if (token != null) {
-          Logger.info('Validating stored authentication token', 'UserController');
-          final isValid = await _authService.validateToken();
-          if (!isValid) {
+          Logger.info('Found stored token on app startup', 'UserController');
+          Logger.debug('Token preview: ${token.substring(0, token.length > 20 ? 20 : token.length)}...', 'UserController');
+          Logger.info('Token exists in storage - user remains authenticated', 'UserController');
+          
+          // If we have a token but no user data, something went wrong
+          if (_user == null) {
             Logger.warning(
-              'Stored token is invalid, resetting to unknown status',
+              'Token found but no user data, resetting authentication',
               'UserController',
             );
-            // Clear invalid authentication data
             await _authService.clearStoredData();
             _status = UserStatus.unknown;
-            _user = null;
-          } else {
-            Logger.info('Token validation successful', 'UserController');
-            // If we have a valid token but no user data, something went wrong
-            if (_user == null) {
-              Logger.warning(
-                'Valid token but no user data found, resetting authentication',
-                'UserController',
-              );
-              await _authService.clearStoredData();
-              _status = UserStatus.unknown;
-            }
           }
         } else {
           // No token but connected status - inconsistent state
@@ -303,8 +307,10 @@ class UserController with ChangeNotifier {
         
         // Store the authentication data persistently
         if (response['token'] != null) {
+          final token = response['token'] as String;
           Logger.info('Storing authentication token...', 'UserController');
-          await _authService.storeToken(response['token'] as String);
+          Logger.debug('Token preview: ${token.substring(0, token.length > 20 ? 20 : token.length)}...', 'UserController');
+          await _authService.storeToken(token);
         } else {
           Logger.warning('No token in SMS login response', 'UserController');
         }
@@ -312,6 +318,11 @@ class UserController with ChangeNotifier {
         Logger.info('Storing user data and status...', 'UserController');
         await _authService.storeUser(_user!);
         await _authService.storeUserStatus(_status);
+        await _authService.storePhoneNumber(phoneNumber);
+        Logger.info('Phone number stored: $phoneNumber', 'UserController');
+        
+        // Debug: Verify data was stored
+        await _authService.debugShowStoredKeys();
         
         _safeNotifyListeners();
         Logger.info('SMS login successful - authentication data stored', 'UserController');

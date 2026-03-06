@@ -17,6 +17,7 @@ class AuthenticationService {
   static const String _tokenKey = 'user_token';
   static const String _userKey = 'user_data';
   static const String _statusKey = 'user_status';
+  static const String _phoneKey = 'user_phone_number';
 
   // ==================== CONSTRUCTOR ====================
   
@@ -286,6 +287,10 @@ class AuthenticationService {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString(_tokenKey);
       Logger.info('Retrieved stored token: ${token != null ? "found" : "not found"}', 'AuthService');
+      if (token != null) {
+        Logger.debug('Token preview: ${token.substring(0, token.length > 20 ? 20 : token.length)}...', 'AuthService');
+        Logger.debug('Token length: ${token.length} characters', 'AuthService');
+      }
       return token;
     } catch (e) {
       Logger.error('Error retrieving stored token: $e', 'AuthService');
@@ -339,6 +344,7 @@ class AuthenticationService {
       prefs.remove(_tokenKey),
       prefs.remove(_userKey),
       prefs.remove(_statusKey),
+      prefs.remove(_phoneKey),
     ]);
     Logger.info('All stored authentication data cleared', 'AuthService');
   }
@@ -358,6 +364,85 @@ class AuthenticationService {
     await _storeUserStatus(status);
   }
 
+  /// Store phone number for future reference
+  Future<void> storePhoneNumber(String phoneNumber) async {
+    await _storePhoneNumber(phoneNumber);
+  }
+
+  /// Retrieves the stored phone number
+  Future<String?> getStoredPhoneNumber() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final phone = prefs.getString(_phoneKey);
+      Logger.info('Retrieved stored phone number: ${phone != null ? "found" : "not found"}', 'AuthService');
+      if (phone != null) {
+        Logger.debug('Phone number: $phone', 'AuthService');
+      }
+      return phone;
+    } catch (e) {
+      Logger.error('Error retrieving stored phone number: $e', 'AuthService');
+      return null;
+    }
+  }
+
+  /// Debug helper to show all stored authentication data keys
+  Future<void>debugShowStoredKeys() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final keys = prefs.getKeys();
+      Logger.debug('=== SharedPreferences Keys ===', 'AuthService');
+      Logger.debug('Total keys: ${keys.length}', 'AuthService');
+      
+      final hasToken = prefs.containsKey(_tokenKey);
+      final hasUser = prefs.containsKey(_userKey);
+      final hasStatus = prefs.containsKey(_statusKey);
+      final hasPhone = prefs.containsKey(_phoneKey);
+      
+      Logger.debug('Has $_tokenKey: $hasToken', 'AuthService');
+      Logger.debug('Has $_userKey: $hasUser', 'AuthService');
+      Logger.debug('Has $_statusKey: $hasStatus', 'AuthService');
+      Logger.debug('Has $_phoneKey: $hasPhone', 'AuthService');
+      
+      if (hasToken) {
+        final token = prefs.getString(_tokenKey);
+        Logger.debug('Token value: ${token?.substring(0, token.length > 20 ? 20 : token.length)}...', 'AuthService');
+      }
+      if (hasStatus) {
+        final status = prefs.getString(_statusKey);
+        Logger.debug('Status value: $status', 'AuthService');
+      }
+      if (hasPhone) {
+        final phone = prefs.getString(_phoneKey);
+        Logger.debug('Phone value: $phone', 'AuthService');
+      }
+      Logger.debug('==============================', 'AuthService');
+    } catch (e) {
+      Logger.error('Error showing stored keys: $e', 'AuthService');
+    }
+  }
+
+  /// Debug helper to show COMPLETE token (for testing/Postman)
+  /// WARNING: This shows the full token - only use in development!
+  Future<void> debugShowFullToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString(_tokenKey);
+      
+      Logger.debug('', 'AuthService');
+      Logger.debug('=== COMPLETE TOKEN FOR POSTMAN ===', 'AuthService');
+      if (token != null) {
+        Logger.debug('FULL TOKEN: $token', 'AuthService');
+        Logger.debug('Copy the text above (starting after "FULL TOKEN: ")', 'AuthService');
+      } else {
+        Logger.debug('No token found in storage', 'AuthService');
+      }
+      Logger.debug('==================================', 'AuthService');
+      Logger.debug('', 'AuthService');
+    } catch (e) {
+      Logger.error('Error showing full token: $e', 'AuthService');
+    }
+  }
+
   // ==================== PRIVATE HELPER METHODS ====================
 
   /// Common handler for authentication responses
@@ -367,6 +452,9 @@ class AuthenticationService {
         response['user'] != null) {
       final token = response['token'] as String;
       final userData = response['user'] as Map<String, dynamic>;
+
+      Logger.info('$operation response received with token', 'AuthService');
+      Logger.debug('Token received - length: ${token.length} chars', 'AuthService');
 
       // Store authentication data
       await _storeToken(token);
@@ -418,6 +506,11 @@ class AuthenticationService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_tokenKey, token);
     Logger.info('Authentication token stored successfully', 'AuthService');
+    Logger.debug('Token preview: ${token.substring(0, token.length > 20 ? 20 : token.length)}...', 'AuthService');
+    
+    // Verify it was stored
+    final verification = prefs.getString(_tokenKey);
+    Logger.debug('Verification - token retrieved: ${verification != null ? "SUCCESS" : "FAILED"}', 'AuthService');
   }
 
   Future<void> _clearToken() async {
@@ -446,5 +539,11 @@ class AuthenticationService {
     // Debug: Verify it was stored
     final verification = prefs.getString(_statusKey);
     Logger.info('Verification - stored status retrieved: "$verification"', 'AuthService');
+  }
+
+  Future<void> _storePhoneNumber(String phoneNumber) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_phoneKey, phoneNumber);
+    Logger.info('Phone number stored successfully: $phoneNumber', 'AuthService');
   }
 }
