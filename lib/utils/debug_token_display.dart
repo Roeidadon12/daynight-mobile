@@ -26,9 +26,9 @@ class _DebugTokenDisplayState extends State<DebugTokenDisplay> {
     try {
       final userController = Provider.of<UserController>(context, listen: false);
       // Get token from storage
-      final token = await userController.getStoredPhoneNumber(); // This gets phone, we need token
+      // final token = await userController.getStoredPhoneNumber(); // This gets phone, we need token
       // Let's use the auth service directly
-      final authService = userController;
+      // final authService = userController;
       
       // Actually, let's just call the debug method
       await userController.showFullTokenInConsole();
