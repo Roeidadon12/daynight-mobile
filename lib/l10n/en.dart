@@ -262,4 +262,7 @@ const Map<String, String> enTexts = {
   'user-status-guest': 'Guest',
   'user-status-unknown': 'Unknown',
   'phone-number-required-for-identification': 'Phone number is required for identification',
+  'organizer-enter-permits': 'Enter permits',
+  'organizer-scan': 'Scan',
+  'organizer-edit-event': 'Edit',
 };

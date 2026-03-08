@@ -260,4 +260,7 @@ const Map<String, String> heTexts = {
   'cancel': 'בטל',
   'image-selection-error': 'שגיאה בבחירת תמונה. אנא נסו שוב.',
   'select-image': 'בחר תמונה',
+  'organizer-enter-permits': 'אישור כניסה',
+  'organizer-scan': 'סריקה',
+  'organizer-edit-event': 'עריכה',
 };

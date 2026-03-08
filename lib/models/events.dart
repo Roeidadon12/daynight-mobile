@@ -212,6 +212,13 @@ class OrganizerEvent {
   final int id;
   final String title;
   final String category;
+  final String coverImage;
+  final String endDateTime;
+  final String dateType;
+  final String startDate;
+  final String startTime;
+  final String eventDate;
+  final String status;
   
   // Permission flags
   final bool canAccessBookings;
@@ -230,6 +237,13 @@ class OrganizerEvent {
     required this.id,
     required this.title,
     required this.category,
+    required this.coverImage,
+    required this.endDateTime,
+    required this.dateType,
+    required this.startDate,
+    required this.startTime,
+    required this.eventDate,
+    required this.status,
     required this.canAccessBookings,
     required this.canAccessReport,
     required this.canAccessTeam,
@@ -246,9 +260,16 @@ class OrganizerEvent {
   /// Creates an OrganizerEvent from JSON
   factory OrganizerEvent.fromJson(Map<String, dynamic> json) {
     return OrganizerEvent(
-      id: json['id'] as int,
+      id: _parseInt(json['id']),
       title: json['title'] as String? ?? '',
       category: json['category'] as String? ?? '',
+      coverImage: json['cover_image'] as String? ?? '',
+      endDateTime: json['end_date_time'] as String? ?? '',
+      dateType: json['date_type'] as String? ?? '',
+      startDate: json['start_date'] as String? ?? '',
+      startTime: json['start_time'] as String? ?? '',
+      eventDate: json['event_date'] as String? ?? '',
+      status: json['status'] as String? ?? '',
       canAccessBookings: _parseBooleanString(json['can_access_bookings']),
       canAccessReport: _parseBooleanString(json['can_access_report']),
       canAccessTeam: _parseBooleanString(json['can_access_team']),
@@ -269,6 +290,13 @@ class OrganizerEvent {
       'id': id,
       'title': title,
       'category': category,
+      'cover_image': coverImage,
+      'end_date_time': endDateTime,
+      'date_type': dateType,
+      'start_date': startDate,
+      'start_time': startTime,
+      'event_date': eventDate,
+      'status': status,
       'can_access_bookings': canAccessBookings ? 'yes' : 'no',
       'can_access_report': canAccessReport ? 'yes' : 'no',
       'can_access_team': canAccessTeam ? 'yes' : 'no',
@@ -293,6 +321,18 @@ class OrganizerEvent {
     return false;
   }
 
+  static int _parseInt(dynamic value) {
+    if (value is int) return value;
+    if (value is String) {
+      return int.tryParse(value) ?? 0;
+    }
+    return 0;
+  }
+
+  bool get isActive => status.toLowerCase() == 'active';
+
+  bool get isExpired => status.toLowerCase() == 'expired';
+
   /// Check if user has full access to the event
   bool get hasFullAccess {
     return canAccessBookings &&
@@ -316,6 +356,6 @@ class OrganizerEvent {
 
   @override
   String toString() {
-    return 'OrganizerEvent(id: $id, title: $title, category: $category)';
+    return 'OrganizerEvent(id: $id, title: $title, category: $category, status: $status)';
   }
 }

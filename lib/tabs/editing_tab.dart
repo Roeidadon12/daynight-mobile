@@ -1,4 +1,5 @@
 import 'package:day_night/controllers/create_event/empty_my_events.dart';
+import 'package:day_night/controllers/event/orginizer_events/orginizer_events_list.dart';
 import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../services/event_service.dart';
@@ -81,9 +82,10 @@ class _EditingTabState extends State<EditingTab>
       return const EmptyMyEvents();
     }
 
-    // TODO: Show events list when there are events
-    // For now, still showing empty state
-    return const EmptyMyEvents();
+    return OrginizerEventsList(
+      events: _userEvents,
+      onRefresh: _loadUserEvents,
+    );
   }
 
   @override
