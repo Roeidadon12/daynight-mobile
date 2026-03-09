@@ -9,19 +9,19 @@ import 'package:day_night/models/events.dart';
 import 'package:day_night/services/event_service.dart';
 import 'package:flutter/material.dart';
 
-class EditEventPage extends StatefulWidget {
+class DetailEventPage extends StatefulWidget {
   final OrganizerEvent event;
 
-  const EditEventPage({
+  const DetailEventPage({
     super.key,
     required this.event,
   });
 
   @override
-  State<EditEventPage> createState() => _EditEventPageState();
+  State<DetailEventPage> createState() => _DetailEventPageState();
 }
 
-class _EditEventPageState extends State<EditEventPage> {
+class _DetailEventPageState extends State<DetailEventPage> {
   final EventService _eventService = EventService();
   int _waitingParticipants = 0;
   double _totalEarnings = 0;
@@ -90,25 +90,25 @@ class _EditEventPageState extends State<EditEventPage> {
               children: [
                 Expanded(
                   child: _TopActionButton(
-                    label: localizations.get('edit-event-team'),
+                    label: localizations.get('detail-event-team'),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: _TopActionButton(
-                    label: localizations.get('edit-event-links'),
+                    label: localizations.get('detail-event-links'),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: _TopActionButton(
-                    label: localizations.get('edit-event-coupons'),
+                    label: localizations.get('detail-event-coupons'),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: _TopActionButton(
-                    label: localizations.get('edit-event-cashier'),
+                    label: localizations.get('detail-event-cashier'),
                   ),
                 ),
               ],
