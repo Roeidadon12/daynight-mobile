@@ -2,7 +2,7 @@ import 'package:day_night/constants.dart';
 import 'package:day_night/app_localizations.dart';
 import 'package:day_night/controllers/user/user_controller.dart';
 import 'package:day_night/controllers/user/user_profile_section.dart';
-import 'package:day_night/controllers/create_event/edit_event_pages/detail_event.dart';
+import 'package:day_night/controllers/create_event/details_event_pages/detail_event.dart';
 import 'package:day_night/models/events.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -43,7 +43,7 @@ class _OrginizerEventsListState extends State<OrginizerEventsList> {
         final event = filteredEvents[index];
         return OrginizerEventListTile(
           event: event,
-          onEditPressed: () {
+          onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
