@@ -53,6 +53,9 @@ class DevConfig implements AppConfig {
   
   @override
   bool get enableDebugCurlOutput => true; // Enable curl debug output in dev
+
+  @override
+  bool get supportCustomerMode => false; // Temporary: show only Edit tab and hide bottom tabs
   
   @override
   Duration get apiTimeout => const Duration(seconds: 30);

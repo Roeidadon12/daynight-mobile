@@ -5,11 +5,17 @@ import 'package:day_night/app_localizations.dart';
 class OrginizerEventListTile extends StatelessWidget {
   final OrganizerEvent event;
   final VoidCallback? onTap;
+  final VoidCallback? onEditPressed;
+  final bool showTrailingArrow;
+  final bool showBottomActions;
 
   const OrginizerEventListTile({
     super.key,
     required this.event,
     this.onTap,
+    this.onEditPressed,
+    this.showTrailingArrow = true,
+    this.showBottomActions = true,
   });
 
   String _formatStartDateTime() {
@@ -121,15 +127,17 @@ class OrginizerEventListTile extends StatelessWidget {
                 ),
               ),
             ),
-            trailing: Icon(
-              Directionality.of(context) == TextDirection.ltr
-                  ? Icons.chevron_left
-                  : Icons.chevron_right,
-              color: Colors.grey[400],
-              size: 22,
-            ),
+            trailing: showTrailingArrow
+                ? Icon(
+                    Directionality.of(context) == TextDirection.ltr
+                        ? Icons.chevron_left
+                        : Icons.chevron_right,
+                    color: Colors.grey[400],
+                    size: 22,
+                  )
+                : null,
           ),
-          if (event.isActive) ...[
+          if (event.isActive && showBottomActions) ...[
             Divider(
               height: 1,
               thickness: 1,
@@ -171,6 +179,7 @@ class OrginizerEventListTile extends StatelessWidget {
                         label: localizations.get('organizer-edit-event'),
                         color: const Color(0xFFB9C0CD),
                         icon: Icons.edit_outlined,
+                        onPressed: onEditPressed,
                       ),
                     ),
                   ],
@@ -188,11 +197,13 @@ class _ActionButton extends StatelessWidget {
   final String label;
   final Color color;
   final IconData icon;
+  final VoidCallback? onPressed;
 
   const _ActionButton({
     required this.label,
     required this.color,
     required this.icon,
+    this.onPressed,
   });
 
   @override
@@ -200,9 +211,10 @@ class _ActionButton extends StatelessWidget {
     return SizedBox(
       height: 32,
       child: TextButton(
-        onPressed: () {},
+        onPressed: onPressed,
         style: TextButton.styleFrom(
           foregroundColor: color,
+          disabledForegroundColor: color,
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           minimumSize: const Size(0, 32),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,

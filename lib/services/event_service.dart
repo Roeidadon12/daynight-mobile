@@ -453,4 +453,26 @@ class EventService {
 
     return [];
   }
+
+  Future<EventStatistics?> getEventStatistics(String eventId) async {
+    try {
+      final response = await api.request(
+        endpoint: ApiCommands.getEventStatistics.value,
+        method: 'GET',
+        queryParams: {'event_id': eventId},
+        headers: await ApiHeaders.buildHeader(null, true),
+      );
+
+      Logger.info(
+        'Successfully fetched statistics for event ID $eventId',
+        'EventService',
+      );
+
+      return EventStatistics.fromJson(response);
+    } catch (e) {
+      Logger.error('Error fetching event statistics: $e', 'EventService');
+      return null;
+    }
+  }
+
 }

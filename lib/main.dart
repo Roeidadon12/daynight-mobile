@@ -151,7 +151,15 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
+  bool get _editOnlyMode => !kSupportCustomerMode;
+
   List<Widget> _getPages(bool isLoggedIn) {
+    if (_editOnlyMode) {
+      return [
+        const EditingTab(isSelected: true),
+      ];
+    }
+
     if (isLoggedIn) {
       return [
         const HomeTab(),
@@ -170,6 +178,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onItemTapped(int index, bool isLoggedIn) {
+    if (_editOnlyMode) {
+      return;
+    }
+
     setState(() {
       if (!isLoggedIn && index >= 2) {
         // For guest users, adjust index since TicketTab is not present
@@ -191,6 +203,13 @@ class _MyHomePageState extends State<MyHomePage> {
         // Ensure selected index doesn't exceed available pages
         if (_selectedIndex >= pages.length) {
           _selectedIndex = 0;
+        }
+
+        if (_editOnlyMode) {
+          return Scaffold(
+            body: pages.first,
+            floatingActionButton: null,
+          );
         }
         
         return Scaffold(

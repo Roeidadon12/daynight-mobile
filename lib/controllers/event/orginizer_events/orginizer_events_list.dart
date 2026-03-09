@@ -1,6 +1,8 @@
 import 'package:day_night/constants.dart';
+import 'package:day_night/app_localizations.dart';
 import 'package:day_night/controllers/user/user_controller.dart';
 import 'package:day_night/controllers/user/user_profile_section.dart';
+import 'package:day_night/controllers/create_event/edit_event_pages/edit_event.dart';
 import 'package:day_night/models/events.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,6 +29,8 @@ class _OrginizerEventsListState extends State<OrginizerEventsList> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     final filteredEvents = _selectedFilter == _OrginizerStatusFilter.active
         ? widget.events.where((event) => event.isActive).toList()
         : widget.events.where((event) => !event.isActive).toList();
@@ -37,7 +41,17 @@ class _OrginizerEventsListState extends State<OrginizerEventsList> {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final event = filteredEvents[index];
-        return OrginizerEventListTile(event: event);
+        return OrginizerEventListTile(
+          event: event,
+          onEditPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => EditEventPage(event: event),
+              ),
+            );
+          },
+        );
       },
     );
 
@@ -68,7 +82,8 @@ class _OrginizerEventsListState extends State<OrginizerEventsList> {
             children: [
               Expanded(
                 child: _FilterButton(
-                  title: 'Active ($activeCount)',
+                  title:
+                      '${localizations.get("organizer-filter-active")} ($activeCount)',
                   isSelected: _selectedFilter == _OrginizerStatusFilter.active,
                   onTap: () {
                     setState(() {
@@ -80,7 +95,8 @@ class _OrginizerEventsListState extends State<OrginizerEventsList> {
               const SizedBox(width: 10),
               Expanded(
                 child: _FilterButton(
-                  title: 'Non Active ($nonActiveCount)',
+                  title:
+                      '${localizations.get("organizer-filter-non-active")} ($nonActiveCount)',
                   isSelected: _selectedFilter == _OrginizerStatusFilter.nonActive,
                   onTap: () {
                     setState(() {
@@ -97,8 +113,8 @@ class _OrginizerEventsListState extends State<OrginizerEventsList> {
               ? Center(
                   child: Text(
                     _selectedFilter == _OrginizerStatusFilter.active
-                        ? 'No active events'
-                        : 'No non active events',
+                        ? localizations.get('organizer-empty-active-events')
+                        : localizations.get('organizer-empty-non-active-events'),
                     style: TextStyle(color: Colors.grey[400]),
                   ),
                 )

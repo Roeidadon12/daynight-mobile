@@ -359,3 +359,131 @@ class OrganizerEvent {
     return 'OrganizerEvent(id: $id, title: $title, category: $category, status: $status)';
   }
 }
+
+/// Statistics response for an organizer event.
+class EventStatistics {
+  final String status;
+  final EventStatisticsData data;
+
+  EventStatistics({
+    required this.status,
+    required this.data,
+  });
+
+  factory EventStatistics.fromJson(Map<String, dynamic> json) {
+    return EventStatistics(
+      status: json['status'] as String? ?? '',
+      data: EventStatisticsData.fromJson(
+        (json['data'] as Map<String, dynamic>?) ?? <String, dynamic>{},
+      ),
+    );
+  }
+}
+
+class EventStatisticsData {
+  final double totalEarning;
+  final double conversationRate;
+  final int eventReach;
+  final int avgAge;
+  final int totalPendingBookings;
+  final int totalAbandonedBookings;
+  final int totalDeclinedBookings;
+  final int totalRejectedBookings;
+  final int totalMales;
+  final int totalFemales;
+  final int totalNone;
+  final int totalNotMention;
+  final int totalParticipants;
+  final List<int> salesByGenderPercentage;
+  final List<int> salesByGenderArrMale;
+  final List<int> salesByGenderArrFemale;
+  final List<int> salesByDayArr;
+  final List<int> salesByTimeArr;
+  final List<String> dailySaleDateArr;
+  final List<int> dailySaleCountArr;
+  final int alreadyScannedParticipants;
+  final int totalFreeTicket;
+  final String eventId;
+
+  EventStatisticsData({
+    required this.totalEarning,
+    required this.conversationRate,
+    required this.eventReach,
+    required this.avgAge,
+    required this.totalPendingBookings,
+    required this.totalAbandonedBookings,
+    required this.totalDeclinedBookings,
+    required this.totalRejectedBookings,
+    required this.totalMales,
+    required this.totalFemales,
+    required this.totalNone,
+    required this.totalNotMention,
+    required this.totalParticipants,
+    required this.salesByGenderPercentage,
+    required this.salesByGenderArrMale,
+    required this.salesByGenderArrFemale,
+    required this.salesByDayArr,
+    required this.salesByTimeArr,
+    required this.dailySaleDateArr,
+    required this.dailySaleCountArr,
+    required this.alreadyScannedParticipants,
+    required this.totalFreeTicket,
+    required this.eventId,
+  });
+
+  factory EventStatisticsData.fromJson(Map<String, dynamic> json) {
+    return EventStatisticsData(
+      totalEarning: _toDouble(json['total_earning']),
+      conversationRate: _toDouble(json['conversation_rate']),
+      eventReach: _toInt(json['event_reach']),
+      avgAge: _toInt(json['avgAge']),
+      totalPendingBookings: _toInt(json['total_pending_bookings']),
+      totalAbandonedBookings: _toInt(json['total_abandoned_bookings']),
+      totalDeclinedBookings: _toInt(json['total_declined_bookings']),
+      totalRejectedBookings: _toInt(json['total_rejected_bookings']),
+      totalMales: _toInt(json['total_males']),
+      totalFemales: _toInt(json['total_females']),
+      totalNone: _toInt(json['total_none']),
+      totalNotMention: _toInt(json['total_not_mention']),
+      totalParticipants: _toInt(json['total_participants']),
+      salesByGenderPercentage: _toIntList(json['sales_by_gender_percentage']),
+      salesByGenderArrMale: _toIntList(json['sales_by_gender_arr_male']),
+      salesByGenderArrFemale: _toIntList(json['sales_by_gender_arr_female']),
+      salesByDayArr: _toIntList(json['sales_by_day_arr']),
+      salesByTimeArr: _toIntList(json['sales_by_time_arr']),
+      dailySaleDateArr: _toStringList(json['daily_sale_date_arr']),
+      dailySaleCountArr: _toIntList(json['daily_sale_count_arr']),
+      alreadyScannedParticipants: _toInt(json['already_scanned_participants']),
+      totalFreeTicket: _toInt(json['total_free_ticket']),
+      eventId: (json['event_id'] ?? '').toString(),
+    );
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value is double) return value;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  static List<int> _toIntList(dynamic value) {
+    if (value is List) {
+      return value.map((item) => _toInt(item)).toList();
+    }
+    return <int>[];
+  }
+
+  static List<String> _toStringList(dynamic value) {
+    if (value is List) {
+      return value.map((item) => item.toString()).toList();
+    }
+    return <String>[];
+  }
+}

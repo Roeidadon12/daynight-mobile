@@ -22,6 +22,7 @@ String get kAppToken => config.appToken; // Bearer token for API requests
 
 // Debug Settings
 bool get kEnableDebugCurlOutput => config.enableDebugCurlOutput;
+bool get kSupportCustomerMode => config.supportCustomerMode;
 
 // Colors
 Color get kMainBackgroundColor => config.mainBackgroundColor;

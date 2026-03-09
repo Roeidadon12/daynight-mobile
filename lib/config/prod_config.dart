@@ -49,6 +49,9 @@ class ProdConfig implements AppConfig {
   
   @override
   bool get enableDebugCurlOutput => false; // Disable curl debug output in production
+
+  @override
+  bool get supportCustomerMode => false; // Temporary: show only Edit tab and hide bottom tabs
   
   @override
   Duration get apiTimeout => const Duration(seconds: 10);

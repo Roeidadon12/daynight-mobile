@@ -26,6 +26,7 @@ abstract class AppConfig {
   bool get enableAnalytics;
   bool get enableCrashReporting;
   bool get enableDebugCurlOutput;
+  bool get supportCustomerMode;
   
   // Timeouts
   Duration get apiTimeout;

@@ -1,5 +1,7 @@
 import 'package:day_night/controllers/create_event/empty_my_events.dart';
+import 'package:day_night/controllers/create_event/new_event_pages/new_event.dart';
 import 'package:day_night/controllers/event/orginizer_events/orginizer_events_list.dart';
+import 'package:day_night/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../services/event_service.dart';
@@ -88,6 +90,55 @@ class _EditingTabState extends State<EditingTab>
     );
   }
 
+  Widget _buildPageHeader() {
+    final localizations = AppLocalizations.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Center(
+            child: Text(
+              localizations.get('my-events'),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NewEventPage(),
+                  ),
+                );
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: kBrandPrimary,
+                side: BorderSide.none,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              icon: const Icon(Icons.add, size: 18),
+              label: Text(
+                localizations.get('create-event'),
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
@@ -98,7 +149,7 @@ class _EditingTabState extends State<EditingTab>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 3. Content Area - Show EmptyMyEvents by default
+            _buildPageHeader(),
             Expanded(child: _buildContent()),
           ],
         ),
