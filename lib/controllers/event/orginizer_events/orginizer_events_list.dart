@@ -1,5 +1,6 @@
 import 'package:day_night/constants.dart';
 import 'package:day_night/app_localizations.dart';
+import 'package:day_night/controllers/event/edit_event/edit_event_page.dart';
 import 'package:day_night/controllers/user/user_controller.dart';
 import 'package:day_night/controllers/user/user_profile_section.dart';
 import 'package:day_night/controllers/event/event_details/detail_event.dart';
@@ -48,6 +49,14 @@ class _OrginizerEventsListState extends State<OrginizerEventsList> {
               context,
               MaterialPageRoute(
                 builder: (_) => DetailEventPage(event: event),
+              ),
+            );
+          },
+          onEditPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => EventEditingPage(event: event),
               ),
             );
           },

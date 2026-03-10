@@ -288,4 +288,8 @@ const Map<String, String> heTexts = {
   'special-graphs-men': 'גברים',
   'special-graphs-total': 'סה\"כ',
   'special-graphs-participants': 'משתתפים',
+  'event-edit-general': 'כללי',
+  'event-edit-media': 'מדיה',
+  'event-edit-advanced': 'מתקדם',
+  'event-edit-bank-details': 'פרטי בנק',
 };

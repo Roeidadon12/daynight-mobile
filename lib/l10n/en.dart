@@ -290,4 +290,8 @@ const Map<String, String> enTexts = {
   'special-graphs-men': 'Men',
   'special-graphs-total': 'Total',
   'special-graphs-participants': 'Participants',
+  'event-edit-general': 'General',
+  'event-edit-media': 'Media',
+  'event-edit-advanced': 'Advanced',
+  'event-edit-bank-details': 'Bank Details',
 };
