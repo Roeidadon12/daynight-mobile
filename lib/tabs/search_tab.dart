@@ -9,7 +9,7 @@ import '../models/search_criteria.dart';
 import '../controllers/search/search_date_criteria.dart';
 import '../controllers/search/show_price_range.dart';
 import '../services/event_service.dart';
-import '../controllers/event/event_list_item.dart';
+import '../controllers/event/event_main_tab/event_list_item.dart';
 import '../providers/search_provider.dart';
 
 class SearchTab extends StatefulWidget {

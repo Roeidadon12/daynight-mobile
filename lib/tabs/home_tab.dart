@@ -1,5 +1,5 @@
-import 'package:day_night/controllers/event/horizontal_event_gallery.dart';
-import 'package:day_night/controllers/event/event_details_page.dart';
+import 'package:day_night/controllers/event/common_controllers/horizontal_event_gallery.dart';
+import 'package:day_night/controllers/event/event_main_tab/event_details_page.dart';
 import 'package:day_night/models/events.dart';
 import 'package:day_night/utils/slide_page_route.dart';
 import 'package:flutter/material.dart';
@@ -278,7 +278,7 @@ class _HomeTabState extends State<HomeTab> {
                       Navigator.push(
                         context,
                         SlidePageRoute(
-                          page: EventDetailsPage(event: event),
+                          page: EventDetailsTab(event: event),
                         ),
                       );
                     },
@@ -343,7 +343,7 @@ class _HomeTabState extends State<HomeTab> {
                       Navigator.push(
                         context,
                         SlidePageRoute(
-                          page: EventDetailsPage(event: event),
+                          page: EventDetailsTab(event: event),
                         ),
                       );
                     },

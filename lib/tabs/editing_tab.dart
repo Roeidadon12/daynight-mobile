@@ -1,5 +1,5 @@
-import 'package:day_night/controllers/create_event/empty_my_events.dart';
-import 'package:day_night/controllers/create_event/new_event_pages/new_event.dart';
+import 'package:day_night/controllers/event/create_event/empty_my_events.dart';
+import 'package:day_night/controllers/event/create_event/new_event_pages/new_event.dart';
 import 'package:day_night/controllers/event/orginizer_events/orginizer_events_list.dart';
 import 'package:day_night/app_localizations.dart';
 import 'package:flutter/material.dart';

@@ -1,5 +1,5 @@
 import 'package:day_night/constants.dart';
-import 'package:day_night/controllers/event/event_summary_tile.dart';
+import 'package:day_night/controllers/event/event_main_tab/event_summary_tile.dart';
 import 'package:day_night/controllers/shared/custom_app_bar.dart';
 import 'package:day_night/controllers/shared/primary_button.dart';
 import 'package:day_night/controllers/checkout/ticket/list_tickets.dart';

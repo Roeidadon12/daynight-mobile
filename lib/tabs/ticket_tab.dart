@@ -4,7 +4,7 @@ import 'package:day_night/models/events.dart';
 import 'package:flutter/material.dart';
 import '../app_localizations.dart';
 import '../constants.dart';
-import '../controllers/event/event_list_item.dart';
+import '../controllers/event/event_main_tab/event_list_item.dart';
 
 class TicketTab extends StatefulWidget {
   const TicketTab({super.key});

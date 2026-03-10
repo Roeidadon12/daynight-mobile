@@ -2,7 +2,7 @@ import 'package:day_night/constants.dart';
 import 'package:day_night/app_localizations.dart';
 import 'package:day_night/controllers/user/user_controller.dart';
 import 'package:day_night/controllers/user/user_profile_section.dart';
-import 'package:day_night/controllers/create_event/details_event_pages/detail_event.dart';
+import 'package:day_night/controllers/event/event_details/detail_event.dart';
 import 'package:day_night/models/events.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

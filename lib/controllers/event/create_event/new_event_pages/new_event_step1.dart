@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../app_localizations.dart';
-import '../../../constants.dart';
-import '../../shared/primary_button.dart';
-import '../../../models/category.dart';
-import '../../../models/language.dart';
-import '../../../utils/category_utils.dart';
-import '../../../utils/language_helper.dart';
-import '../../shared/labeled_text_form_field.dart';
+import '../../../../app_localizations.dart';
+import '../../../../constants.dart';
+import '../../../shared/primary_button.dart';
+import '../../../../models/category.dart';
+import '../../../../models/language.dart';
+import '../../../../utils/category_utils.dart';
+import '../../../../utils/language_helper.dart';
+import '../../../shared/labeled_text_form_field.dart';
 
 class NewEventStep1 extends StatefulWidget {
   final Map<String, dynamic> eventData;

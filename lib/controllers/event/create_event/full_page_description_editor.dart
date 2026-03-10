@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'dart:convert';
-import '../../app_localizations.dart';
-import '../../constants.dart';
+import '../../../app_localizations.dart';
+import '../../../constants.dart';
 
 class FullPageDescriptionEditor extends StatefulWidget {
   final String initialContent;

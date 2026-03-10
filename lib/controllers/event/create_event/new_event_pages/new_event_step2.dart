@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:convert';
-import '../../../app_localizations.dart';
-import '../../../constants.dart';
-import '../../../models/language.dart';
-import '../../shared/primary_button.dart';
-import '../../../utils/language_helper.dart';
-import '../../../utils/quill_to_html_converter.dart';
-import '../../../utils/logger.dart';
+import '../../../../app_localizations.dart';
+import '../../../../constants.dart';
+import '../../../../models/language.dart';
+import '../../../shared/primary_button.dart';
+import '../../../../utils/language_helper.dart';
+import '../../../../utils/quill_to_html_converter.dart';
+import '../../../../utils/logger.dart';
 import '../full_page_description_editor.dart';
 
 class NewEventStep2 extends StatefulWidget {

@@ -1,9 +1,9 @@
 import 'package:day_night/models/related_event.dart';
 import 'package:flutter/material.dart';
 import 'package:day_night/constants.dart';
-import '../shared/event_empty_state.dart';
-import '../shared/horizontal_refresh_indicator.dart';
-import '../../app_localizations.dart';
+import '../../shared/event_empty_state.dart';
+import '../../shared/horizontal_refresh_indicator.dart';
+import '../../../app_localizations.dart';
 
 class HorizontalRelatedEventGallery extends StatefulWidget {
   final List<RelatedEvent> events;

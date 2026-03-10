@@ -1,29 +1,29 @@
-import 'package:day_night/controllers/event/horizontal_related_event_gallery.dart';
+import 'package:day_night/controllers/event/common_controllers/horizontal_related_event_gallery.dart';
 import 'package:day_night/controllers/event/organizer/organizer_info_card.dart';
 import 'package:day_night/models/events.dart';
 import 'package:day_night/utils/slide_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import '../shared/flip_card.dart';
-import '../../app_localizations.dart';
-import '../../constants.dart';
-import '../shared/custom_app_bar.dart';
-import '../shared/primary_button.dart';
-import '../shared/address_map_widget.dart';
+import '../../shared/flip_card.dart';
+import '../../../app_localizations.dart';
+import '../../../constants.dart';
+import '../../shared/custom_app_bar.dart';
+import '../../shared/primary_button.dart';
+import '../../shared/address_map_widget.dart';
 import 'package:day_night/controllers/checkout/checkout_tickets_page.dart';
 import 'package:day_night/services/event_service.dart';
 import 'package:day_night/models/event_details.dart';
 
-class EventDetailsPage extends StatefulWidget {
+class EventDetailsTab extends StatefulWidget {
   final Event event;
 
-  const EventDetailsPage({super.key, required this.event});
+  const EventDetailsTab({super.key, required this.event});
 
   @override
-  State<EventDetailsPage> createState() => _EventDetailsPageState();
+  State<EventDetailsTab> createState() => _EventDetailsTabState();
 }
 
-class _EventDetailsPageState extends State<EventDetailsPage> {
+class _EventDetailsTabState extends State<EventDetailsTab> {
   bool isLiked = false;
   EventDetails? eventDetails;
   bool isLoading = true;

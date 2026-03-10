@@ -1,8 +1,8 @@
-import 'package:day_night/controllers/event/event_summary_tile.dart';
+import 'package:day_night/controllers/event/event_main_tab/event_summary_tile.dart';
 import 'package:day_night/models/events.dart';
 import 'package:flutter/material.dart';
 import 'event_details_page.dart';
-import '../../utils/slide_page_route.dart';
+import '../../../utils/slide_page_route.dart';
 
 class EventListItem extends StatelessWidget {
   final Event event;
@@ -20,7 +20,7 @@ class EventListItem extends StatelessWidget {
         }
         Navigator.push(
           context,
-          SlidePageRoute(page: EventDetailsPage(event: event)),
+          SlidePageRoute(page: EventDetailsTab(event: event)),
         );
       },
       child: Container(

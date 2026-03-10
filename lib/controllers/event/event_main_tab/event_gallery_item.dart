@@ -1,6 +1,6 @@
 import 'package:day_night/models/events.dart';
 import 'package:flutter/material.dart';
-import '../../constants.dart';
+import '../../../constants.dart';
 
 class EventGalleryItem extends StatelessWidget {
   final Event event;
