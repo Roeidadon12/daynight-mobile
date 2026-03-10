@@ -1,10 +1,10 @@
 import 'package:day_night/app_localizations.dart';
 import 'package:day_night/constants.dart';
 import 'package:day_night/controllers/event/orginizer_events/orginizer_event_list_tile.dart';
-import 'package:day_night/controllers/create_event/edit_event_pages/special_graphs.dart';
-import 'package:day_night/controllers/create_event/edit_event_pages/summary_status_card.dart';
-import 'package:day_night/controllers/create_event/edit_event_pages/total_earnings_section.dart';
-import 'package:day_night/controllers/create_event/edit_event_pages/waiting_participants_section.dart';
+import 'package:day_night/controllers/event/event_details/special_graphs.dart';
+import 'package:day_night/controllers/event/event_details/summary_status_card.dart';
+import 'package:day_night/controllers/event/event_details/total_earnings_section.dart';
+import 'package:day_night/controllers/event/event_details/waiting_participants_section.dart';
 import 'package:day_night/models/events.dart';
 import 'package:day_night/services/event_service.dart';
 import 'package:flutter/material.dart';
