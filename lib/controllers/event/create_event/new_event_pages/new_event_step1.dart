@@ -5,18 +5,21 @@ import '../../../../constants.dart';
 import '../../../shared/primary_button.dart';
 import '../../../../models/category.dart';
 import '../../../../models/language.dart';
+import '../../../../models/event_details.dart';
 import '../../../../utils/category_utils.dart';
 import '../../../../utils/language_helper.dart';
 import '../../../shared/labeled_text_form_field.dart';
 
 class NewEventStep1 extends StatefulWidget {
   final Map<String, dynamic> eventData;
+  final EventEditDetails? initialEventData;
   final Function(String, dynamic) onDataChanged;
   final VoidCallback onNext;
 
   const NewEventStep1({
     super.key,
     required this.eventData,
+    this.initialEventData,
     required this.onDataChanged,
     required this.onNext,
   });
@@ -106,6 +109,9 @@ class _NewEventStep1State extends State<NewEventStep1> {
   @override
   void initState() {
     super.initState();
+
+    _seedEventDataFromInitialDetails();
+
     // Load categories for all supported languages
     for (final lang in _supportedLanguages) {
       _categoriesByLanguage[lang.code] = getCategoriesByLanguageId(lang.id);
@@ -271,6 +277,36 @@ class _NewEventStep1State extends State<NewEventStep1> {
     
     // Initialize country from timezone
     _updateCountryFromTimezone();
+  }
+
+  void _seedEventDataFromInitialDetails() {
+    final details = widget.initialEventData;
+    if (details == null) {
+      return;
+    }
+
+    final heContent = details.heEventContent;
+    final enContent = details.enEventContent;
+
+    void setIfMissing(String key, dynamic value) {
+      final current = widget.eventData[key];
+      final missing =
+          current == null || (current is String && current.trim().isEmpty);
+      if (missing && value != null) {
+        widget.eventData[key] = value;
+      }
+    }
+
+    setIfMissing('he_title', heContent?.title);
+    setIfMissing('en_title', enContent?.title ?? heContent?.title);
+    setIfMissing('he_category_id', heContent?.eventCategoryId);
+    setIfMissing('en_category_id', enContent?.eventCategoryId);
+    setIfMissing('address', details.address ?? heContent?.address ?? enContent?.address ?? details.event.mapAddress);
+    setIfMissing('min_age', details.event.minAge);
+    setIfMissing('start_date', details.event.startDate);
+    setIfMissing('start_time', details.event.startTime);
+    setIfMissing('end_date', details.event.endDate);
+    setIfMissing('end_time', details.event.endTime);
   }
 
   @override
