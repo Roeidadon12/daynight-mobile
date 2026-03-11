@@ -120,6 +120,87 @@ class ApiService {
     );
   }
 
+  /// Makes an HTTP request where a value is appended as a path segment.
+  ///
+  /// Example:
+  /// endpoint: '/event-management/edit', pathValue: 250
+  /// Resulting path: '/event-management/edit/250'
+  Future<Map<String, dynamic>> requestWithPath({
+    required String endpoint,
+    required dynamic pathValue,
+    required String method,
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParams,
+    dynamic body,
+  }) async {
+    final cleanEndpoint = endpoint.endsWith('/')
+        ? endpoint.substring(0, endpoint.length - 1)
+        : endpoint;
+
+    final pathSegment = pathValue.toString().startsWith('/')
+        ? pathValue.toString().substring(1)
+        : pathValue.toString();
+
+    try {
+      final normalizedEndpoint = cleanEndpoint.startsWith('/')
+          ? cleanEndpoint.substring(1)
+          : cleanEndpoint;
+      final cleanBaseUrl =
+          baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+      final url = '$cleanBaseUrl/$normalizedEndpoint/$pathSegment';
+
+      final uri = Uri.parse(url).replace(queryParameters: queryParams);
+      Logger.debug('Making path request to: $uri', 'ApiService');
+
+      if (kEnableDebugCurlOutput) {
+        final curlCommand = _generateCurlCommand(
+          uri: uri,
+          method: method,
+          headers: {...defaultHeaders, ...?headers},
+          body: body,
+        );
+        stderr.writeln('');
+        stderr.writeln('=== COPY THIS CURL COMMAND ===');
+        stderr.writeln(curlCommand);
+        stderr.writeln('=== END CURL COMMAND ===');
+        stderr.writeln('');
+      }
+
+      final response = await _executeRequest(
+        uri: uri,
+        method: method,
+        headers: {...defaultHeaders, ...?headers},
+        body: body,
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        try {
+          return json.decode(response.body) as Map<String, dynamic>;
+        } catch (e) {
+          Logger.error('Failed to parse JSON response', 'ApiService');
+          Logger.error(
+            'Response body: ${response.body.substring(0, response.body.length > 500 ? 500 : response.body.length)}',
+            'ApiService',
+          );
+          throw FormatException('Invalid JSON response: $e');
+        }
+      } else {
+        Logger.error('Request failed with status: ${response.statusCode}', 'ApiService');
+        Logger.error(
+          'Response body: ${response.body.substring(0, response.body.length > 500 ? 500 : response.body.length)}',
+          'ApiService',
+        );
+        throw ServerException('Request failed with status: ${response.statusCode}');
+      }
+    } on SocketException catch (e) {
+      Logger.error('Socket error: $e', 'ApiService');
+      rethrow;
+    } catch (e) {
+      Logger.error('Error making request: $e', 'ApiService');
+      rethrow;
+    }
+  }
+
   /// Makes an HTTP request with the given parameters.
   Future<Map<String, dynamic>> request({
     required String endpoint,

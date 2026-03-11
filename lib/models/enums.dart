@@ -34,6 +34,7 @@ enum ApiCommands {
   getEvents('/events'),
   getEventDetails('/event/details'),
   getEventStatistics('/dashboard/event/statistics'),
+  getEventDetailsForEdit('/event-management/edit'), // Fixed: removed duplicate /dashboard since baseUrl already includes /api/dashboard
   getUserEvents('/events'), // Fixed: removed duplicate /dashboard since baseUrl already includes /api/dashboard
   createEvent('/event-management/store/'),
   updateEvent('/events'),

@@ -1,4 +1,3 @@
-import 'package:day_night/constants.dart';
 import 'package:day_night/models/event_details.dart';
 import 'package:day_night/models/events.dart';
 import 'package:day_night/services/event_service.dart';
@@ -18,7 +17,7 @@ class EventEditingPage extends StatefulWidget {
 
 class _EventEditingPageState extends State<EventEditingPage> {
   final EventService _eventService = EventService();
-  EventDetails? _eventDetails;
+  EventEditDetails? _eventDetails;
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -35,7 +34,7 @@ class _EventEditingPageState extends State<EventEditingPage> {
     });
 
     try {
-      final details = await _eventService.getEventById(kAppLanguageId, widget.event.id);
+      final details = await _eventService.getEventDetailsForEdit(widget.event.id);
       if (!mounted) {
         return;
       }

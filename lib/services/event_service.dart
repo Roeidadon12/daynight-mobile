@@ -254,6 +254,41 @@ class EventService {
     }
   }
 
+  Future<EventEditDetails?> getEventDetailsForEdit(int eventId) async {
+
+    try {
+      final response = await dashboardApi.requestWithPath(
+        endpoint: ApiCommands.getEventDetailsForEdit.value,
+        pathValue: eventId,
+        method: 'GET',
+        headers: await ApiHeaders.buildHeader(null, true),
+      );
+
+      Map<String, dynamic> payload;
+
+      if (response['data'] is Map<String, dynamic>) {
+        payload = response['data'] as Map<String, dynamic>;
+      } else {
+        payload = response;
+      }
+
+      if (!payload.containsKey('event')) {
+        Logger.error('Edit details response missing event object', 'EventService');
+        return null;
+      }
+
+      final eventEditDetails = EventEditDetails.fromJson(payload);
+      Logger.info(
+        'Successfully fetched edit details for event ID $eventId',
+        'EventService',
+      );
+      return eventEditDetails;
+    } catch (e) {
+      Logger.error('Error parsing edit event details: $e', 'EventService');
+      return null;
+    }
+  }
+
   /// Creates a new event by submitting event data to the backend API.
   ///
   /// [eventData] contains all the event information to be submitted
