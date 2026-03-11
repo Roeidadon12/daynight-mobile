@@ -2,6 +2,7 @@ import 'package:day_night/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter/services.dart';
 import 'utils/logger.dart';
 import 'splash_screen.dart';
 import 'app_localizations.dart';
@@ -64,25 +65,54 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  static final SystemUiOverlayStyle _darkSystemUi =
+      SystemUiOverlayStyle.light.copyWith(
+    statusBarColor: Colors.transparent,
+    systemNavigationBarColor: kMainBackgroundColor,
+    systemNavigationBarDividerColor: Colors.transparent,
+  );
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: _darkSystemUi,
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        color: kMainBackgroundColor,
+        builder: (context, child) {
+          return ColoredBox(
+            color: kMainBackgroundColor,
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          scaffoldBackgroundColor: kMainBackgroundColor,
+          appBarTheme: AppBarTheme(
+            backgroundColor: kMainBackgroundColor,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+            systemOverlayStyle: SystemUiOverlayStyle.light,
+          ),
+          bottomSheetTheme: BottomSheetThemeData(
+            backgroundColor: kMainBackgroundColor,
+          ),
+          canvasColor: kMainBackgroundColor,
+        ),
+        localizationsDelegates: [
+          const AppLocalizationsDelegate(),
+          FlutterQuillLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'),
+          Locale('he'),
+        ],
+        home: const SplashScreenWrapper(),
       ),
-      localizationsDelegates: [
-        const AppLocalizationsDelegate(),
-        FlutterQuillLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('en'),
-        Locale('he'),
-      ],
-      home: const SplashScreenWrapper(),
     );
   }
 }
