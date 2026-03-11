@@ -13,6 +13,7 @@ import '../../../shared/labeled_text_form_field.dart';
 class NewEventStep1 extends StatefulWidget {
   final Map<String, dynamic> eventData;
   final EventEditDetails? initialEventData;
+  final bool isEditMode;
   final Function(String, dynamic) onDataChanged;
   final VoidCallback onNext;
 
@@ -20,6 +21,7 @@ class NewEventStep1 extends StatefulWidget {
     super.key,
     required this.eventData,
     this.initialEventData,
+    this.isEditMode = false,
     required this.onDataChanged,
     required this.onNext,
   });
@@ -637,7 +639,12 @@ class _NewEventStep1State extends State<NewEventStep1> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                16,
+                16,
+                widget.isEditMode ? 32 : 16,
+              ),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -1597,20 +1604,20 @@ class _NewEventStep1State extends State<NewEventStep1> {
             ),
           ),
           
-          // Continue Button
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: PrimaryButton(
-                onPressed: _saveAndNext,
-                textKey: 'create-event-continue-to-description',
-                disabled: !_isFormValid(),
-                trailingIcon: Icons.arrow_forward,
-                flexible: false,
+          if (!widget.isEditMode)
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: PrimaryButton(
+                  onPressed: _saveAndNext,
+                  textKey: 'create-event-continue-to-description',
+                  disabled: !_isFormValid(),
+                  trailingIcon: Icons.arrow_forward,
+                  flexible: false,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

@@ -143,6 +143,7 @@ const Map<String, String> heTexts = {
   'characters': 'תווים',
   'tap-to-edit': 'לחץ לעריכת התיאור',
   'save': 'שמור',
+  'save-changes': 'שמור שינויים',
   'discard': 'בטל',
   'unsaved-changes': 'שינויים לא נשמרו',
   'unsaved-changes-message': 'האם ברצונך לשמור את השינויים?',

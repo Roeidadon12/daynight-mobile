@@ -6,6 +6,7 @@ import 'package:day_night/controllers/event/edit_event/general_edit_page.dart';
 import 'package:day_night/controllers/event/edit_event/media_edit_page.dart';
 import 'package:day_night/controllers/event/edit_event/advanced_edit_page.dart';
 import 'package:day_night/controllers/event/edit_event/bank_details_edit_page.dart';
+import 'package:day_night/controllers/shared/primary_button.dart';
 import 'package:day_night/services/event_service.dart';
 import 'package:flutter/material.dart';
 
@@ -134,6 +135,14 @@ class _EventEditingPageState extends State<EventEditingPage> {
     }
   }
 
+  void _onSaveChangesPressed() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context).get('save-changes')),
+      ),
+    );
+  }
+
   PreferredSizeWidget _buildAppBar(AppLocalizations localizations) {
     return AppBar(
       backgroundColor: kMainBackgroundColor,
@@ -228,6 +237,17 @@ class _EventEditingPageState extends State<EventEditingPage> {
                 ),
               ),
               Expanded(child: _buildSelectedSection()),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: PrimaryButton(
+                    onPressed: _onSaveChangesPressed,
+                    textKey: 'save-changes',
+                    flexible: false,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

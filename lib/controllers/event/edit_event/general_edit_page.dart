@@ -24,6 +24,7 @@ class GeneralEditSection extends StatelessWidget {
     return NewEventStep1(
       eventData: eventData,
       initialEventData: initialEventData,
+      isEditMode: true,
       onDataChanged: onDataChanged,
       onNext: onNext ?? () {},
     );

@@ -13,6 +13,7 @@ import '../full_page_description_editor.dart';
 
 class NewEventStep2 extends StatefulWidget {
   final Map<String, dynamic> eventData;
+  final bool isEditMode;
   final Function(String, dynamic) onDataChanged;
   final VoidCallback onNext;
   final VoidCallback onPrevious;
@@ -20,6 +21,7 @@ class NewEventStep2 extends StatefulWidget {
   const NewEventStep2({
     super.key,
     required this.eventData,
+    this.isEditMode = false,
     required this.onDataChanged,
     required this.onNext,
     required this.onPrevious,
@@ -462,7 +464,12 @@ class _NewEventStep2State extends State<NewEventStep2> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                16,
+                16,
+                widget.isEditMode ? 32 : 16,
+              ),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -796,20 +803,20 @@ class _NewEventStep2State extends State<NewEventStep2> {
             ),
           ),
           
-          // Navigation Buttons
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: PrimaryButton(
-                onPressed: _saveAndNext,
-                textKey: 'create-event-continue-to-advanced-settings',
-                disabled: !_isFormValid(),
-                trailingIcon: Icons.arrow_forward,
-                flexible: false,
+          if (!widget.isEditMode)
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: PrimaryButton(
+                  onPressed: _saveAndNext,
+                  textKey: 'create-event-continue-to-advanced-settings',
+                  disabled: !_isFormValid(),
+                  trailingIcon: Icons.arrow_forward,
+                  flexible: false,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

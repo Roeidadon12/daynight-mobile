@@ -25,6 +25,7 @@ class MediaEditSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return NewEventStep2(
       eventData: eventData,
+      isEditMode: true,
       onDataChanged: onDataChanged,
       onNext: onNext ?? () {},
       onPrevious: onPrevious ?? () {},

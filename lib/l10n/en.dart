@@ -143,6 +143,7 @@ const Map<String, String> enTexts = {
   'characters': 'characters',
   'tap-to-edit': 'Tap to edit description',
   'save': 'Save',
+  'save-changes': 'Save Changes',
   'discard': 'Discard',
   'unsaved-changes': 'Unsaved Changes',
   'unsaved-changes-message': 'Do you want to save your changes?',
