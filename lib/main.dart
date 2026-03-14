@@ -17,6 +17,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'providers/search_provider.dart';
 import 'controllers/user/user_controller.dart';
+import 'screens/auth/login_screen.dart';
 
 Future<void> setAppLanguageIdByDeviceLocale() async {
   try {
@@ -186,7 +187,9 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> _getPages(bool isLoggedIn) {
     if (_editOnlyMode) {
       return [
-        const EditingTab(isSelected: true),
+        isLoggedIn
+            ? const EditingTab(isSelected: true)
+            : const LoginScreen(popOnSuccess: false),
       ];
     }
 

@@ -9,7 +9,9 @@ import 'sms_verification_screen.dart';
 import 'login_register_with_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final bool popOnSuccess;
+
+  const LoginScreen({super.key, this.popOnSuccess = true});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -93,7 +95,9 @@ class _LoginScreenState extends State<LoginScreen> {
     
     if (success) {
       if (mounted) {
-        Navigator.of(context).pop(); // Return to previous screen
+        if (widget.popOnSuccess && Navigator.of(context).canPop()) {
+          Navigator.of(context).pop(); // Return to previous screen
+        }
       }
     } else {
       setState(() {
@@ -108,7 +112,9 @@ class _LoginScreenState extends State<LoginScreen> {
     
     if (success) {
       if (mounted) {
-        Navigator.of(context).pop(); // Return to previous screen
+        if (widget.popOnSuccess && Navigator.of(context).canPop()) {
+          Navigator.of(context).pop(); // Return to previous screen
+        }
       }
     } else {
       setState(() {
@@ -148,9 +154,13 @@ class _LoginScreenState extends State<LoginScreen> {
               isRegistration: false, // This is a login flow
               autoSendOtp: false, // OTP already sent, don't send again
               onSuccess: () {
-                // Pop SMS verification screen and login screen to return to calling screen
-                Navigator.of(context).pop(); // Close SMS screen
-                Navigator.of(context).pop(); // Close login screen
+                // Always close SMS verification screen
+                Navigator.of(context).pop();
+
+                // Only close login screen when it was opened as a pushed route
+                if (widget.popOnSuccess && Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
               },
             ),
           ),
