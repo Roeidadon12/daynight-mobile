@@ -199,6 +199,24 @@ class EventEditDetails {
       address: json['address'] as String?,
     );
   }
+
+  EventEditDetails copyWith({
+    EditEvent? event,
+    EventCurrencyInfo? currencyInfo,
+    List<Language>? languages,
+    EventLanguageContent? enEventContent,
+    EventLanguageContent? heEventContent,
+    String? address,
+  }) {
+    return EventEditDetails(
+      event: event ?? this.event,
+      currencyInfo: currencyInfo ?? this.currencyInfo,
+      languages: languages ?? this.languages,
+      enEventContent: enEventContent ?? this.enEventContent,
+      heEventContent: heEventContent ?? this.heEventContent,
+      address: address ?? this.address,
+    );
+  }
 }
 
 class EditEvent {
@@ -327,6 +345,62 @@ class EditEvent {
       serialNumber: _asInt(json['serial_number']) ?? 0,
     );
   }
+
+  EditEvent copyWith({
+    String? status,
+    String? startDate,
+    String? startTime,
+    String? endDate,
+    String? endTime,
+    int? minAge,
+    String? mapAddress,
+    String? coverImage,
+    int? measurementId,
+    String? pixelId,
+    String? tiktokPixelId,
+  }) {
+    return EditEvent(
+      id: id,
+      organizerId: organizerId,
+      thumbnail: thumbnail,
+      status: status ?? this.status,
+      dateType: dateType,
+      countdownStatus: countdownStatus,
+      startDate: startDate ?? this.startDate,
+      startTime: startTime ?? this.startTime,
+      duration: duration,
+      endDate: endDate ?? this.endDate,
+      endTime: endTime ?? this.endTime,
+      endDateTime: endDateTime,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      eventType: eventType,
+      isFeatured: isFeatured,
+      latitude: latitude,
+      longitude: longitude,
+      minAge: minAge ?? this.minAge,
+      isRequiredIdNumber: isRequiredIdNumber,
+      isRequiredFacebookUsername: isRequiredFacebookUsername,
+      isRequiredInstagramUsername: isRequiredInstagramUsername,
+      coverImage: coverImage ?? this.coverImage,
+      mapStatus: mapStatus,
+      mapAddress: mapAddress ?? this.mapAddress,
+      isRequiredFacebookOrInstagram: isRequiredFacebookOrInstagram,
+      autoTicketApproval: autoTicketApproval,
+      taxStatus: taxStatus,
+      taxType: taxType,
+      taxAmount: taxAmount,
+      imageOfIdStatus: imageOfIdStatus,
+      measurementId: measurementId ?? this.measurementId,
+      pixelId: pixelId ?? this.pixelId,
+      tiktokPixelId: tiktokPixelId ?? this.tiktokPixelId,
+      hideDuration: hideDuration,
+      hideGeneralStatsStatus: hideGeneralStatsStatus,
+      hideProgressBarStatus: hideProgressBarStatus,
+      selectedTickets: selectedTickets,
+      serialNumber: serialNumber,
+    );
+  }
 }
 
 class EventCurrencyInfo {
@@ -434,6 +508,42 @@ class EventLanguageContent {
       refundPolicyStatus: json['refund_policy_status'] as String?,
       metaKeywordsStatus: json['meta_keywords_status'] as String?,
       metaDescriptionStatus: json['meta_description_status'] as String?,
+    );
+  }
+
+  EventLanguageContent copyWith({
+    int? eventCategoryId,
+    String? title,
+    String? slug,
+    String? description,
+    String? address,
+    String? country,
+  }) {
+    return EventLanguageContent(
+      id: id,
+      eventId: eventId,
+      languageId: languageId,
+      eventCategoryId: eventCategoryId ?? this.eventCategoryId,
+      title: title ?? this.title,
+      slug: slug ?? this.slug,
+      description: description ?? this.description,
+      metaKeywords: metaKeywords,
+      metaDescription: metaDescription,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      address: address ?? this.address,
+      country: country ?? this.country,
+      state: state,
+      city: city,
+      zipCode: zipCode,
+      googleCalendarId: googleCalendarId,
+      refundPolicy: refundPolicy,
+      titleStatus: titleStatus,
+      descriptionStatus: descriptionStatus,
+      countryStatus: countryStatus,
+      refundPolicyStatus: refundPolicyStatus,
+      metaKeywordsStatus: metaKeywordsStatus,
+      metaDescriptionStatus: metaDescriptionStatus,
     );
   }
 }

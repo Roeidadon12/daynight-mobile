@@ -31,6 +31,7 @@ class _EventEditingPageState extends State<EventEditingPage> {
   bool _isLoading = true;
   String? _errorMessage;
   _EditSection _selectedSection = _EditSection.general;
+  bool _eventDetailsRebuildScheduled = false;
 
   @override
   void initState() {
@@ -46,6 +47,183 @@ class _EventEditingPageState extends State<EventEditingPage> {
 
   void _onEventDataChanged(String key, dynamic value) {
     _eventFormData[key] = value;
+    _syncEventDetailsFromFormChange(key, value);
+  }
+
+  int? _asInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    return int.tryParse(value.toString());
+  }
+
+  String? _asString(dynamic value) {
+    if (value == null) return null;
+    return value.toString();
+  }
+
+  bool _asBool(dynamic value) {
+    if (value is bool) {
+      return value;
+    }
+
+    final normalized = value?.toString().trim().toLowerCase();
+    return normalized == '1' || normalized == 'true' || normalized == 'yes';
+  }
+
+  EventLanguageContent? _updateLanguageContent(
+    EventLanguageContent? content, {
+    String? title,
+    int? categoryId,
+    String? address,
+    String? country,
+  }) {
+    if (content == null) {
+      return null;
+    }
+
+    return content.copyWith(
+      title: title,
+      eventCategoryId: categoryId,
+      address: address,
+      country: country,
+    );
+  }
+
+  void _syncEventDetailsFromFormChange(String key, dynamic value) {
+    final details = _eventDetails;
+    if (details == null) {
+      return;
+    }
+
+    EventEditDetails updated = details;
+
+    switch (key) {
+      case 'he_title':
+        updated = updated.copyWith(
+          heEventContent: _updateLanguageContent(updated.heEventContent, title: _asString(value)),
+        );
+        break;
+      case 'en_title':
+        updated = updated.copyWith(
+          enEventContent: _updateLanguageContent(updated.enEventContent, title: _asString(value)),
+        );
+        break;
+      case 'he_category_id':
+        updated = updated.copyWith(
+          heEventContent: _updateLanguageContent(updated.heEventContent, categoryId: _asInt(value)),
+        );
+        break;
+      case 'en_category_id':
+        updated = updated.copyWith(
+          enEventContent: _updateLanguageContent(updated.enEventContent, categoryId: _asInt(value)),
+        );
+        break;
+      case 'address':
+        updated = updated.copyWith(
+          address: _asString(value),
+          heEventContent: _updateLanguageContent(updated.heEventContent, address: _asString(value)),
+          enEventContent: _updateLanguageContent(updated.enEventContent, address: _asString(value)),
+          event: updated.event.copyWith(mapAddress: _asString(value)),
+        );
+        break;
+      case 'min_age':
+        updated = updated.copyWith(
+          event: updated.event.copyWith(minAge: _asInt(value) ?? updated.event.minAge),
+        );
+        break;
+      case 'start_date':
+        updated = updated.copyWith(
+          event: updated.event.copyWith(startDate: _asString(value) ?? updated.event.startDate),
+        );
+        break;
+      case 'start_time':
+        updated = updated.copyWith(
+          event: updated.event.copyWith(startTime: _asString(value) ?? updated.event.startTime),
+        );
+        break;
+      case 'end_date':
+        updated = updated.copyWith(
+          event: updated.event.copyWith(endDate: _asString(value) ?? updated.event.endDate),
+        );
+        break;
+      case 'end_time':
+        updated = updated.copyWith(
+          event: updated.event.copyWith(endTime: _asString(value) ?? updated.event.endTime),
+        );
+        break;
+      case 'image':
+        updated = updated.copyWith(
+          event: updated.event.copyWith(coverImage: _asString(value) ?? updated.event.coverImage),
+        );
+        break;
+      case 'he_description':
+        updated = updated.copyWith(
+          heEventContent: updated.heEventContent?.copyWith(description: _asString(value) ?? ''),
+        );
+        break;
+      case 'en_description':
+        updated = updated.copyWith(
+          enEventContent: updated.enEventContent?.copyWith(description: _asString(value) ?? ''),
+        );
+        break;
+      case 'isPrivateEvent':
+        updated = updated.copyWith(
+          event: updated.event.copyWith(status: _asBool(value) ? '1' : '0'),
+        );
+        break;
+      case 'urlSuffix':
+        updated = updated.copyWith(
+          heEventContent: updated.heEventContent?.copyWith(slug: _asString(value) ?? ''),
+          enEventContent: updated.enEventContent?.copyWith(slug: _asString(value) ?? ''),
+        );
+        break;
+      case 'pixel_id':
+        updated = updated.copyWith(
+          event: updated.event.copyWith(pixelId: _asString(value)),
+        );
+        break;
+      case 'tiktok_pixel_id':
+        updated = updated.copyWith(
+          event: updated.event.copyWith(tiktokPixelId: _asString(value)),
+        );
+        break;
+      case 'measurement_id':
+        updated = updated.copyWith(
+          event: updated.event.copyWith(measurementId: _asInt(value)),
+        );
+        break;
+      case 'he_country':
+        updated = updated.copyWith(
+          heEventContent: _updateLanguageContent(updated.heEventContent, country: _asString(value)),
+        );
+        break;
+      case 'en_country':
+        updated = updated.copyWith(
+          enEventContent: _updateLanguageContent(updated.enEventContent, country: _asString(value)),
+        );
+        break;
+      default:
+        return;
+    }
+
+    _eventDetails = updated;
+    _scheduleEventDetailsRebuild();
+  }
+
+  void _scheduleEventDetailsRebuild() {
+    if (!mounted || _eventDetailsRebuildScheduled) {
+      return;
+    }
+
+    _eventDetailsRebuildScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      _eventDetailsRebuildScheduled = false;
+      setState(() {});
+    });
   }
 
   void _hydrateFormDataFromDetails(EventEditDetails details) {
