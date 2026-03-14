@@ -6,16 +6,20 @@ class OrginizerEventListTile extends StatelessWidget {
   final OrganizerEvent event;
   final VoidCallback? onTap;
   final VoidCallback? onEditPressed;
+  final VoidCallback? onGraphPressed;
   final bool showTrailingArrow;
   final bool showBottomActions;
+  final bool showGraphButton;
 
   const OrginizerEventListTile({
     super.key,
     required this.event,
     this.onTap,
     this.onEditPressed,
+    this.onGraphPressed,
     this.showTrailingArrow = true,
     this.showBottomActions = true,
+    this.showGraphButton = false,
   });
 
   String _formatStartDateTime() {
@@ -127,13 +131,27 @@ class OrginizerEventListTile extends StatelessWidget {
                 ),
               ),
             ),
-            trailing: showTrailingArrow
-                ? Icon(
-                    Directionality.of(context) == TextDirection.ltr
-                        ? Icons.chevron_left
-                        : Icons.chevron_right,
-                    color: Colors.grey[400],
-                    size: 22,
+            trailing: showTrailingArrow || showGraphButton
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showGraphButton)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 4),
+                          child: _TrailingIconButton(
+                            icon: Icons.bar_chart_rounded,
+                            onPressed: onGraphPressed,
+                          ),
+                        ),
+                      if (showTrailingArrow)
+                        Icon(
+                          Directionality.of(context) == TextDirection.ltr
+                              ? Icons.chevron_left
+                              : Icons.chevron_right,
+                          color: Colors.grey[400],
+                          size: 22,
+                        ),
+                    ],
                   )
                 : null,
           ),
@@ -188,6 +206,39 @@ class OrginizerEventListTile extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _TrailingIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onPressed;
+
+  const _TrailingIconButton({
+    required this.icon,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 44,
+      height: 44,
+      child: IconButton(
+        onPressed: onPressed,
+        style: IconButton.styleFrom(
+          padding: EdgeInsets.zero,
+          backgroundColor: Colors.white.withValues(alpha: 0.06),
+          foregroundColor: Colors.white,
+          disabledForegroundColor: Colors.white,
+          shape: CircleBorder(
+            side: BorderSide(
+              color: Colors.white.withValues(alpha: 0.12),
+            ),
+          ),
+        ),
+        icon: Icon(icon, size: 22),
       ),
     );
   }

@@ -84,6 +84,8 @@ class _DetailEventPageState extends State<DetailEventPage> {
               event: widget.event,
               showTrailingArrow: false,
               showBottomActions: false,
+              showGraphButton: true,
+              onGraphPressed: () {},
             ),
             const SizedBox(height: 12),
             Row(
