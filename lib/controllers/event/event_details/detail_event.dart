@@ -5,6 +5,7 @@ import 'package:day_night/controllers/event/event_details/special_graphs.dart';
 import 'package:day_night/controllers/event/event_details/summary_status_card.dart';
 import 'package:day_night/controllers/event/event_details/total_earnings_section.dart';
 import 'package:day_night/controllers/event/event_details/waiting_participants_section.dart';
+import 'package:day_night/controllers/event/event_data/event_data_page.dart';
 import 'package:day_night/models/events.dart';
 import 'package:day_night/services/event_service.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,14 @@ class _DetailEventPageState extends State<DetailEventPage> {
   int _abondedParticipants = 0;
   int _rejectedParticipants = 0;
   int _hiddenParticipants = 0;
+
+  void _handleGraphPressed() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EventDataPage(event: widget.event),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -85,7 +94,7 @@ class _DetailEventPageState extends State<DetailEventPage> {
               showTrailingArrow: false,
               showBottomActions: false,
               showGraphButton: true,
-              onGraphPressed: () {},
+              onGraphPressed: _handleGraphPressed,
             ),
             const SizedBox(height: 12),
             Row(

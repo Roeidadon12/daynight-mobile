@@ -249,4 +249,5 @@ const Map<String, String> heTexts = {
   'event-edit-media': 'מדיה',
   'event-edit-advanced': 'מתקדם',
   'event-edit-bank-details': 'פרטי בנק',
+  'event-data': 'נתוני אירוע',
 };

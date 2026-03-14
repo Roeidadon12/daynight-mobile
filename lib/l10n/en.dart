@@ -251,4 +251,5 @@ const Map<String, String> enTexts = {
   'event-edit-media': 'Media',
   'event-edit-advanced': 'Advanced',
   'event-edit-bank-details': 'Bank Details',
+  'event-data': 'Event Data',
 };
