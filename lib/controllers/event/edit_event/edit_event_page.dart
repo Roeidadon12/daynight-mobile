@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:day_night/app_localizations.dart';
 import 'package:day_night/constants.dart';
 import 'package:day_night/models/event_details.dart';
@@ -29,6 +31,7 @@ class _EventEditingPageState extends State<EventEditingPage> {
   EventEditDetails? _eventDetails;
   late Map<String, dynamic> _eventFormData;
   bool _isLoading = true;
+  bool _isSaving = false;
   String? _errorMessage;
   _EditSection _selectedSection = _EditSection.general;
   bool _eventDetailsRebuildScheduled = false;
@@ -313,12 +316,238 @@ class _EventEditingPageState extends State<EventEditingPage> {
     }
   }
 
-  void _onSaveChangesPressed() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context).get('save-changes')),
-      ),
+  int _resolveInt(dynamic value, int fallback) {
+    if (value == null) return fallback;
+    if (value is int) return value;
+    return int.tryParse(value.toString()) ?? fallback;
+  }
+
+  String _resolveString(dynamic value, String fallback) {
+    if (value == null) return fallback;
+    final text = value.toString().trim();
+    return text.isEmpty ? fallback : text;
+  }
+
+  int _toBinary(dynamic value, int fallback) {
+    if (value == null) return fallback;
+    if (value is bool) return value ? 1 : 0;
+
+    final normalized = value.toString().trim().toLowerCase();
+    if (normalized == '1' || normalized == 'true' || normalized == 'yes') return 1;
+    if (normalized == '0' || normalized == 'false' || normalized == 'no') return 0;
+    return fallback;
+  }
+
+  String _toYesNo(dynamic value, String fallback) {
+    if (value == null) return fallback;
+    final normalized = value.toString().trim().toLowerCase();
+    if (normalized == '1' || normalized == 'true' || normalized == 'yes') return 'yes';
+    if (normalized == '0' || normalized == 'false' || normalized == 'no') return 'no';
+    return fallback;
+  }
+
+  List<String> _toStringList(dynamic value) {
+    if (value is List) {
+      return value
+          .where((item) => item != null)
+          .map((item) => item.toString().trim())
+          .where((item) => item.isNotEmpty)
+          .toList();
+    }
+
+    if (value is String && value.trim().isNotEmpty) {
+      return [value.trim()];
+    }
+
+    return <String>[];
+  }
+
+  File? _resolveCoverImageFile() {
+    final dynamic explicitFile = _eventFormData['imageFile'];
+    if (explicitFile is File && explicitFile.existsSync()) {
+      return explicitFile;
+    }
+
+    final imagePath = _eventFormData['image']?.toString();
+    if (imagePath != null && imagePath.isNotEmpty) {
+      final candidate = File(imagePath);
+      if (candidate.existsSync()) {
+        return candidate;
+      }
+    }
+
+    return null;
+  }
+
+  Map<String, dynamic> _buildUpdateEventPayload() {
+    final details = _eventDetails!;
+    final event = details.event;
+
+    final isFeatured = _toYesNo(_eventFormData['is_featured'], _toYesNo(event.isFeatured, 'no'));
+    final countdownStatus = _toBinary(_eventFormData['countdown_status'], event.countdownStatus);
+    final mapStatus = _toBinary(_eventFormData['map_status'], event.mapStatus);
+    final endDateTimeStatus = _toBinary(
+      _eventFormData['end_date_time_status'],
+      event.hideDuration == 1 ? 0 : 1,
     );
+
+    String dateType = _resolveString(_eventFormData['date_type'], event.dateType);
+    if (dateType != 'single' && dateType != 'multiple') {
+      dateType = 'single';
+    }
+
+    final address = _resolveString(
+      _eventFormData['address'],
+      details.address ?? event.mapAddress ?? '',
+    );
+    final mapAddress = _resolveString(_eventFormData['map_address'], event.mapAddress ?? address);
+    final latitude = _resolveString(_eventFormData['latitude'], event.latitude?.toString() ?? '');
+    final longitude = _resolveString(_eventFormData['longitude'], event.longitude?.toString() ?? '');
+
+    final slug = _resolveString(
+      _eventFormData['slug'] ?? _eventFormData['urlSuffix'],
+      details.enEventContent?.slug ?? details.heEventContent?.slug ?? '',
+    );
+
+    final payload = <String, dynamic>{
+      'event_id': widget.event.id,
+      'min_age': _resolveInt(_eventFormData['min_age'], event.minAge).clamp(0, 999),
+      'countdown_status': countdownStatus,
+      'is_featured': isFeatured,
+      'date_type': dateType,
+      'end_date_time_status': endDateTimeStatus,
+      'map_status': mapStatus,
+      'address': address,
+      'map_address': mapAddress,
+      'latitude': latitude,
+      'longitude': longitude,
+      'pixel_id': _resolveString(_eventFormData['pixel_id'], event.pixelId ?? ''),
+      'tiktok_pixel_id': _resolveString(_eventFormData['tiktok_pixel_id'], event.tiktokPixelId ?? ''),
+      'measurement_id': _resolveString(_eventFormData['measurement_id'], event.measurementId?.toString() ?? ''),
+      'slug': slug,
+      'bank_name': _resolveString(_eventFormData['bank_name'] ?? _eventFormData['bankNumber'], ''),
+      'account_name': _resolveString(_eventFormData['account_name'] ?? _eventFormData['accountHolderName'], ''),
+      'account_number': _resolveString(_eventFormData['account_number'] ?? _eventFormData['bankAccountNumber'], ''),
+      'branch_number': _resolveString(_eventFormData['branch_number'] ?? _eventFormData['branch'], ''),
+      'cover_image': _resolveString(_eventFormData['cover_image'] ?? _eventFormData['image'], event.coverImage),
+    };
+
+    if (dateType == 'single') {
+      payload['start_date'] = _resolveString(_eventFormData['start_date'], event.startDate);
+      payload['start_time'] = _resolveString(_eventFormData['start_time'], event.startTime);
+      payload['end_date'] = _resolveString(_eventFormData['end_date'], event.endDate);
+      payload['end_time'] = _resolveString(_eventFormData['end_time'], event.endTime);
+    } else {
+      final mStartDate = _toStringList(_eventFormData['m_start_date']);
+      final mStartTime = _toStringList(_eventFormData['m_start_time']);
+      final mEndDate = _toStringList(_eventFormData['m_end_date']);
+      final mEndTime = _toStringList(_eventFormData['m_end_time']);
+
+      payload['m_start_date'] = mStartDate.isNotEmpty
+          ? mStartDate
+          : [_resolveString(_eventFormData['start_date'], event.startDate)];
+      payload['m_start_time'] = mStartTime.isNotEmpty
+          ? mStartTime
+          : [_resolveString(_eventFormData['start_time'], event.startTime)];
+      payload['m_end_date'] = mEndDate.isNotEmpty
+          ? mEndDate
+          : [_resolveString(_eventFormData['end_date'], event.endDate)];
+      payload['m_end_time'] = mEndTime.isNotEmpty
+          ? mEndTime
+          : [_resolveString(_eventFormData['end_time'], event.endTime)];
+    }
+
+    final enTitle = _resolveString(
+      _eventFormData['en_title'],
+      details.enEventContent?.title ?? details.heEventContent?.title ?? widget.event.title,
+    );
+    final enCategoryId = _resolveInt(
+      _eventFormData['en_category_id'],
+      details.enEventContent?.eventCategoryId ?? details.heEventContent?.eventCategoryId ?? 0,
+    );
+    final enCountry = _resolveString(
+      _eventFormData['en_country'],
+      details.enEventContent?.country ?? details.heEventContent?.country ?? '',
+    );
+    final enDescription = _resolveString(
+      _eventFormData['en_description'],
+      details.enEventContent?.description ?? details.heEventContent?.description ?? '',
+    );
+
+    payload['en_title'] = enTitle;
+    payload['en_category_id'] = enCategoryId;
+    payload['en_country'] = enCountry;
+    payload['en_description'] = enDescription;
+    payload['en_refund_policy'] = _resolveString(_eventFormData['en_refund_policy'], details.enEventContent?.refundPolicy ?? '');
+    payload['en_meta_keywords'] = _resolveString(_eventFormData['en_meta_keywords'], details.enEventContent?.metaKeywords ?? '');
+    payload['en_meta_description'] = _resolveString(_eventFormData['en_meta_description'], details.enEventContent?.metaDescription ?? '');
+
+    if (_eventFormData['he_title'] != null || details.heEventContent != null) {
+      payload['he_title'] = _resolveString(
+        _eventFormData['he_title'],
+        details.heEventContent?.title ?? enTitle,
+      );
+      payload['he_category_id'] = _resolveInt(
+        _eventFormData['he_category_id'],
+        details.heEventContent?.eventCategoryId ?? enCategoryId,
+      );
+      payload['he_country'] = _resolveString(
+        _eventFormData['he_country'],
+        details.heEventContent?.country ?? enCountry,
+      );
+      payload['he_description'] = _resolveString(
+        _eventFormData['he_description'],
+        details.heEventContent?.description ?? enDescription,
+      );
+      payload['he_refund_policy'] = _resolveString(_eventFormData['he_refund_policy'], details.heEventContent?.refundPolicy ?? '');
+      payload['he_meta_keywords'] = _resolveString(_eventFormData['he_meta_keywords'], details.heEventContent?.metaKeywords ?? '');
+      payload['he_meta_description'] = _resolveString(_eventFormData['he_meta_description'], details.heEventContent?.metaDescription ?? '');
+    }
+
+    return payload;
+  }
+
+  Future<void> _onSaveChangesPressed() async {
+    if (_eventDetails == null || _isSaving) {
+      return;
+    }
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final payload = _buildUpdateEventPayload();
+      final success = await _eventService.updateEvent(
+        eventId: widget.event.id,
+        eventData: payload,
+        coverImageFile: _resolveCoverImageFile(),
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success
+                ? 'Event updated successfully.'
+                : 'Failed to update event. Please try again.',
+          ),
+        ),
+      );
+
+      if (success) {
+        await _loadEventDetails();
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
   }
 
   PreferredSizeWidget _buildAppBar(AppLocalizations localizations) {
@@ -423,6 +652,7 @@ class _EventEditingPageState extends State<EventEditingPage> {
                     onPressed: _onSaveChangesPressed,
                     textKey: 'save-changes',
                     flexible: false,
+                    disabled: _isSaving,
                   ),
                 ),
               ),

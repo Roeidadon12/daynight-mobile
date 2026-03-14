@@ -398,6 +398,68 @@ class EventService {
     }
   }
 
+  Future<bool> updateEvent({
+    required int eventId,
+    required Map<String, dynamic> eventData,
+    File? coverImageFile,
+  }) async {
+    try {
+      Logger.info(
+        'Updating event $eventId with data: ${eventData.keys.join(', ')}',
+        'EventService',
+      );
+
+      final formFields = <String, String>{};
+      eventData.forEach((key, value) {
+        if (value == null) {
+          return;
+        }
+
+        if (value is List) {
+          for (var i = 0; i < value.length; i++) {
+            final item = value[i];
+            if (item != null) {
+              formFields['$key[$i]'] = item.toString();
+            }
+          }
+          return;
+        }
+
+        formFields[key] = value.toString();
+      });
+
+      final files = <String, File>{};
+      if (coverImageFile != null && await coverImageFile.exists()) {
+        files['cover_image'] = coverImageFile;
+      }
+
+      final response = await dashboardApi.postMultipart(
+        '${ApiCommands.updateEvent.value}/$eventId',
+        fields: formFields,
+        files: files.isEmpty ? null : files,
+        headers: await ApiHeaders.buildMultipartHeaders(null, true),
+      );
+
+      final status = response['status']?.toString().toLowerCase();
+      final isSuccess =
+          status == 'success' || status == 'true' || response['success'] == true;
+
+      if (isSuccess) {
+        Logger.info('Successfully updated event $eventId', 'EventService');
+        return true;
+      }
+
+      Logger.error(
+        'Failed to update event $eventId: ${response['message'] ?? 'Unknown error'}',
+        'EventService',
+      );
+      return false;
+    } catch (e) {
+      Logger.error('Error updating event $eventId: $e', 'EventService');
+      return false;
+    }
+  }
+
   /// Fetches the current user's events from the dashboard.
   ///
   /// Requires authentication. If no login token is present, returns an empty list.

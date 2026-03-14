@@ -37,7 +37,7 @@ enum ApiCommands {
   getEventDetailsForEdit('/event-management/edit'), // Fixed: removed duplicate /dashboard since baseUrl already includes /api/dashboard
   getUserEvents('/events'), // Fixed: removed duplicate /dashboard since baseUrl already includes /api/dashboard
   createEvent('/event-management/store/'),
-  updateEvent('/events'),
+  updateEvent('/event-management/update'),
   deleteEvent('/events'),
   getLanguages('/languages'),
   getSendOtp('/send-otp'),
