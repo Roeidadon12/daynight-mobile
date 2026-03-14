@@ -29,7 +29,6 @@ class NewEventStep3 extends StatefulWidget {
 
 class _NewEventStep3State extends State<NewEventStep3> {
   final _formKey = GlobalKey<FormState>();
-  final _organizerNameController = TextEditingController();
   final _urlSuffixController = TextEditingController();
   final _trackingField1Controller = TextEditingController();
   final _trackingField2Controller = TextEditingController();
@@ -44,7 +43,6 @@ class _NewEventStep3State extends State<NewEventStep3> {
   void initState() {
     super.initState();
     // Initialize with existing data if any
-    _organizerNameController.text = widget.eventData['organizerName'] ?? '';
     _urlSuffixController.text = widget.eventData['urlSuffix'] ?? '';
     _trackingField1Controller.text = widget.eventData['trackingField1'] ?? '';
     _trackingField2Controller.text = widget.eventData['trackingField2'] ?? '';
@@ -57,7 +55,6 @@ class _NewEventStep3State extends State<NewEventStep3> {
 
   @override
   void dispose() {
-    _organizerNameController.dispose();
     _urlSuffixController.dispose();
     _trackingField1Controller.dispose();
     _trackingField2Controller.dispose();
@@ -67,7 +64,7 @@ class _NewEventStep3State extends State<NewEventStep3> {
   }
 
   bool _isFormValid() {
-    return _organizerNameController.text.trim().isNotEmpty && _termsAccepted && !_isCreatingEvent;
+    return _termsAccepted && !_isCreatingEvent;
   }
 
   /// Populate empty non-default language fields with default language values
@@ -174,7 +171,6 @@ class _NewEventStep3State extends State<NewEventStep3> {
       }
       
       // Save form data
-      widget.onDataChanged('organizerName', _organizerNameController.text);
       widget.onDataChanged('urlSuffix', _urlSuffixController.text);
       widget.onDataChanged('finalUrl', finalUrl);
       widget.onDataChanged('isPrivateEvent', _isPrivateEvent);
@@ -203,7 +199,7 @@ class _NewEventStep3State extends State<NewEventStep3> {
       // Prepare additional form data
       final additionalData = {
         'urlSuffix': _urlSuffixController.text,
-        'organizerName': _organizerNameController.text,
+        'organizerName': widget.eventData['organizerName'] ?? '',
         'isPrivateEvent': _isPrivateEvent,
         'trackingField1': _trackingField1Controller.text,
         'trackingField2': _trackingField2Controller.text,
@@ -295,18 +291,6 @@ class _NewEventStep3State extends State<NewEventStep3> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Organizer Name
-                    LabeledTextFormField(
-                      controller: _organizerNameController,
-                      titleKey: 'organizer-name',
-                      hintTextKey: 'enter-organizer-name',
-                      errorTextKey: 'organizer-name-required',
-                      isRequired: true,
-                      onChanged: (value) => setState(() {}),
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
                     // URL Address
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

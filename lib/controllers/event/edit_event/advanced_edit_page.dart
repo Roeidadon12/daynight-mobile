@@ -26,7 +26,6 @@ class AdvancedEditSection extends StatefulWidget {
 class _AdvancedEditSectionState extends State<AdvancedEditSection> {
   late bool _isPrivateEvent;
   bool _isEditedByUser = false;
-  final TextEditingController _organizerNameController = TextEditingController();
   final TextEditingController _contactEmailController = TextEditingController();
   final TextEditingController _organizerIdentificationNumberController = TextEditingController();
   final TextEditingController _urlSuffixController = TextEditingController();
@@ -38,7 +37,6 @@ class _AdvancedEditSectionState extends State<AdvancedEditSection> {
   void initState() {
     super.initState();
     _isPrivateEvent = _resolvePrivateEventValue();
-    _organizerNameController.text = widget.eventData['organizerName']?.toString() ?? '';
     _contactEmailController.text = widget.eventData['contactEmail']?.toString() ?? '';
     _organizerIdentificationNumberController.text = widget.eventData['organizerIdentificationNumber']?.toString() ?? '';
     _urlSuffixController.text = widget.eventData['urlSuffix']?.toString() ??
@@ -58,7 +56,6 @@ class _AdvancedEditSectionState extends State<AdvancedEditSection> {
 
   @override
   void dispose() {
-    _organizerNameController.dispose();
     _contactEmailController.dispose();
     _organizerIdentificationNumberController.dispose();
     _urlSuffixController.dispose();
@@ -127,17 +124,6 @@ class _AdvancedEditSectionState extends State<AdvancedEditSection> {
                 widget.onDataChanged('isPrivateEvent', value);
               },
               activeThumbColor: kBrandPrimary,
-            ),
-            const SizedBox(height: 24),
-            LabeledTextFormField(
-              controller: _organizerNameController,
-              titleKey: 'organizer-name',
-              hintTextKey: 'enter-organizer-name',
-              errorTextKey: 'organizer-name-required',
-              isRequired: true,
-              onChanged: (value) {
-                widget.onDataChanged('organizerName', value);
-              },
             ),
             const SizedBox(height: 24),
             LabeledTextFormField(
