@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../app_localizations.dart';
+import '../../constants.dart';
 
 class LabeledTextFormField extends StatelessWidget {
   final TextEditingController controller;
@@ -88,8 +89,8 @@ class LabeledTextFormField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(32),
-              borderSide: const BorderSide(
-                color: Color(0xFF8B5CF6),
+              borderSide: BorderSide(
+                color: kBrandPrimarySoft,
                 width: 2,
               ),
             ),

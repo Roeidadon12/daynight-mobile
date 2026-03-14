@@ -229,7 +229,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     style: const TextStyle(color: Colors.white),
                   ),
                   trailing: _selectedGender == gender
-                      ? const Icon(Icons.check, color: Color(0xFF8B5CF6))
+                      ? Icon(Icons.check, color: kBrandPrimarySoft)
                       : null,
                   onTap: () {
                     _genderNotifier.value = gender;

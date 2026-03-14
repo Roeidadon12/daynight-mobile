@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_localizations.dart';
+import 'constants.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -7,7 +8,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple,
+      backgroundColor: kBrandPrimary,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -830,7 +830,7 @@ class _NewEventStep2State extends State<NewEventStep2> {
           width: 60,
           height: 60,
           decoration: BoxDecoration(
-            color: Colors.deepPurple,
+            color: kBrandPrimary,
             borderRadius: BorderRadius.circular(30),
           ),
           child: const Icon(

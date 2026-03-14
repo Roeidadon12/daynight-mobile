@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:day_night/app_localizations.dart';
+import 'package:day_night/constants.dart';
 import 'package:flutter/material.dart';
 
 class SpecialGraphsSection extends StatelessWidget {
@@ -178,7 +179,7 @@ class _GenderDonutPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = strokeWidth
-      ..color = const Color(0xFFE548BF);
+      ..color = kBrandAccentMagenta;
 
     final menPaint = Paint()
       ..style = PaintingStyle.stroke

@@ -19,6 +19,9 @@ abstract class AppConfig {
   Color get mainBackgroundColor;
   Color get brandNegativePrimary;
   Color get brandPrimary;
+  Color get brandPrimarySoft;
+  Color get brandPrimaryGradient;
+  Color get brandAccentMagenta;
   Color get brandPrimaryInvert;
   Color get brandTextPrimary;
   

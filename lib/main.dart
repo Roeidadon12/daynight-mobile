@@ -87,7 +87,7 @@ class MyApp extends StatelessWidget {
           );
         },
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          colorScheme: ColorScheme.fromSeed(seedColor: kBrandPrimary),
           scaffoldBackgroundColor: kMainBackgroundColor,
           appBarTheme: AppBarTheme(
             backgroundColor: kMainBackgroundColor,

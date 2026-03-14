@@ -38,6 +38,15 @@ class DevConfig implements AppConfig {
 
   @override
   Color get brandPrimary => const Color(0xFF6200EE);
+
+  @override
+  Color get brandPrimarySoft => const Color(0xFF8B5CF6);
+
+  @override
+  Color get brandPrimaryGradient => const Color(0xFF9A6DFF);
+
+  @override
+  Color get brandAccentMagenta => const Color(0xFFE548BF);
   
   @override
   Color get brandPrimaryInvert => const Color(0x22262F40);

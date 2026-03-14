@@ -1,4 +1,5 @@
 import 'package:day_night/app_localizations.dart';
+import 'package:day_night/constants.dart';
 import 'package:flutter/material.dart';
 
 class WaitingParticipantsSection extends StatelessWidget {
@@ -47,23 +48,23 @@ class WaitingParticipantsSection extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: const Color(0xFF9A6DFF)),
+                  border: Border.all(color: kBrandPrimary),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       localizations.get('organizer-enter-permits'),
-                      style: const TextStyle(
-                        color: Color(0xFF9A6DFF),
+                      style: TextStyle(
+                        color: kBrandPrimary,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(width: 6),
-                    const Icon(
+                    Icon(
                       Icons.how_to_reg_outlined,
-                      color: Color(0xFF9A6DFF),
+                      color: kBrandPrimary,
                       size: 20,
                     ),
                   ],
@@ -89,8 +90,8 @@ class WaitingParticipantsSection extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '$waitingParticipants',
-                    style: const TextStyle(
-                      color: Color(0xFF9A6DFF),
+                    style: TextStyle(
+                      color: kBrandPrimary,
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
                       height: 1,

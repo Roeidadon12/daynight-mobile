@@ -1,6 +1,7 @@
 import 'package:day_night/models/events.dart';
 import 'package:flutter/material.dart';
 import 'package:day_night/app_localizations.dart';
+import 'package:day_night/constants.dart';
 
 class OrginizerEventListTile extends StatelessWidget {
   final OrganizerEvent event;
@@ -174,7 +175,7 @@ class OrginizerEventListTile extends StatelessWidget {
                             flex: 3,
                             child: _ActionButton(
                               label: localizations.get('organizer-enter-permits'),
-                              color: const Color(0xFF8B7DFF),
+                              color: kBrandPrimary,
                               icon: Icons.how_to_reg_outlined,
                             ),
                           ),

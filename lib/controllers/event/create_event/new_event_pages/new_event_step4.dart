@@ -58,7 +58,7 @@ class NewEventStep4 extends StatelessWidget {
                                     height: imageHeight,
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
-                                        colors: [kBrandPrimary, Colors.purple],
+                                        colors: [kBrandPrimary, kBrandPrimaryGradient],
                                       ),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
